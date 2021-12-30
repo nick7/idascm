@@ -1,0 +1,11 @@
+*.gitattributes     text
+*.gitignore         text
+*.gitmodules        text
+
+*.c                 text
+*.cpp               text
+*.h                 text
+*.hpp               text
+*.json              text
+*.md                text
+*.txt               text
