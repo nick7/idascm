@@ -40,7 +40,6 @@ namespace idascm
             explicit command_manager(char const * root_path);
 
         protected:
-            // auto add_set(command_set const * table) noexcept -> bool;
             void reload(void);
 
         private:

@@ -14,22 +14,6 @@ namespace idascm
     command_set::~command_set(void)
     {}
 
-    // {
-    //   "commands": {
-    //      "0x0000": {
-    //        "name": "NOP",
-    //        "args": []
-    //      },
-    //      "0x0002": {
-    //        "name": "GOTO",
-    //        "args": [
-    //          {
-    //          }
-    //        ]
-    //      },
-    //   }
-    // }
-
     namespace
     {
         auto opcode_from_string(char const * string) -> std::uint16_t
