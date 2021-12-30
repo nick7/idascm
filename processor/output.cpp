@@ -1,21 +1,34 @@
 # include <processor/output.hpp>
+# include <processor/analyzer.hpp>
 # include <processor/module.hpp>
 # include <engine/command_set.hpp>
+# include <engine/decoder.hpp>
+# include <engine/instruction.hpp>
 # include <core/logger.hpp>
 
 namespace idascm
 {
-    auto output::instruction(outctx_t & ctx) -> bool
+    auto output::output_instruction(outctx_t & ctx) -> bool
     {
         assert(m_isa);
         auto command = m_isa->get_command(ctx.insn.itype);
         assert(command);
+        if (! command)
+        {
+            return false;
+        }
         IDASCM_LOG_T("output: %s", command->name);
 
-        // ctx.out_mnemonic();
-        ctx.out_custom_mnem(command->name);
+        output_mnemonics(ctx);
 
         auto const count = insn_operand_count(ctx.insn);
+
+        instruction src = {}; // actual instruction
+        if (m_analyzer && count > UA_MAXOP)
+        {
+            m_analyzer->analyze_instruction(ctx.insn.ea, src);
+        }
+
         for (std::uint8_t n = 0; n < count; ++ n)
         {
             if (n < UA_MAXOP)
@@ -32,10 +45,22 @@ namespace idascm
             }
             else
             {
-                ctx.out_line("<OP>");
+                if (m_analyzer)
+                {
+                    op_t op = {};
+                    op.n = n;
+                    if (m_analyzer->handle_operand(src, n, op))
+                    {
+                        output_operand(ctx, op);
+                    }
+                }
+                else
+                {
+                    ctx.out_line("<OP>");
+                }
             }
 
-            if (n + 1 < count && ctx.insn.ops[n + 1].type != o_void)
+            if (n + 1 < count)
             {
                 ctx.out_symbol(',');
                 ctx.out_char(' ');
@@ -47,11 +72,15 @@ namespace idascm
         return true;
     }
 
-    void output::mnemonics(outctx_t & ctx)
+    void output::output_mnemonics(outctx_t & ctx)
     {
+        auto command = m_isa->get_command(ctx.insn.itype);
+        assert(command);
+        // ctx.out_mnemonic();
+        ctx.out_custom_mnem(command->name);
     }
 
-    auto output::operand(outctx_t & ctx, op_t const & op) -> bool
+    auto output::output_operand(outctx_t & ctx, op_t const & op) -> bool
     {
         switch (op.type)
         {

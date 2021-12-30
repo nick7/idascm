@@ -3,27 +3,37 @@
 
 namespace idascm
 {
+    struct operand;
+
+    class analyzer;
     class command_set;
 
     class output
     {
         public:
-            auto instruction(outctx_t & ctx) -> bool;
-            void mnemonics(outctx_t & ctx);
-            auto operand(outctx_t & ctx, op_t const & op) -> bool;
-
-        public:
-            output(void)
-                : m_isa(nullptr)
-            {}
+            auto output_instruction(outctx_t & ctx) -> bool;
+            void output_mnemonics(outctx_t & ctx);
+            auto output_operand(outctx_t & ctx, op_t const & op) -> bool;
 
             void set_isa(command_set const * isa)
             {
                 m_isa = isa;
             }
 
+            void set_analyzer(analyzer * analyzer)
+            {
+                m_analyzer = analyzer;
+            }
+
+        public:
+            output(void)
+                : m_isa(nullptr)
+                , m_analyzer(nullptr)
+            {}
+
         protected:
             command_set const * m_isa;
+            analyzer *          m_analyzer;
     };
 }
 

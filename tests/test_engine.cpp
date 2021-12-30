@@ -36,7 +36,7 @@ int main(int argc, char * argv[])
     dec.set_memory_api(&memory);
     
     instruction ins = {};
-    dec.decode(0, ins);
+    dec.decode_instruction(0, ins);
     
     return 0;
 }

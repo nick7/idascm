@@ -13,7 +13,8 @@ namespace idascm
     class decoder
     {
         public:
-            auto decode(std::uint32_t address, instruction & in) -> std::uint32_t;
+            auto decode_instruction(std::uint32_t address, instruction & in) const -> std::uint32_t;
+            auto decode_operand(std::uint32_t address, operand & op) const -> std::uint32_t;
 
         public:
             decoder(void)
@@ -30,9 +31,6 @@ namespace idascm
             {
                 m_memory = api;
             }
-
-        protected:
-            auto decode_operand(std::uint32_t address, operand & op) -> std::uint32_t;
 
         private:
             command_set const * m_isa;

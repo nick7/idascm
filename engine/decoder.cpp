@@ -10,7 +10,7 @@ namespace idascm
     {
     }
 
-    auto decoder::decode(std::uint32_t address, instruction & in) -> std::uint32_t
+    auto decoder::decode_instruction(std::uint32_t address, instruction & in) const -> std::uint32_t
     {
         assert(m_memory && m_isa);
         std::uint32_t ptr = address;
@@ -39,10 +39,11 @@ namespace idascm
             }
             ++ in.operand_count;
         }
+        in.size = (ptr - address);
         return ptr - address;
     }
 
-    auto decoder::decode_operand(std::uint32_t address, operand & op) -> std::uint32_t
+    auto decoder::decode_operand(std::uint32_t address, operand & op) const -> std::uint32_t
     {
         assert(m_memory && m_isa);
         std::uint32_t ptr = address;

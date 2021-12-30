@@ -35,17 +35,6 @@ namespace idascm
         std::memset(m_cmd_to_uuid_map, 0x00, sizeof(m_cmd_to_uuid_map));
     }
 
-    // auto command_manager::add_set(command_set const * set) noexcept -> bool
-    // {
-    //     auto const index = to_uint(set->get_version());
-    //     if (index < std::size(m_set_map))
-    //     {
-    //         m_set_map[index] = set;
-    //         reload();
-    //     }
-    //     return false;
-    // }
-
     auto command_manager::get_set(version ver) noexcept -> command_set const *
     {
         auto const index = to_uint(ver);

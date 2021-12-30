@@ -9,6 +9,7 @@ namespace idascm
 
     class analyzer;
     class emulator;
+    class memory_api_ida;
     class output;
 
     class module

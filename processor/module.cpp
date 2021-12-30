@@ -22,9 +22,11 @@ namespace idascm
         m_isa = processor_isa(version::gtavc_win32);
         assert(m_isa);
         processor_set_current_isa(m_isa);
+
         m_analyzer->set_isa(m_isa);
         m_emulator->set_isa(m_isa);
         m_output->set_isa(m_isa);
+        m_output->set_analyzer(m_analyzer);
     }
 
     module::~module(void)
@@ -113,8 +115,9 @@ namespace idascm
             }
             case processor_t::ev_ana_insn:
             {
-                auto out = va_arg(va, insn_t *);
-                return m_analyzer->analyze(out);
+                auto insn = va_arg(va, insn_t *);
+                assert(insn);
+                return m_analyzer->analyze_instruction(*insn);
             }
             case processor_t::ev_emu_insn:
             {
@@ -131,14 +134,14 @@ namespace idascm
             case processor_t::ev_out_insn:
             {
                 auto const ctx = va_arg(va, outctx_t *);
-                return m_output->instruction(*ctx) ? 1 : -1;
+                return m_output->output_instruction(*ctx) ? 1 : -1;
             }
             case processor_t::ev_out_operand:
             {
                 auto const ctx = va_arg(va, outctx_t *);
                 auto const op  = va_arg(va, op_t const *);
                 // return out_opnd(*ctx, *op) ? 1 : -1;
-                return m_output->operand(*ctx, *op) ? 1 : -1;
+                return m_output->output_operand(*ctx, *op) ? 1 : -1;
             }
             // case processor_t::ev_realcvt: // 76
             // {
