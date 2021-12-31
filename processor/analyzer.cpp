@@ -73,6 +73,7 @@ namespace idascm
             handle_operand(src, i, insn.ops[i]);
         }
         insn.size = src.size;
+        insn_set_inversion_flag(insn, (src.flags & instruction_flag_not) != 0);
         insn_set_operand_count(insn, src.operand_count);
         return true;
     }

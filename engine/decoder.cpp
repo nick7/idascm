@@ -13,8 +13,11 @@ namespace idascm
     auto decoder::decode_instruction(std::uint32_t address, instruction & in) const -> std::uint32_t
     {
         assert(m_memory && m_isa);
-        std::uint32_t ptr = address;
-        ptr += m_memory->read(ptr, &in.opcode);
+        std::uint32_t ptr    = address;
+        std::uint16_t opcode = 0;
+        ptr += m_memory->read(ptr, &opcode);
+        in.opcode  = opcode & ~0x8000;
+        in.flags   = (opcode & 0x8000) ? instruction_flag_not : 0;
         in.address = address;
         in.command = m_isa->get_command(in.opcode);
         if (! in.command)

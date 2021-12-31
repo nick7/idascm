@@ -24,13 +24,27 @@ namespace idascm
     constexpr
     void insn_set_operand_count(insn_t & insn, std::uint8_t count) noexcept
     {
-        insn.insnpref = char(count);
+        insn.insnpref = (insn.insnpref & ~0x1f) | (0x1f & count);
     }
 
     constexpr
     auto insn_operand_count(insn_t const & insn) noexcept -> std::uint8_t
     {
-        return std::uint8_t(insn.insnpref);
+        return std::uint8_t(0x1f & insn.insnpref);
+    }
+
+    // 'not'
+    constexpr
+    void insn_set_inversion_flag(insn_t & insn, bool flag) noexcept
+    {
+        insn.insnpref = (insn.insnpref & ~0x20) | (flag ? 0x20 : 0);
+    }
+
+    // 'not'
+    constexpr
+    auto insn_inversion_flag(insn_t & insn) noexcept -> bool
+    {
+        return (insn.insnpref & 0x20) != 0;
     }
 }
 

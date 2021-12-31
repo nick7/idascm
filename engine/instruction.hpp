@@ -32,12 +32,18 @@ namespace idascm
         };
     };
 
+    enum instruction_flag : std::uint8_t
+    {
+        instruction_flag_not    = 1 << 0, // condition inversion
+    };
+
     // instruction is a command instance with actual runtime values
     struct instruction
     {
         command const *     command;
-        std::uint16_t       opcode;
         vmsize_t            address;
+        std::uint16_t       opcode;
+        std::uint8_t        flags;
         std::uint8_t        size;
         std::uint8_t        operand_count;
         operand             operand_list[16];

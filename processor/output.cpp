@@ -77,6 +77,10 @@ namespace idascm
         auto command = m_isa->get_command(ctx.insn.itype);
         assert(command);
         // ctx.out_mnemonic();
+        if (insn_inversion_flag(ctx.insn))
+        {
+            ctx.out_keyword("NOT");
+        }
         ctx.out_custom_mnem(command->name);
     }
 
