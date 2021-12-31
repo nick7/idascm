@@ -10,11 +10,13 @@ namespace idascm
     class decoder;
     class memory_api_ida;
 
+    // byte analyzer
+    // produces instructions (insn_t)
     class analyzer
     {
         public:
             auto analyze_instruction(std::uint32_t address, instruction & ins) -> bool;
-            auto analyze_instruction(insn_t & insn) -> int;
+            auto analyze_instruction(insn_t & insn) -> bool;
             
             auto handle_instruction(instruction const & src, insn_t & dst) const -> bool;
             auto handle_operand(instruction const & src, std::uint8_t index, op_t & dst) const -> bool;

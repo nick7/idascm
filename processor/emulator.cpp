@@ -26,7 +26,8 @@ namespace idascm
             case o_mem:
             {
                 insn.create_op_data(op.addr, op);
-                insn.add_dref(op.addr, op.offb, dr_R);
+                // TODO: deal with dr_R / dw_W
+                insn.add_dref(op.addr, op.offb, dr_O);
                 break;
             }
             case o_near:
@@ -57,22 +58,37 @@ namespace idascm
         m_isa = isa;
     }
 
-    auto emulator::emulate(insn_t const & insn) -> int
+    auto emulator::emulate_instruction(insn_t const & insn) -> bool
     {
         assert(m_isa);
         auto const command = m_isa->get_command(insn.itype);
         assert(command);
         if (! command)
         {
-            return 0;
+            return false;
         }
-        IDASCM_LOG_T("emulate %s", command->name);
+        IDASCM_LOG_D("emulate +0x%04x %s flags=0x%02x", insn.ea, command->name, command->flags);
         for (std::uint8_t i = 0; i < std::size(insn.ops); ++ i)
         {
             emulate_operand(insn, insn.ops[i]);
         }
         if (! (command->flags & command_flag_stop))
-            insn.add_cref(insn.ea, insn.ea + insn.size, fl_F);
-        return 1;
+        {
+            add_cref(insn.ea, insn.ea + insn.size, fl_F);
+        }
+        return true;
+    }
+
+    auto emulator::is_return(insn_t const & insn) const -> bool
+    {
+        auto const command = m_isa->get_command(insn.itype);
+        assert(command);
+        if (! command)
+        {
+            return false;
+        }
+        if (command->flags & command_flag_return)
+            return true;
+        return false;
     }
 }

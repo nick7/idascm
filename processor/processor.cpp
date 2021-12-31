@@ -129,6 +129,7 @@ namespace idascm
         };
         IDASCM_LOG_I("processor_set_isa: %s", isa ? to_string(isa->get_version()) : nullptr);
         g_isa = isa;
+# if 0
         for (std::uint16_t op = 0; op < 0x1000; ++ op)
         {
             g_instruction_list[op] = {};
@@ -149,6 +150,7 @@ namespace idascm
                     g_instruction_list[op].feature |= CF_STOP;
             }
         }
+# endif
     }
 
     auto processor_current_isa(void) -> command_set const *
@@ -185,7 +187,7 @@ namespace idascm
         assembler.a_double          = nullptr;
         assembler.a_tbyte           = nullptr;
         assembler.a_packreal        = nullptr;
-        assembler.a_dups            = "bs#s(c,) #d, #v";
+        assembler.a_dups            = ".dup #s(c,) #d, #v";
         assembler.a_bss             = ".bss %s";
         assembler.a_equ             = "equ";
         assembler.a_seg             = nullptr;
@@ -221,6 +223,26 @@ namespace idascm
         return assembler;
     }
 
+    namespace
+    {
+        struct
+        {
+            version         ver;
+            char const *    description;
+        }
+        static const gs_processor_table[] = \
+        {
+            { version::gta3_ps2,    "GTA 3 (PlayStation 2)"                             },
+            { version::gta3_xbox,   "GTA 3 (XBOX Original)"                             },
+            { version::gta3_win32,  "GTA 3 (Win32)"                                     },
+            { version::gtavc_ps2,   "GTA Vice City (PlayStation 2)"                     },
+            { version::gtavc_xbox,  "GTA Vice City (XBOX Original)"                     },
+            { version::gtavc_win32, "GTA Vice City (Win32)"                             },
+            { version::gtalcs_psp,  "GTA Liberty City Stories (PlayStation Portable)"   },
+            { version::gtavcs_psp,  "GTA Vice City Stories (PlayStation Portable)"      },
+        };
+    }
+
     auto processor(void) noexcept -> processor_t
     {
         static bool s_startup;
@@ -230,25 +252,12 @@ namespace idascm
             s_startup = true;
         }
 
-        struct
+        static char const * s_snames[std::size(gs_processor_table) + 1];
+        static char const * s_lnames[std::size(gs_processor_table) + 1];
+        for (std::size_t i = 0; i < std::size(gs_processor_table); ++ i)
         {
-            version         ver;
-            char const *    description;
-        }
-        static const s_processor_table[] = \
-        {
-            { version::gta3_ps2,    "GTA 3 (PlayStation 2)"             },
-            { version::gta3_win32,  "GTA 3 (Win32)"                     },
-            { version::gtavc_ps2,   "GTA Vice City (PlayStation 2)"     },
-            { version::gtavc_win32, "GTA Vice City (Win32)"             },
-        };
-
-        static char const * s_snames[std::size(s_processor_table) + 1];
-        static char const * s_lnames[std::size(s_processor_table) + 1];
-        for (std::size_t i = 0; i < std::size(s_processor_table); ++ i)
-        {
-            s_snames[i] = to_string(s_processor_table[i].ver);
-            s_lnames[i] = s_processor_table[i].description;
+            s_snames[i] = to_string(gs_processor_table[i].ver);
+            s_lnames[i] = gs_processor_table[i].description;
         }
 
         static asm_t const s_asm = assembler();
@@ -323,6 +332,8 @@ namespace idascm
                 return "out_data";
             case processor_t::ev_creating_segm: // 26
                 return "creating_segm";
+            case processor_t::ev_rename: // 31
+                return "rename";
             case processor_t::ev_is_ret_insn: // 36
                 return "is_ret_insn";
             case processor_t::ev_is_switch: // 41
@@ -337,10 +348,14 @@ namespace idascm
                 return "func_bounds";
             case processor_t::ev_create_func_frame: // 60
                 return "create_func_frame";
+            case processor_t::ev_demangle_name: // 63
+                return "demangle_name";
             case processor_t::ev_add_cref: // 64
                 return "add_cref";
             case processor_t::ev_add_dref: // 65
                 return "add_dref";
+            case processor_t::ev_del_cref: // 66
+                return "del_cref";
             case processor_t::ev_auto_queue_empty: // 71
                 return "auto_queue_empty";
             case processor_t::ev_extract_address: // 75

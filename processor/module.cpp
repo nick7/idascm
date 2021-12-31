@@ -57,7 +57,7 @@ namespace idascm
     }
 
     // virtual
-    ssize_t idaapi module::on_event(ssize_t msgid, va_list va)
+    ssize_t idaapi module::on_event(ssize_t msgid, va_list args)
     {
         IDASCM_LOG_D("module::on_event - %d '%s'", msgid, to_string(processor_t::event_t(msgid)));
         switch (msgid)
@@ -79,19 +79,19 @@ namespace idascm
             }
             case processor_t::ev_newprc: // 2
             {
-                m_proc = va_arg(va, int);
-                auto const keep_cfg = va_arg(va, bool);
+                m_proc = va_arg(args, int);
+                auto const keep_cfg = va_arg(args, bool);
+                IDASCM_LOG_D("%d, %d", m_proc, keep_cfg);
                 return 1;
             }
             case processor_t::ev_newfile: // 4
             {
-                // here we can load additional data from a current dir
-                auto * fname = va_arg(va, char*);
+                IDASCM_LOG_D("'%s'", va_arg(args, char const *));
                 return 1;
             }
             case processor_t::ev_is_cond_insn:
             {
-                auto const cmd = get_command(m_isa, va_arg(va, insn_t const *));
+                auto const cmd = get_command(m_isa, va_arg(args, insn_t const *));
                 assert(cmd);
                 if (cmd->flags & command_flag_condition)
                     return 1;
@@ -99,15 +99,12 @@ namespace idascm
             }
             case processor_t::ev_is_ret_insn:
             {
-                auto const cmd = get_command(m_isa, va_arg(va, insn_t const *));
-                assert(cmd);
-                if (cmd->flags & command_flag_return)
-                    return 1;
-                return -1;
+                auto const insn = va_arg(args, insn_t const *);
+                return m_emulator->is_return(*insn) ? 1 : -1;
             }
             case processor_t::ev_is_call_insn:
             {
-                auto const cmd = get_command(m_isa, va_arg(va, insn_t const *));
+                auto const cmd = get_command(m_isa, va_arg(args, insn_t const *));
                 assert(cmd);
                 if (cmd->flags & command_flag_call)
                     return 1;
@@ -115,41 +112,34 @@ namespace idascm
             }
             case processor_t::ev_ana_insn:
             {
-                auto insn = va_arg(va, insn_t *);
+                auto insn = va_arg(args, insn_t *);
                 assert(insn);
-                return m_analyzer->analyze_instruction(*insn);
+                return m_analyzer->analyze_instruction(*insn) ? insn->size : 0;
             }
             case processor_t::ev_emu_insn:
             {
-                auto const insn = va_arg(va, insn_t const *);
+                auto const insn = va_arg(args, insn_t const *);
                 assert(insn);
-                return m_emulator->emulate(*insn);
+                return m_emulator->emulate_instruction(*insn) ? 1 : 0;
             }
             case processor_t::ev_out_header:
             {
-                auto const ctx = va_arg(va, outctx_t *);
+                auto const ctx = va_arg(args, outctx_t *);
                 ctx->gen_header(GH_PRINT_ALL);
                 return 1;
             }
             case processor_t::ev_out_insn:
             {
-                auto const ctx = va_arg(va, outctx_t *);
+                auto const ctx = va_arg(args, outctx_t *);
                 return m_output->output_instruction(*ctx) ? 1 : -1;
             }
             case processor_t::ev_out_operand:
             {
-                auto const ctx = va_arg(va, outctx_t *);
-                auto const op  = va_arg(va, op_t const *);
+                auto const ctx = va_arg(args, outctx_t *);
+                auto const op  = va_arg(args, op_t const *);
                 // return out_opnd(*ctx, *op) ? 1 : -1;
                 return m_output->output_operand(*ctx, *op) ? 1 : -1;
             }
-            // case processor_t::ev_realcvt: // 76
-            // {
-            //     auto m    = va_arg(va, void *);
-            //     auto e    = va_arg(va, uint16 *);
-            //     auto swt  = va_arg(va, uint16);
-            //     return 0;
-            // }
         }
 
         return 0;

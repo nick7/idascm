@@ -65,6 +65,8 @@ namespace idascm
             { version::gtavc_win32,         "gtavc_win32"       },
             { version::gtavc_xbox,          "gtavc_xbox"        },
             { version::gtavc_xbox_jp,       "gtavc_xbox_jp"     },
+            { version::gtalcs_ps2,          "gtalcs_ps2"        },
+            { version::gtalcs_psp,          "gtalcs_psp"        },
             { version::gtavcs_ps2,          "gtavcs_ps2"        },
             { version::gtavcs_psp,          "gtavcs_psp"        },
         };

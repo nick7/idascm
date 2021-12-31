@@ -49,17 +49,15 @@ namespace idascm
         return true;
     }
 
-    auto analyzer::analyze_instruction(insn_t & insn) -> int
+    auto analyzer::analyze_instruction(insn_t & insn) -> bool
     {
         instruction src = {};
         if (! analyze_instruction(insn.ea, src))
-            return 0;
-        IDASCM_LOG_T("analyze %s", src.command->name);
+            return false;
+        IDASCM_LOG_D("analyze +0x%04x %s", insn.ea, src.command->name);
         if (! handle_instruction(src, insn))
-        {
-            return 0;
-        }
-        return insn.size;
+            return false;
+        return true;
     }
 
     auto analyzer::handle_instruction(instruction const & src, insn_t & insn) const -> bool

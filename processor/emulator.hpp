@@ -9,9 +9,11 @@ namespace idascm
     class emulator
     {
         public:
-            auto emulate(insn_t const & insn) -> int;
+            auto emulate_instruction(insn_t const & insn) -> bool;
             void emulate_operand(insn_t const & insn, op_t const & op);
             void set_isa(command_set const * isa);
+
+            auto is_return(insn_t const & insn) const -> bool;
 
         public:
             emulator(void)
