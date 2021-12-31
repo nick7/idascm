@@ -80,6 +80,7 @@ namespace idascm
         if (insn_inversion_flag(ctx.insn))
         {
             ctx.out_keyword("NOT");
+            ctx.out_char(' ');
         }
         ctx.out_custom_mnem(command->name);
     }
