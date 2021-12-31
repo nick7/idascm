@@ -21,6 +21,7 @@ namespace idascm
     {
         std::uint8_t    type;
         std::uint8_t    offset;
+        std::uint8_t    size;
         union
         {
             std::int8_t     value_int8;

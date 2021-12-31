@@ -26,22 +26,51 @@ namespace idascm
             return 0;
         }
         in.operand_count = 0;
-        for (std::uint8_t i = 0; i < in.command->argument_count; ++ i)
+
+        std::uint8_t op = 0;
+        while (op < in.command->argument_count)
         {
-            in.operand_list[i].offset = static_cast<std::uint8_t>(ptr - address);
-            switch (in.command->argument_list[i])
+            if (in.command->argument_list[op] == argument_type::variadic)
+                break;
+            in.operand_list[op].offset  = static_cast<std::uint8_t>(ptr - address);
+            switch (in.command->argument_list[op])
             {
                 case argument_type::string64:
-                    in.operand_list[i].type         = operand_string;
-                    in.operand_list[i].value_ptr    = ptr;
-                    ptr += 8;
+                    in.operand_list[op].type        = operand_string;
+                    in.operand_list[op].value_ptr   = ptr;
+                    in.operand_list[op].size = 8;
                     break;
                 default:
-                    ptr += decode_operand(ptr, in.operand_list[i]);
+                    if (! decode_operand(ptr, in.operand_list[op]))
+                        return 0;
                     break;
             }
-            ++ in.operand_count;
+            ptr += in.operand_list[op].size;
+            ++ op;
         }
+        if (in.command->argument_list[op] == argument_type::variadic)
+        {
+            while (op < std::size(in.operand_list))
+            {
+                std::uint8_t type = 0;
+                if (! m_memory->read(ptr, &type))
+                {
+                    IDASCM_LOG_W("memoey read failed at 0x%08x", ptr);
+                    return 0;
+                }
+                if (operand_none == type)
+                {
+                    ptr += sizeof(type);
+                    break;
+                }
+                in.operand_list[op].offset  = static_cast<std::uint8_t>(ptr - address);
+                if (! decode_operand(ptr, in.operand_list[op]))
+                    return 0;
+                ptr += in.operand_list[op].size;
+                ++ op;
+            }
+        }
+        in.operand_count = op;
         in.size = (ptr - address);
         return ptr - address;
     }
@@ -72,10 +101,20 @@ namespace idascm
                 op.value_ptr = var;
                 break;
             }
+            case operand_local:
+            {
+                std::uint16_t var = -1;
+                ptr += m_memory->read(ptr, &var);
+                op.value_ptr = var;
+                break;
+            }
             default:
+            {
                 IDASCM_LOG_W("unsupported operand type: %d", op.type);
                 return 0;
+            }
         }
-        return ptr - address;
+        op.size = (ptr - address);
+        return op.size;
     }
 }

@@ -137,6 +137,13 @@ namespace idascm
                 dst.addr    = src.operand_list[index].value_ptr;
                 break;
             }
+            case operand_local:
+            {
+                dst.type    = o_reg;
+                dst.dtype   = dt_dword;
+                dst.reg     = src.operand_list[index].value_ptr;
+                break;
+            }
             default:
             {
                 dst.flags &= ~OF_SHOW;

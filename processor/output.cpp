@@ -134,6 +134,13 @@ namespace idascm
                 }
                 return true;
             }
+            case o_reg:
+            {
+                char string[32];
+                qsnprintf(string, sizeof(string) - 1, "@%d", op.reg);
+                ctx.out_register(string);
+                return true;
+            }
             case o_near:
             case o_mem:
             {
