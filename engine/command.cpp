@@ -105,7 +105,7 @@ namespace idascm
         auto const name = value["name"];
         if (name.is_valid())
         {
-            std::strncpy(command.name, value["name"].c_str(), std::size(command.name) - 1);
+            std::strncpy(command.name, name.c_str(), std::size(command.name) - 1);
         }
 
         auto const flags = value["flags"];
@@ -144,6 +144,12 @@ namespace idascm
                 }
                 command.argument_list[i] = argument_type_from_json(arguments[i]["type"]);
             }
+        }
+
+        auto comment = value["comment"];
+        if (comment.is_valid())
+        {
+            std::strncpy(command.comment, comment.c_str(), std::size(command.comment) - 1);
         }
 
         return command;

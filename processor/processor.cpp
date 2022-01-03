@@ -173,7 +173,7 @@ namespace idascm
         assembler.header            = nullptr;
         assembler.origin            = "org";
         assembler.end               = "end";
-        assembler.cmnt              = ";";
+        assembler.cmnt              = "//";
         assembler.ascsep            = '"';
         assembler.accsep            = '\'';
         assembler.esccodes          = "\"'";
@@ -338,8 +338,14 @@ namespace idascm
                 return "is_ret_insn";
             case processor_t::ev_is_switch: // 41
                 return "is_switch";
+            case processor_t::ev_can_have_type: // 48
+                return "can_have_type";
+            case processor_t::ev_get_reg_name: // 52
+                return "get_reg_name";
             case processor_t::ev_str2reg: // 53
                 return "str2reg";
+            case processor_t::ev_get_autocmt: // 54
+                return "get_autocmt";
             case processor_t::ev_get_bg_color: // 55
                 return "get_bg_color";
             case processor_t::ev_is_jump_func: // 56

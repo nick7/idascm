@@ -81,6 +81,7 @@ namespace idascm
 
     auto emulator::is_return(insn_t const & insn) const -> bool
     {
+        assert(m_isa);
         auto const command = m_isa->get_command(insn.itype);
         assert(command);
         if (! command)
@@ -90,5 +91,48 @@ namespace idascm
         if (command->flags & command_flag_return)
             return true;
         return false;
+    }
+
+    auto emulator::get_autocomment(insn_t const & insn) const -> qstring
+    {
+        assert(m_isa);
+        auto const command = m_isa->get_command(insn.itype);
+        assert(command);
+
+        qstring comment;
+        comment.reserve(128);
+        if (command)
+        {
+            char buffer[32];
+            qsnprintf(buffer, sizeof(buffer) - 1, "0x%04x", insn.itype);
+            comment.append(buffer);
+
+            if (command->comment[0])
+            {
+                comment.append(" - ");
+                comment.append(command->comment);
+            }
+
+            qstring flags;
+            flags.reserve(128);
+            for (std::uint8_t i = 0; i < 8; ++ i)
+            {
+                std::uint8_t const flag = 1 << i;
+                if (command->flags & flag)
+                {
+                    if (! flags.empty())
+                        flags.append(", ");
+                    flags.append(to_string(command_flag(flag)));
+                }
+            }
+            if (! flags.empty())
+            {
+                comment.append(" (flags: ");
+                comment.append(flags);
+                comment.append(")");
+            }
+        }
+
+        return comment;
     }
 }

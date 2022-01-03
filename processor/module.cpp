@@ -89,27 +89,6 @@ namespace idascm
                 IDASCM_LOG_D("'%s'", va_arg(args, char const *));
                 return 1;
             }
-            case processor_t::ev_is_cond_insn:
-            {
-                auto const cmd = get_command(m_isa, va_arg(args, insn_t const *));
-                assert(cmd);
-                if (cmd->flags & command_flag_condition)
-                    return 1;
-                return -1;
-            }
-            case processor_t::ev_is_ret_insn:
-            {
-                auto const insn = va_arg(args, insn_t const *);
-                return m_emulator->is_return(*insn) ? 1 : -1;
-            }
-            case processor_t::ev_is_call_insn:
-            {
-                auto const cmd = get_command(m_isa, va_arg(args, insn_t const *));
-                assert(cmd);
-                if (cmd->flags & command_flag_call)
-                    return 1;
-                return -1;
-            }
             case processor_t::ev_ana_insn:
             {
                 auto insn = va_arg(args, insn_t *);
@@ -139,6 +118,38 @@ namespace idascm
                 auto const op  = va_arg(args, op_t const *);
                 // return out_opnd(*ctx, *op) ? 1 : -1;
                 return m_output->output_operand(*ctx, *op) ? 1 : -1;
+            }
+            case processor_t::ev_is_cond_insn:
+            {
+                auto const cmd = get_command(m_isa, va_arg(args, insn_t const *));
+                assert(cmd);
+                if (cmd->flags & command_flag_condition)
+                    return 1;
+                return -1;
+            }
+            case processor_t::ev_is_call_insn:
+            {
+                auto const cmd = get_command(m_isa, va_arg(args, insn_t const *));
+                assert(cmd);
+                if (cmd->flags & command_flag_call)
+                    return 1;
+                return -1;
+            }
+            case processor_t::ev_is_ret_insn:
+            {
+                auto const insn = va_arg(args, insn_t const *);
+                return m_emulator->is_return(*insn) ? 1 : -1;
+            }
+            case processor_t::ev_get_autocmt:
+            {
+                auto const buf  = va_arg(args, qstring *);
+                auto const insn = va_arg(args, insn_t const *);
+                assert(buf && insn);
+                auto const comment = m_emulator->get_autocomment(*insn);
+                if (comment.empty())
+                    return 0;
+                *buf = comment;
+                return 1;
             }
         }
 

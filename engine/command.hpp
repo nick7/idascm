@@ -44,11 +44,11 @@ namespace idascm
     // TODO: move out opcode field
     struct command
     {
-        // std::uint16_t   opcode;
         char            name[64];
         std::uint8_t    flags;
         std::uint8_t    argument_count;
         argument_type   argument_list[16];
+        char            comment[64];
     };
 
     auto operator == (command const & first, command const & second) noexcept -> bool;
