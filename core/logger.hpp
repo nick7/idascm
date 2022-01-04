@@ -1,4 +1,5 @@
 # pragma once
+# include <core/core.hpp>
 # include <cstdarg>
 # include <cstdio>
 
@@ -53,6 +54,10 @@ namespace idascm
             auto current_level(void) const -> level
             {
                 return m_level;
+            }
+            void set_level(level level)
+            {
+                m_level = level;
             }
 
         protected:

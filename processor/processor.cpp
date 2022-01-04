@@ -52,7 +52,7 @@ namespace idascm
         void startup(void)
         {
             static ida_logger logger;
-            IDASCM_LOG_I("idascm proc module (%s %s)", __DATE__, __TIME__);
+            IDASCM_LOG_I("idascm %s", build_version());
             IDASCM_LOG_I("IDA_SDK_VERSION: %d", IDA_SDK_VERSION);
         }
 
@@ -168,66 +168,6 @@ namespace idascm
         return processor_command_manager().get_set(ver);
     }
 
-    auto assembler(void) noexcept -> asm_t
-    {
-        asm_t assembler = {};
-        assembler.flag              = AS_COLON | ASH_HEXF3 | ASO_OCTF4 | ASB_BINF4;
-        assembler.uflag             = 0;
-        assembler.name              = "GTA SCM";
-        assembler.help              = 0;
-        assembler.header            = nullptr;
-        assembler.origin            = "org";
-        assembler.end               = "end";
-        assembler.cmnt              = "//";
-        assembler.ascsep            = '"';
-        assembler.accsep            = '\'';
-        assembler.esccodes          = "\"'";
-        assembler.a_ascii           = ".ascii";
-        assembler.a_byte            = ".byte";
-        assembler.a_word            = ".word";
-        assembler.a_dword           = ".dword";
-        assembler.a_qword           = nullptr;
-        assembler.a_oword           = nullptr;
-        assembler.a_float           = ".float";
-        assembler.a_double          = nullptr;
-        assembler.a_tbyte           = nullptr;
-        assembler.a_packreal        = nullptr;
-        assembler.a_dups            = ".dup #s(c,) #d, #v";
-        assembler.a_bss             = ".bss %s";
-        assembler.a_equ             = "equ";
-        assembler.a_seg             = nullptr;
-        assembler.a_curip           = "*";
-        // assembler.out_func_header   = nullptr;
-        // assembler.out_func_footer   = nullptr;
-        assembler.a_public          = "global";
-        assembler.a_weak            = nullptr;
-        assembler.a_extrn           = "xref";
-        assembler.a_comdef          = nullptr;
-        assembler.get_type_name     = nullptr;
-        assembler.a_align           = nullptr;
-        assembler.lbrace            = '(';
-        assembler.rbrace            = ')';
-        assembler.a_mod             = "%";
-        assembler.a_band            = "&";
-        assembler.a_bor             = "|";
-        assembler.a_xor             = "^";
-        assembler.a_bnot            = "!";
-        assembler.a_shl             = "<<";
-        assembler.a_shr             = ">>";
-        assembler.a_sizeof_fmt      = "sizeof";
-        assembler.flag2             = AS2_BYTE1CHAR;
-        assembler.cmnt2             = nullptr;
-        assembler.low8              = nullptr;
-        assembler.high8             = nullptr;
-        assembler.low16             = nullptr;
-        assembler.high16            = nullptr;
-        assembler.a_include_fmt     = nullptr;
-        assembler.a_vstruc_fmt      = nullptr;
-        assembler.a_rva             = nullptr;
-        assembler.a_yword           = nullptr;
-        return assembler;
-    }
-
     namespace
     {
         struct
@@ -265,9 +205,12 @@ namespace idascm
             s_lnames[i] = gs_processor_table[i].description;
         }
 
+        static char l_assembler_header_string[256];
+        qsnprintf(l_assembler_header_string, sizeof(l_assembler_header_string) - 1, "// idascm %s", build_version());
+
         static char const * const l_assembler_header[] = \
         {
-            "// idascm (" __DATE__ " " __TIME__ ")",
+            l_assembler_header_string,
             nullptr,
         };
 

@@ -76,6 +76,5 @@ namespace idascm
             struct json_data *  m_data;
             std::size_t         m_begin;
             std::size_t         m_end;
-            char const *        m_debug;
     };
 }

@@ -34,17 +34,17 @@ namespace idascm
                 return nullptr;
             data->refs              = 1;
             data->source            = new (std::nothrow) char[length + 1];
-            data->length            = length;
-            data->source[0]         = '\0';
-            data->source[length]    = '\0';
             data->tokens            = new (std::nothrow) jsmntok_t[capacity];
-            data->capacity          = capacity;
-            data->count             = 0;
             if (! data->source || ! data->tokens)
             {
                 json_data_release(data);
                 return nullptr;
             }
+            data->length            = length;
+            data->source[0]         = '\0';
+            data->source[length]    = '\0';
+            data->capacity          = capacity;
+            data->count             = 0;
             return data;
         }
 
@@ -409,10 +409,6 @@ namespace idascm
             release();
         }
         m_data  = data;
-        if (m_data)
-        {
-            m_debug = c_str();
-        }
     }
 
     void json_value::release(void)

@@ -2,7 +2,9 @@
 # include <algorithm>
 # include <cstdarg>
 # include <cstdio>
-# include <windows.h>
+# if defined IDASCM_PLATFORM_WINDOWS
+#   include <windows.h>
+# endif
 
 namespace idascm
 {
@@ -35,6 +37,7 @@ namespace idascm
             return nullptr;
         }
 
+# if defined IDASCM_PLATFORM_WINDOWS
         class win32_debug_handler : public logger::handler
         {
             public:
@@ -45,6 +48,7 @@ namespace idascm
                     OutputDebugStringW(buffer);
                 }
         };
+# endif
 
         class file_handler : public logger::handler
         {
@@ -59,7 +63,7 @@ namespace idascm
                 file_handler(void)
                     : m_file(nullptr)
                 {
-                    m_file = std::fopen("h:/idascm.log", "wb");
+                    m_file = std::fopen("idascm.log", "wb");
                 }
 
                 ~file_handler(void)
@@ -84,13 +88,18 @@ namespace idascm
     }
 
     logger::logger(void)
-        : m_level(level::debug)
+        : m_level(level::info)
     {
         std::memset(m_handlers, 0, sizeof(m_handlers));
+# if defined IDASCM_BUILD_DEBUG
         static file_handler file;
         add_handler(&file);
+        set_level(level::debug);
+# endif
+# if defined IDASCM_PLATFORM_WINDOWS
         static win32_debug_handler debug;
         add_handler(&debug);
+# endif
     }
 
     logger::~logger(void)
