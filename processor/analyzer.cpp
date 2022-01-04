@@ -67,7 +67,7 @@ namespace idascm
         {
             if (i >= std::size(insn.ops))
             {
-                IDASCM_LOG_W("%s: too many operands (%d)", instruction_name(src), src.operand_count);
+                IDASCM_LOG_W("%s: too many operands (%d)", name(src), src.operand_count);
                 break;
             }
             handle_operand(src, i, insn.ops[i]);
@@ -83,16 +83,48 @@ namespace idascm
         assert(index < std::size(src.operand_list));
         if (index >= src.operand_count)
             return false;
+        auto const command = src.command;
+        if (! command)
+            return false;
         dst.offb = static_cast<char>(src.operand_list[index].offset);
         dst.flags |= OF_SHOW;
+
+        // logical types
+        switch (command->argument_list[index])
+        {
+            case argument_type::address:
+            {
+                std::int32_t value = 0;
+                if (to_int(src.operand_list[index], value))
+                {
+                    dst.value = *reinterpret_cast<std::uint32_t *>(&value);
+                    if (value >= 0)
+                    {
+                        dst.type    = o_far;
+                        dst.dtype   = dt_code;
+                        dst.addr    = value;
+                    }
+                    else
+                    {
+                        dst.type    = o_near;
+                        dst.dtype   = dt_code;
+                        dst.addr    = -value;
+                    }
+                    return true;
+                }
+                // TODO: handle non-integer address representation
+                break;
+            }
+        }
+
+        // actual types
         switch (src.operand_list[index].type)
         {
-            case operand_string:
+            case operand_string64:
             {
                 dst.type    = o_imm;
                 dst.dtype   = dt_string;
-                dst.addr    = src.operand_list[index].value_ptr;
-                IDASCM_LOG_D("string at %x", src.operand_list[index].value_ptr);
+                dst.addr    = src.address + src.operand_list[index].offset;
                 break;
             }
             case operand_int8:
@@ -111,13 +143,6 @@ namespace idascm
             }
             case operand_int32:
             {
-                if (src.command->argument_list[index] == argument_type::address)
-                {
-                    dst.type    = o_near;
-                    dst.dtype   = dt_code;
-                    dst.addr    = src.operand_list[index].value_int32;
-                    break;
-                }
                 dst.type    = o_imm;
                 dst.dtype   = dt_dword;
                 dst.value   = src.operand_list[index].value_int32;

@@ -20,7 +20,20 @@ namespace idascm
             case o_imm:
             {
                 set_immd(insn.ea);
-                op_num(insn.ea, op.n);
+                switch (op.dtype)
+                {
+                    case dt_byte:
+                    case dt_word:
+                    case dt_dword:
+                        op_dec(insn.ea, op.n);
+                        break;
+                    case dt_float:
+                        op_flt(insn.ea, op.n);
+                        break;
+                    default:
+                        op_num(insn.ea, op.n);
+                        break;
+                }
                 break;
             }
             case o_mem:
@@ -31,18 +44,32 @@ namespace idascm
                 break;
             }
             case o_near:
+            case o_far:
             {
+                std::uint32_t address = op.addr;
+                if (op.type == o_near)
+                {
+                    auto segment = getseg(insn.ea);
+                    if (segment)
+                    {
+                        address = segment->start_ea + address;
+                    }
+                    else
+                    {
+                        IDASCM_LOG_W("no segment found");
+                    }
+                }
                 if (command->flags & command_flag_jump)
                 {
-                    insn.add_cref(op.addr, op.offb, fl_JN);
+                    insn.add_cref(address, op.offb, fl_JN);
                     break;
                 }
                 if (command->flags & command_flag_call)
                 {
-                    insn.add_cref(op.addr, op.offb, fl_CN);
+                    insn.add_cref(address, op.offb, fl_CN);
                     break;
                 }
-                insn.add_dref(op.addr, op.offb, dr_O);
+                insn.add_dref(address, op.offb, dr_O);
                 break;
             }
             default:

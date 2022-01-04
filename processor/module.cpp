@@ -49,17 +49,20 @@ namespace idascm
         m_isa = nullptr;
     }
 
-    auto get_command(command_set const * isa, insn_t const * ins) -> command const *
+    namespace
     {
-        if (! isa || ! ins)
-            return nullptr;
-        return isa->get_command(ins->itype);
+        auto get_command(command_set const * isa, insn_t const * ins) -> command const *
+        {
+            if (! isa || ! ins)
+                return nullptr;
+            return isa->get_command(ins->itype);
+        }
     }
 
     // virtual
     ssize_t idaapi module::on_event(ssize_t msgid, va_list args)
     {
-        IDASCM_LOG_D("module::on_event - %d '%s'", msgid, to_string(processor_t::event_t(msgid)));
+        IDASCM_LOG_D("module::on_event: %zd '%s'", msgid, to_string(processor_t::event_t(msgid)));
         switch (msgid)
         {
             case processor_t::ev_init: // 0
@@ -139,6 +142,26 @@ namespace idascm
             {
                 auto const insn = va_arg(args, insn_t const *);
                 return m_emulator->is_return(*insn) ? 1 : -1;
+            }
+            case processor_t::ev_get_reg_name:
+            {
+                auto const buf      = va_arg(args, qstring *);
+                auto const reg      = va_arg(args, int);
+                auto const width    = va_arg(args, std::size_t);
+                auto const reghi    = va_arg(args, int);
+                assert(buf);
+                buf->sprnt("@%d", reg);
+                return buf->length();
+            }
+            case processor_t::ev_str2reg:
+            {
+                auto const regname = va_arg(args, char const *);
+                assert(regname && regname[0]);
+                if (regname[0] == '@')
+                {
+                    return 1 + std::atoi(regname + 1);
+                }
+                return 0;
             }
             case processor_t::ev_get_autocmt:
             {

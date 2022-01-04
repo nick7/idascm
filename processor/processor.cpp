@@ -11,11 +11,13 @@ namespace idascm
     command_set const * g_isa;
     int                 g_proc;
 
+# if defined IDASCM_STATIC_MODULE_INSTANCE
     auto module_instance(void) -> module &
     {
         static module instance;
         return instance;
     }
+# endif
 
     namespace
     {
@@ -56,7 +58,7 @@ namespace idascm
 
         char const * const g_register_names[] = \
         {
-            "cs", "ds"
+            "@CS", "@DS"
         };
 
         bytes_t const g_retcode_list[] = \
@@ -74,23 +76,26 @@ namespace idascm
 
         instruc_t g_instruction_list[0x1000];
 
-# if IDA_SDK_VERSION >= 750 && 0
+# if defined IDASCM_STATIC_MODULE_INSTANCE
         ssize_t idaapi notify_handler(void * user_data, int code, va_list va)
         {
-            IDASCM_LOG_D("notify_handler: %d '%s'", code, to_string(processor_t::event_t(code)));
-            if (code == processor_t::ev_get_procmod)
-            {
-                // return size_t(SET_MODULE_DATA(module));
-                auto m = static_cast<module *>(set_module_data(&g_data_id, new module));
-                m->set_data_id(g_data_id);
-                return std::size_t(m);
-            }
-            return 0;
+            return module_instance().on_event(code, va);
         }
 # else
         ssize_t idaapi notify_handler(void * user_data, int code, va_list va)
         {
-            return module_instance().on_event(code, va);
+            IDASCM_LOG_D("notify_handler: %d '%s'", code, to_string(processor_t::event_t(code)));
+            switch (code)
+            {
+                case processor_t::ev_get_procmod:
+                {
+                    int data_id = 0;
+                    auto m = static_cast<module *>(set_module_data(&data_id, new module));
+                    m->set_data_id(data_id);
+                    return reinterpret_cast<std::size_t>(m);
+                }
+            }
+            return 0;
         }
 # endif
 
@@ -166,9 +171,9 @@ namespace idascm
     auto assembler(void) noexcept -> asm_t
     {
         asm_t assembler = {};
-        assembler.flag              = AS_COLON | ASH_HEXF3;
+        assembler.flag              = AS_COLON | ASH_HEXF3 | ASO_OCTF4 | ASB_BINF4;
         assembler.uflag             = 0;
-        assembler.name              = "GTA SCM Bytecode";
+        assembler.name              = "GTA SCM";
         assembler.help              = 0;
         assembler.header            = nullptr;
         assembler.origin            = "org";
@@ -260,7 +265,69 @@ namespace idascm
             s_lnames[i] = gs_processor_table[i].description;
         }
 
-        static asm_t const s_asm = assembler();
+        static char const * const l_assembler_header[] = \
+        {
+            "// idascm (" __DATE__ " " __TIME__ ")",
+            nullptr,
+        };
+
+        asm_t assembler = {};
+        assembler.flag              = AS_COLON | ASH_HEXF3 | ASO_OCTF4 | ASB_BINF4;
+        assembler.uflag             = 0;
+        assembler.name              = "GTA SCM";
+        assembler.help              = 0;
+        assembler.header            = l_assembler_header;
+        assembler.origin            = "org";
+        assembler.end               = "end";
+        assembler.cmnt              = "//";
+        assembler.ascsep            = '"';
+        assembler.accsep            = '\'';
+        assembler.esccodes          = "\"'";
+        assembler.a_ascii           = ".ascii";
+        assembler.a_byte            = ".byte";
+        assembler.a_word            = ".word";
+        assembler.a_dword           = ".dword";
+        assembler.a_qword           = nullptr;
+        assembler.a_oword           = nullptr;
+        assembler.a_float           = ".float";
+        assembler.a_double          = nullptr;
+        assembler.a_tbyte           = nullptr;
+        assembler.a_packreal        = nullptr;
+        assembler.a_dups            = ".dup #s(c,) #d, #v";
+        assembler.a_bss             = ".bss %s";
+        assembler.a_equ             = "equ";
+        assembler.a_seg             = nullptr;
+        assembler.a_curip           = "*";
+        // assembler.out_func_header   = nullptr;
+        // assembler.out_func_footer   = nullptr;
+        assembler.a_public          = "global";
+        assembler.a_weak            = nullptr;
+        assembler.a_extrn           = "xref";
+        assembler.a_comdef          = nullptr;
+        assembler.get_type_name     = nullptr;
+        assembler.a_align           = nullptr;
+        assembler.lbrace            = '(';
+        assembler.rbrace            = ')';
+        assembler.a_mod             = "%";
+        assembler.a_band            = "&";
+        assembler.a_bor             = "|";
+        assembler.a_xor             = "^";
+        assembler.a_bnot            = "!";
+        assembler.a_shl             = "<<";
+        assembler.a_shr             = ">>";
+        assembler.a_sizeof_fmt      = "sizeof";
+        assembler.flag2             = AS2_BYTE1CHAR;
+        assembler.cmnt2             = nullptr;
+        assembler.low8              = nullptr;
+        assembler.high8             = nullptr;
+        assembler.low16             = nullptr;
+        assembler.high16            = nullptr;
+        assembler.a_include_fmt     = nullptr;
+        assembler.a_vstruc_fmt      = nullptr;
+        assembler.a_rva             = nullptr;
+        assembler.a_yword           = nullptr;
+
+        static asm_t const s_asm = assembler;
         static asm_t const * const s_asm_list[] = \
         {
             &s_asm,
@@ -285,8 +352,8 @@ namespace idascm
         proc.segreg_size    = 0;
         proc.reg_code_sreg  = 0;
         proc.reg_data_sreg  = 1;
-        proc.codestart      = g_codestart_list;
-        proc.retcodes       = g_retcode_list;
+        // proc.codestart      = g_codestart_list;
+        // proc.retcodes       = g_retcode_list;
         proc.instruc_start  = 0x0000;
         proc.instruc_end    = 0x0fff;
         proc.instruc        = g_instruction_list;

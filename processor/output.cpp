@@ -40,7 +40,6 @@ namespace idascm
                 {
                     break;
                 }
-
                 ctx.out_one_operand(n);
             }
             else
@@ -142,13 +141,23 @@ namespace idascm
                 ctx.out_register(string);
                 return true;
             }
-            case o_near:
             case o_mem:
+            case o_far:
+            case o_near:
             {
-                if (! ctx.out_name_expr(op, op.addr))
+                std::uint32_t address = op.addr;
+                if (o_near == op.type)
+                {
+                    auto segment = getseg(ctx.insn.ea);
+                    if (segment)
+                    {
+                        address = segment->start_ea + address;
+                    }
+                }
+                if (! ctx.out_name_expr(op, address))
                 {
                     ctx.out_tagon(COLOR_ERROR);
-                    ctx.out_btoa(op.addr, 16);
+                    ctx.out_btoa(op.value, 16);
                     ctx.out_tagoff(COLOR_ERROR);
                     remember_problem(PR_NONAME, ctx.insn.ea);
                 }

@@ -14,7 +14,7 @@ namespace idascm
         operand_int8        = 0x04,
         operand_int16       = 0x05,
         operand_float32     = 0x06,
-        operand_string      = 0x10, // special
+        operand_string64    = 0x10, // special
     };
 
     struct operand
@@ -27,11 +27,14 @@ namespace idascm
             std::int8_t     value_int8;
             std::int16_t    value_int16;
             std::int32_t    value_int32;
+            std::int64_t    value_int64;
             float           value_float32;
             char            value_string64[8];
             vmsize_t        value_ptr;
         };
     };
+
+    auto to_int(operand const & op, std::int32_t & value) noexcept -> bool;
 
     enum instruction_flag : std::uint8_t
     {
@@ -50,5 +53,5 @@ namespace idascm
         operand             operand_list[16];
     };
 
-    auto instruction_name(instruction const & ins) noexcept -> char const *;
+    auto name(instruction const & ins) noexcept -> char const *;
 }

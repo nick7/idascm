@@ -2,13 +2,15 @@ set (PROJECT engine)
 add_library (
     ${PROJECT}
     STATIC
+        # headers
         engine.hpp
         command.hpp
         command_manager.hpp
         command_set.hpp
         decoder.hpp
+        instruction.hpp
         version.hpp
-        #
+        # sources
         command.cpp
         command_manager.cpp
         command_set.cpp

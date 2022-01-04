@@ -36,8 +36,8 @@ namespace idascm
             switch (in.command->argument_list[op])
             {
                 case argument_type::string64:
-                    in.operand_list[op].type        = operand_string;
-                    in.operand_list[op].value_ptr   = ptr;
+                    in.operand_list[op].type = operand_string64;
+                    m_memory->read(ptr, in.operand_list[op].value_string64, 8);
                     in.operand_list[op].size = 8;
                     break;
                 default:

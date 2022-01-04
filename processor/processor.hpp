@@ -7,6 +7,9 @@
 # else
 #   include <idaidp.hpp>
 # endif
+# if IDA_SDK_VERSION < 750
+#   define IDASCM_STATIC_MODULE_INSTANCE
+# endif
 
 namespace idascm
 {

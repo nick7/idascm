@@ -9,7 +9,7 @@ namespace idascm
     {
         unknown     = 0x0 << 4,
 
-        // abstract types
+        // logical (abstract) types
         any         = 0x1 << 4,
         integer     = 0x2 << 4,     // signed integer
         real        = 0x3 << 4,     // floating point
