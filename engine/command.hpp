@@ -3,6 +3,7 @@
 
 namespace idascm
 {
+    class json_object;
     class json_value;
 
     enum class argument_type : std::uint8_t
@@ -53,5 +54,5 @@ namespace idascm
 
     auto operator == (command const & first, command const & second) noexcept -> bool;
 
-    auto command_from_json(json_value const & value) -> command;
+    auto command_from_json(json_object const & object) -> command;
 }

@@ -16,10 +16,18 @@ namespace idascm
         {
             std::string const path = root + "/" + std::string(to_string(ver)) + ".json";
             IDASCM_LOG_I("Loading commands from '%s'", path.c_str());
-            auto set = new command_set;
-            if (set->load(json_value::from_file(path.c_str())))
+            auto const set = new command_set;
+            auto const json = json_value::from_file(path.c_str());
+            if (json.is_valid())
             {
-                return set;
+                auto const object = json.to_object();
+                if (object.is_valid())
+                {
+                    if (set->load(object))
+                    {
+                        return set;
+                    }
+                }
             }
             delete set;
             return nullptr;

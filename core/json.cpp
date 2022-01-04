@@ -288,85 +288,70 @@ namespace idascm
         return json_type::invalid;
     }
 
-    auto json_value::contains(char const * key) const noexcept -> bool
+    auto json_value::to_primitive(void) const -> json_primitive
     {
-        return m_data && token_find(m_data, &m_data->tokens[m_begin], key, key ? std::strlen(key) : 0);
-    }
-
-    auto json_value::key_at(std::size_t index) const -> json_value
-    {
-        json_value value;
-        if (m_data && JSMN_OBJECT == m_data->tokens[m_begin].type)
-        {
-            if (auto const token = token_at(m_data, &m_data->tokens[m_begin], index))
-            {
-                value.assign(m_data, token - m_data->tokens, token + token_size(m_data, token) - m_data->tokens);
-            }
-        }
-        return value;
-    }
-
-    auto json_value::at(std::size_t index) const -> json_value
-    {
-        json_value value;
+        json_primitive primitive;
         if (m_data)
         {
             switch (m_data->tokens[m_begin].type)
             {
-                case JSMN_OBJECT:
-                    if (auto const token = token_at(m_data, &m_data->tokens[m_begin], index))
-                    {
-                        auto const next = token + 1;
-                        value.assign(m_data, next - m_data->tokens, next + token_size(m_data, next) - m_data->tokens);
-                    }
-                    break;
-                case JSMN_ARRAY:
-                    if (auto const token = token_at(m_data, &m_data->tokens[m_begin], index))
-                    {
-                        value.assign(m_data, token - m_data->tokens, token + token_size(m_data, token) - m_data->tokens);
-                    }
-                    break;
-            }
-        }
-        return value;
-    }
-
-    auto json_value::at(char const * key) const -> json_value
-    {
-        return at(key, key ? std::strlen(key) : 0);
-    }
-
-    auto json_value::at(char const * key, std::size_t length) const -> json_value
-    {
-        json_value value;
-        if (m_data)
-        {
-            if (auto const token = token_find(m_data, &m_data->tokens[m_begin], key, length))
-            {
-                auto const next = token + 1;
-                value.assign(m_data, next - m_data->tokens, next + token_size(m_data, next) - m_data->tokens);
-            }
-        }
-        return value;
-    }
-
-    auto json_value::size(void) const noexcept -> std::size_t
-    {
-        if (m_data)
-        {
-            switch (m_data->tokens[m_begin].type)
-            {
-                case JSMN_OBJECT:
-                case JSMN_ARRAY:
-                    return static_cast<std::size_t>(m_data->tokens[m_begin].size);
+                case JSMN_STRING:
+                case JSMN_PRIMITIVE:
+                    primitive.assign(m_data, m_begin, m_end);
                 default:
                     break;
             }
         }
-        return 0;
+        return primitive;
     }
 
-    auto json_value::to_string(void) const noexcept -> std::string_view
+    auto json_value::to_array(void) const -> json_array
+    {
+        json_array array;
+        if (m_data && JSMN_ARRAY == m_data->tokens[m_begin].type)
+            array.assign(m_data, m_begin, m_end);
+        return array;
+    }
+
+    auto json_value::to_object(void) const -> json_object
+    {
+        json_object object;
+        if (m_data && JSMN_OBJECT == m_data->tokens[m_begin].type)
+            object.assign(m_data, m_begin, m_end);
+        return object;
+    }
+
+    void json_value::assign(json_data * data, std::size_t begin, std::size_t end) noexcept
+    {
+        m_begin = begin;
+        m_end   = end;
+        if (m_data != data)
+        {
+            if (data)
+                ++ data->refs;
+            release();
+        }
+        m_data  = data;
+    }
+
+    void json_value::release(void) noexcept
+    {
+        if (m_data)
+            json_data_release(m_data);
+        m_data = nullptr;
+    }
+
+    void json_value::swap(json_value & other) noexcept
+    {
+        if (this == &other)
+            return;
+        using std::swap;
+        swap(m_data, other.m_data);
+        swap(m_begin, other.m_begin);
+        swap(m_end, other.m_end);
+    }
+
+    auto json_primitive::to_string(void) const noexcept -> std::string_view
     {
         if (m_data)
         {
@@ -382,7 +367,7 @@ namespace idascm
         return {};
     }
 
-    auto json_value::c_str(void) const noexcept -> char const *
+    auto json_primitive::c_str(void) const noexcept -> char const *
     {
         if (m_data)
         {
@@ -398,24 +383,85 @@ namespace idascm
         return nullptr;
     }
 
-    void json_value::assign(json_data * data, std::size_t begin, std::size_t end)
+    auto json_array::at(std::size_t index) const -> json_value
     {
-        m_begin = begin;
-        m_end   = end;
-        if (m_data != data)
+        // if (index >= size())
+        // {
+        //     throw std::out_of_range("index is out of range");
+        // }
+        json_value value;
+        if (m_data && JSMN_ARRAY == m_data->tokens[m_begin].type)
         {
-            if (data)
-                ++ data->refs;
-            release();
+            if (auto const token = token_at(m_data, &m_data->tokens[m_begin], index))
+            {
+                value.assign(m_data, token - m_data->tokens, token + token_size(m_data, token) - m_data->tokens);
+            }
         }
-        m_data  = data;
+        return value;
     }
 
-    void json_value::release(void)
+    auto json_array::size(void) const noexcept -> std::size_t
     {
-        if (m_data)
-            json_data_release(m_data);
-        m_data = nullptr;
+        if (m_data && JSMN_ARRAY == m_data->tokens[m_begin].type)
+            return static_cast<std::size_t>(m_data->tokens[m_begin].size);
+        return 0;
     }
 
+    auto json_object::contains(char const * key) const noexcept -> bool
+    {
+        return m_data && token_find(m_data, &m_data->tokens[m_begin], key, key ? std::strlen(key) : 0);
+    }
+
+    auto json_object::key_at(std::size_t index) const -> json_value
+    {
+        json_value value;
+        if (m_data && JSMN_OBJECT == m_data->tokens[m_begin].type)
+        {
+            if (auto const token = token_at(m_data, &m_data->tokens[m_begin], index))
+            {
+                value.assign(m_data, token - m_data->tokens, token + token_size(m_data, token) - m_data->tokens);
+            }
+        }
+        return value;
+    }
+
+    auto json_object::at(std::size_t index) const -> json_value
+    {
+        json_value value;
+        if (m_data && JSMN_OBJECT == m_data->tokens[m_begin].type)
+        {
+            if (auto const token = token_at(m_data, &m_data->tokens[m_begin], index))
+            {
+                auto const next = token + 1;
+                value.assign(m_data, next - m_data->tokens, next + token_size(m_data, next) - m_data->tokens);
+            }
+        }
+        return value;
+    }
+
+    auto json_object::at(char const * key) const -> json_value
+    {
+        return at(key, key ? std::strlen(key) : 0);
+    }
+
+    auto json_object::at(char const * key, std::size_t length) const -> json_value
+    {
+        json_value value;
+        if (m_data)
+        {
+            if (auto const token = token_find(m_data, &m_data->tokens[m_begin], key, length))
+            {
+                auto const next = token + 1;
+                value.assign(m_data, next - m_data->tokens, next + token_size(m_data, next) - m_data->tokens);
+            }
+        }
+        return value;
+    }
+
+    auto json_object::size(void) const noexcept -> std::size_t
+    {
+        if (m_data && JSMN_OBJECT == m_data->tokens[m_begin].type)
+            return static_cast<std::size_t>(m_data->tokens[m_begin].size);
+        return 0;
+    }
 }
