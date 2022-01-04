@@ -47,7 +47,7 @@ namespace idascm
 
     auto argument_type_from_json(json_value const & value) noexcept -> argument_type
     {
-        return argument_type_from_string(value.c_str());
+        return argument_type_from_string(value.to_primitive().c_str());
     }
 
     auto operator == (command const & first, command const & second) noexcept -> bool
@@ -95,6 +95,8 @@ namespace idascm
 
     auto command_from_json(json_value const & value) -> command
     {
+        auto object = value.to_object();
+
         command command = {};
         
         // auto const opcode = value["opcode"];
@@ -102,13 +104,13 @@ namespace idascm
         //     return command;
         // command.opcode = opcode_from_json(opcode);
         
-        auto const name = value["name"];
+        auto const name = object["name"].to_primitive();
         if (name.is_valid())
         {
             std::strncpy(command.name, name.c_str(), std::size(command.name) - 1);
         }
 
-        auto const flags = value["flags"];
+        auto const flags = object["flags"].to_array();
         if (flags.is_valid())
         {
             for (std::size_t i = 0; i < flags.size(); ++ i)
@@ -116,16 +118,16 @@ namespace idascm
                 for (std::uint8_t flag = 1; flag < 0x80; flag <<= 1)
                 {
                     auto const name = to_string(command_flag(flag));
-                    if (name && 0 == std::strcmp(flags.at(i).c_str(), name))
+                    if (name && 0 == std::strcmp(flags.at(i).to_primitive().c_str(), name))
                         command.flags |= flag;
                 }
             }
         }
 
-        auto const arguments = value["arguments"];
+        auto const arguments = object["arguments"];
         if (arguments.type() == json_type::primitive)
         {
-            command.argument_count = std::atoi(arguments.c_str());
+            command.argument_count = std::atoi(arguments.to_primitive().c_str());
             for (std::size_t i = 0; i < command.argument_count; ++ i)
             {
                 command.argument_list[i] = argument_type::any;
@@ -133,20 +135,21 @@ namespace idascm
         }
         else
         {
-            command.argument_count = (std::uint8_t) arguments.size();
+            auto const argument_array = arguments.to_array();
+            command.argument_count = (std::uint8_t) argument_array.size();
             for (std::size_t i = 0; i < command.argument_count; ++ i)
             {
-                auto const argument = arguments[i];
+                auto const argument = argument_array[i];
                 if (json_type::primitive == argument.type())
                 {
-                    command.argument_list[i] = argument_type_from_json(arguments[i]);
+                    command.argument_list[i] = argument_type_from_json(argument_array[i]);
                     continue;
                 }
-                command.argument_list[i] = argument_type_from_json(arguments[i]["type"]);
+                command.argument_list[i] = argument_type_from_json(argument_array[i].to_object()["type"]);
             }
         }
 
-        auto comment = value["comment"];
+        auto comment = object["comment"].to_primitive();
         if (comment.is_valid())
         {
             std::strncpy(command.comment, comment.c_str(), std::size(command.comment) - 1);

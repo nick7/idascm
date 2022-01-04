@@ -8,3 +8,14 @@ target_link_libraries (
     PUBLIC
         engine
 )
+
+set (PROJECT test_json)
+add_executable (
+    ${PROJECT}
+        test_json.cpp
+)
+target_link_libraries (
+    ${PROJECT}
+    PUBLIC
+        core
+)

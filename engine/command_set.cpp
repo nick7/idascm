@@ -25,15 +25,18 @@ namespace idascm
 
         auto opcode_from_json(json_value const & value) -> std::uint16_t
         {
-            return opcode_from_string(value.c_str());
+            return opcode_from_string(value.to_primitive().c_str());
         }
     }
 
     auto command_set::load(json_value const & value) -> bool
     {
+        auto const object = value.to_object();
+        if (! object.is_valid())
+            return false;
         m_count   = 0;
-        m_version = to_version(value["version"].c_str());
-        auto const commands = value["commands"];
+        m_version = to_version(object["version"].to_primitive().c_str());
+        auto const commands = object["commands"].to_object();
         if (! commands.is_valid())
             return false;
         for (std::size_t i = 0; i < commands.size(); ++ i)
