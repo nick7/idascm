@@ -57,7 +57,7 @@ int main(int argc, char * argv[])
     auto memory = memory_api_buffer(buffer, sizeof(buffer));
 
     command_set isa;
-    isa.load(json_value::from_string(gs_json));
+    isa.load(json_value::from_string(gs_json).to_object());
 
     decoder dec;
     dec.set_command_set(&isa);

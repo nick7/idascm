@@ -6,13 +6,13 @@
 
 namespace idascm
 {
-    class json_value;
+    class json_object;
 
     // single game implementation opcode database - set of commands
     class command_set
     {
         public:
-            auto load(json_value const & value) -> bool;
+            auto load(json_object const & object) -> bool;
             auto set_command(std::uint16_t opcode, command const & command) -> bool;
 
             auto get_command(std::uint16_t opcode) const noexcept -> command const *

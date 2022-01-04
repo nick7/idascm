@@ -29,9 +29,8 @@ namespace idascm
         }
     }
 
-    auto command_set::load(json_value const & value) -> bool
+    auto command_set::load(json_object const & object) -> bool
     {
-        auto const object = value.to_object();
         if (! object.is_valid())
             return false;
         m_count   = 0;
@@ -41,7 +40,7 @@ namespace idascm
             return false;
         for (std::size_t i = 0; i < commands.size(); ++ i)
         {
-            auto const cmd = commands.at(i);
+            auto const cmd = commands.at(i).to_object();
             if (! cmd.is_valid())
                 continue;
             std::uint16_t const opcode = opcode_from_json(commands.key_at(i));

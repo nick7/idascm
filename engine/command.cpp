@@ -93,10 +93,8 @@ namespace idascm
     //     return static_cast<std::uint16_t>(std::strtoul(value.c_str(), nullptr, 10));
     // }
 
-    auto command_from_json(json_value const & value) -> command
+    auto command_from_json(json_object const & object) -> command
     {
-        auto object = value.to_object();
-
         command command = {};
         
         // auto const opcode = value["opcode"];
