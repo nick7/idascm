@@ -5,6 +5,8 @@ project ("idascm")
 set (CMAKE_CXX_STANDARD 17)
 set (CMAKE_CXX_STANDARD_REQUIRED ON)
 
+option (OPTION_EA64 "64-bit Address Space" OFF)
+
 execute_process (
     COMMAND
         git describe --long --tags --dirty

@@ -17,10 +17,24 @@ target_include_directories (
 target_compile_definitions (
     ${PROJECT}
     INTERFACE
-        __NT__
         __IDP__
         __X64__
+        __AMD64__
 )
+if (WIN32)
+    target_compile_definitions (
+        ${PROJECT}
+        INTERFACE
+            __NT__
+    )
+endif ()
+if (OPTION_EA64)
+    target_compile_definitions (
+        ${PROJECT}
+        INTERFACE
+            __EA64__
+    )
+endif ()
 target_compile_options (
     ${PROJECT}
     INTERFACE

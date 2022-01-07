@@ -22,8 +22,16 @@ target_link_libraries (
         core
         ida
 )
-set_target_properties (
-    ${PROJECT}
-    PROPERTIES
-        OUTPUT_NAME "idascm"
-)
+if (OPTION_EA64)
+    set_target_properties (
+        ${PROJECT}
+        PROPERTIES
+            OUTPUT_NAME "idascm64"
+    )
+else ()
+    set_target_properties (
+        ${PROJECT}
+        PROPERTIES
+            OUTPUT_NAME "idascm"
+    )
+endif ()

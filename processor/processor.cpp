@@ -51,7 +51,10 @@ namespace idascm
 
         void startup(void)
         {
+// EA64 version crashes at callui(ui_msg, ...) O_o
+# ifndef __EA64__
             static ida_logger logger;
+# endif
             IDASCM_LOG_I("idascm %s", build_version());
             IDASCM_LOG_I("IDA_SDK_VERSION: %d", IDA_SDK_VERSION);
         }
@@ -76,14 +79,17 @@ namespace idascm
 
         instruc_t g_instruction_list[0x1000];
 
+        ssize_t idaapi notify_handler(void * user_data, int code, va_list va)
+        {
+            static bool is_initialized = false;
+            if (! is_initialized)
+            {
+                startup();
+            }
+            is_initialized = true;
 # if defined IDASCM_STATIC_MODULE_INSTANCE
-        ssize_t idaapi notify_handler(void * user_data, int code, va_list va)
-        {
             return module_instance().on_event(code, va);
-        }
 # else
-        ssize_t idaapi notify_handler(void * user_data, int code, va_list va)
-        {
             IDASCM_LOG_D("notify_handler: %d '%s'", code, to_string(processor_t::event_t(code)));
             switch (code)
             {
@@ -96,8 +102,8 @@ namespace idascm
                 }
             }
             return 0;
-        }
 # endif
+        }
 
         auto data_root_path(void) -> char const *
         {
@@ -190,13 +196,6 @@ namespace idascm
 
     auto processor(void) noexcept -> processor_t
     {
-        static bool s_startup;
-        if (! s_startup)
-        {
-            startup();
-            s_startup = true;
-        }
-
         static char const * s_snames[std::size(gs_processor_table) + 1];
         static char const * s_lnames[std::size(gs_processor_table) + 1];
         for (std::size_t i = 0; i < std::size(gs_processor_table); ++ i)
@@ -318,6 +317,8 @@ namespace idascm
                 return "newasm";
             case processor_t::ev_newfile: // 4
                 return "newfile";
+            case processor_t::ev_oldfile: // 5
+                return "oldfile";
             case processor_t::ev_newbinary: // 6
                 return "newbinary";
             case processor_t::ev_endbinary: // 7
@@ -340,6 +341,8 @@ namespace idascm
                 return "out_operand";
             case processor_t::ev_out_data: // 20
                 return "out_data";
+            case processor_t::ev_out_label: // 21
+                return "out_label";
             case processor_t::ev_creating_segm: // 26
                 return "creating_segm";
             case processor_t::ev_rename: // 31
@@ -372,6 +375,8 @@ namespace idascm
                 return "add_dref";
             case processor_t::ev_del_cref: // 66
                 return "del_cref";
+            case processor_t::ev_coagulate_dref: // 68
+                return "coagulate_dref";
             case processor_t::ev_auto_queue_empty: // 71
                 return "auto_queue_empty";
             case processor_t::ev_extract_address: // 75

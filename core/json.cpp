@@ -115,7 +115,7 @@ namespace idascm
             assert(data && string && token);
             if (token->end - token->start != length)
                 return false;
-            return 0 == strncmp(string, data->source + token->start, length);
+            return 0 == std::strncmp(string, data->source + token->start, length);
         }
 
         auto token_string(json_data const * data, jsmntok_t const * token, char * dst, std::size_t size) -> std::size_t
@@ -123,7 +123,7 @@ namespace idascm
             assert(data && token && dst);
             auto const length = static_cast<std::size_t>(token->end - token->start);
             size = std::min(size, length);
-            std::memcmp(dst, data->source + token->start, size);
+            std::memcpy(dst, data->source + token->start, size);
             return length;
         }
 
