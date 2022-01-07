@@ -19,7 +19,7 @@ namespace idascm
         , m_emulator(new emulator)
         , m_output(new output)
     {
-        m_isa = processor_isa(version::gtavc_win32);
+        m_isa = processor_isa(version::gtavc_pc);
         assert(m_isa);
         processor_set_current_isa(m_isa);
 

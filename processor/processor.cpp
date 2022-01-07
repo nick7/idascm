@@ -170,21 +170,21 @@ namespace idascm
 
     namespace
     {
-        struct
+        version const gs_processor_table[] = \
         {
-            version         ver;
-            char const *    description;
-        }
-        static const gs_processor_table[] = \
-        {
-            { version::gta3_ps2,    "GTA 3 (PlayStation 2)"                             },
-            { version::gta3_xbox,   "GTA 3 (XBOX Original)"                             },
-            { version::gta3_win32,  "GTA 3 (Win32)"                                     },
-            { version::gtavc_ps2,   "GTA Vice City (PlayStation 2)"                     },
-            { version::gtavc_xbox,  "GTA Vice City (XBOX Original)"                     },
-            { version::gtavc_win32, "GTA Vice City (Win32)"                             },
-            { version::gtalcs_psp,  "GTA Liberty City Stories (PlayStation Portable)"   },
-            { version::gtavcs_psp,  "GTA Vice City Stories (PlayStation Portable)"      },
+            version::gta3_ps2,              // 2001
+            version::gta3_ps2_ex,           // 2001
+            version::gta3_xbox,             //
+            version::gta3_pc,               // 2002
+            version::gta3_pc_ex,            // 2002
+            version::gta3_anniversary,      // 2011
+            version::gta3_definitive,       // 2021
+
+            version::gtavc_ps2,             // 2002
+            version::gtavc_xbox,            // 2003
+            version::gtavc_pc,              // 2003
+            version::gtavc_anniversary,     // 2012
+            version::gtavc_definitive,      // 2021
         };
     }
 
@@ -201,8 +201,8 @@ namespace idascm
         static char const * s_lnames[std::size(gs_processor_table) + 1];
         for (std::size_t i = 0; i < std::size(gs_processor_table); ++ i)
         {
-            s_snames[i] = to_string(gs_processor_table[i].ver);
-            s_lnames[i] = gs_processor_table[i].description;
+            s_snames[i] = to_string(gs_processor_table[i]);
+            s_lnames[i] = version_description(gs_processor_table[i]);
         }
 
         static char l_assembler_header_string[256];
