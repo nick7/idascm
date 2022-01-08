@@ -7,18 +7,18 @@ add_library (
         command.hpp
         command_manager.hpp
         command_set.hpp
-        decoder.hpp
-        decoder_gta3.hpp
-        decoder_gtavc.hpp
+        decoder/decoder.hpp
+        decoder/decoder_gta3.hpp
+        decoder/decoder_gtavc.hpp
         instruction.hpp
         version.hpp
         # sources
         command.cpp
         command_manager.cpp
         command_set.cpp
-        decoder.cpp
-        decoder_gta3.cpp
-        decoder_gtavc.cpp
+        decoder/decoder.cpp
+        decoder/decoder_gta3.cpp
+        decoder/decoder_gtavc.cpp
         instruction.cpp
         version.cpp
 )

@@ -2,7 +2,6 @@
 # include <processor/analyzer.hpp>
 # include <processor/module.hpp>
 # include <engine/command_set.hpp>
-# include <engine/decoder.hpp>
 # include <engine/instruction.hpp>
 # include <core/logger.hpp>
 
