@@ -96,6 +96,13 @@ namespace idascm
             {
                 switch (op.dtype)
                 {
+                    case dt_packreal:
+                    {
+                        char string[16] = { 0 };
+                        qsnprintf(string, sizeof(string) - 1, "%g", static_cast<int>(op.value) / 16.f);
+                        ctx.out_line(string, COLOR_NUMBER);
+                        break;
+                    }
                     case dt_float:
                     {
                         char string[16] = { 0 };

@@ -8,6 +8,8 @@ add_library (
         command_manager.hpp
         command_set.hpp
         decoder.hpp
+        decoder_gta3.hpp
+        decoder_gtavc.hpp
         instruction.hpp
         version.hpp
         # sources
@@ -15,6 +17,8 @@ add_library (
         command_manager.cpp
         command_set.cpp
         decoder.cpp
+        decoder_gta3.cpp
+        decoder_gtavc.cpp
         instruction.cpp
         version.cpp
 )

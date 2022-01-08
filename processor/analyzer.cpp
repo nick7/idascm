@@ -1,7 +1,8 @@
 # include "analyzer.hpp"
 # include <engine/command.hpp>
 # include <engine/command_set.hpp>
-# include <engine/decoder.hpp>
+# include <engine/decoder_gta3.hpp>
+# include <engine/decoder_gtavc.hpp>
 # include <engine/instruction.hpp>
 # include <core/logger.hpp>
 # include <cassert>
@@ -10,7 +11,7 @@ namespace idascm
 {
     class memory_api_ida : public memory_api
     {
-        virtual auto read(vmsize_t address, void * dst, vmsize_t size) -> vmsize_t
+        virtual auto read(std::uint32_t address, void * dst, std::uint32_t size) -> std::uint32_t
         {
             return get_bytes(dst, size, address);
         }
@@ -22,10 +23,20 @@ namespace idascm
         m_decoder->set_command_set(isa);
     }
 
-    analyzer::analyzer(void)
-        : m_decoder(new decoder)
+    analyzer::analyzer(game game)
+        : m_decoder(nullptr)
         , m_memory(new memory_api_ida)
     {
+        switch (game)
+        {
+            case game::gta3:
+                m_decoder = new decoder_gta3;
+                break;
+            case game::gtavc:
+                m_decoder = new decoder_gtavc;
+                break;
+        }
+        assert(m_decoder);
         m_decoder->set_memory_api(m_memory);
     }
 
@@ -120,53 +131,60 @@ namespace idascm
         // actual types
         switch (src.operand_list[index].type)
         {
-            case operand_string64:
+            case operand_type::string64:
             {
                 dst.type    = o_imm;
                 dst.dtype   = dt_string;
                 dst.addr    = src.address + src.operand_list[index].offset;
                 break;
             }
-            case operand_int8:
+            case operand_type::int8:
             {
                 dst.type    = o_imm;
                 dst.dtype   = dt_byte;
                 dst.value   = src.operand_list[index].value_int8;
                 break;
             }
-            case operand_int16:
+            case operand_type::int16:
             {
                 dst.type    = o_imm;
                 dst.dtype   = dt_word;
                 dst.value   = src.operand_list[index].value_int16;
                 break;
             }
-            case operand_int32:
+            case operand_type::int32:
             {
                 dst.type    = o_imm;
                 dst.dtype   = dt_dword;
                 dst.value   = src.operand_list[index].value_int32;
                 break;
             }
-            case operand_float32:
+            case operand_type::float32:
             {
                 dst.type    = o_imm;
                 dst.dtype   = dt_float;
                 dst.value   = src.operand_list[index].value_int32;
                 break;
             }
-            case operand_global:
+            case operand_type::float16i:
+            {
+                dst.type    = o_imm;
+                dst.dtype   = dt_packreal;
+                dst.value   = src.operand_list[index].value_int16;
+                break;
+            }
+            case operand_type::global:
             {
                 dst.type    = o_mem;
                 dst.dtype   = dt_dword;
-                dst.addr    = src.operand_list[index].value_ptr;
+                dst.addr    = src.operand_list[index].value_int16;
                 break;
             }
-            case operand_local:
+            case operand_type::local:
             {
                 dst.type    = o_reg;
                 dst.dtype   = dt_dword;
-                dst.reg     = src.operand_list[index].value_ptr;
+                dst.reg     = src.operand_list[index].value_int16;
                 break;
             }
             default:

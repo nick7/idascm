@@ -12,21 +12,41 @@
 namespace idascm
 {
     module::module(void)
-        : m_proc(-1)
-        , m_data_id(-1)
+        : m_data_id(-1)
         , m_isa(nullptr)
-        , m_analyzer(new analyzer)
-        , m_emulator(new emulator)
-        , m_output(new output)
+        , m_analyzer(nullptr)
+        , m_emulator(nullptr)
+        , m_output(nullptr)
+    {}
+
+    auto module::set_version(version ver) -> bool
     {
-        m_isa = processor_isa(version::gtavc_pc);
-        assert(m_isa);
+        IDASCM_LOG_I("Initializing '%s'", to_string(ver));
+        m_isa = processor_isa(ver);
+        delete m_analyzer;
+        delete m_emulator;
+        delete m_output;
+        m_analyzer = nullptr;
+        m_emulator = nullptr;
+        m_output   = nullptr;
+        if (! m_isa)
+        {
+            IDASCM_LOG_W("Unable to retrieve ISA for '%s'", to_string(ver));
+            return false;
+        }
+
         processor_set_current_isa(m_isa);
+
+        m_analyzer  = new analyzer(version_game(ver));
+        m_emulator  = new emulator;
+        m_output    = new output;
 
         m_analyzer->set_isa(m_isa);
         m_emulator->set_isa(m_isa);
         m_output->set_isa(m_isa);
         m_output->set_analyzer(m_analyzer);
+
+        return true;
     }
 
     module::~module(void)
@@ -62,7 +82,7 @@ namespace idascm
     // virtual
     ssize_t idaapi module::on_event(ssize_t msgid, va_list args)
     {
-        IDASCM_LOG_D("module::on_event: %zd '%s'", msgid, to_string(processor_t::event_t(msgid)));
+        IDASCM_LOG_T("module::on_event: %zd '%s'", msgid, to_string(processor_t::event_t(msgid)));
         switch (msgid)
         {
             case processor_t::ev_init: // 0
@@ -82,14 +102,18 @@ namespace idascm
             }
             case processor_t::ev_newprc: // 2
             {
-                m_proc = va_arg(args, int);
+                auto const id = va_arg(args, int);
                 auto const keep_cfg = va_arg(args, bool);
-                IDASCM_LOG_D("%d, %d", m_proc, keep_cfg);
+                IDASCM_LOG_D("ev_newprc: %d, %d", id, keep_cfg);
+                auto const ver = processor_version(id);
+                if (ver == version::unknown)
+                    return -1;
+                set_version(ver);
                 return 1;
             }
             case processor_t::ev_newfile: // 4
             {
-                IDASCM_LOG_D("'%s'", va_arg(args, char const *));
+                IDASCM_LOG_D("ev_newfile: '%s'", va_arg(args, char const *));
                 return 1;
             }
             case processor_t::ev_ana_insn:

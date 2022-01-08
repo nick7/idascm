@@ -48,7 +48,7 @@ namespace idascm
         char            name[64];
         std::uint8_t    flags;
         std::uint8_t    argument_count;
-        argument_type   argument_list[16];
+        argument_type   argument_list[24];
         char            comment[64];
     };
 

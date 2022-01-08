@@ -21,6 +21,7 @@ namespace idascm
     void processor_set_current_isa(command_set const * set);
     auto processor_current_isa(void) -> command_set const *;
     auto processor_isa(version ver) -> command_set const *;
+    auto processor_version(int proc_id) noexcept -> version;
 
     auto to_string(processor_t::event_t event) -> char const *;
 

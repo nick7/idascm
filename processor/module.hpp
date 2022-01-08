@@ -25,12 +25,13 @@ namespace idascm
                 m_data_id = data_id;
             }
 
+            auto set_version(version ver) -> bool;
+
         public:
             module(void);
             ~module(void);
 
         private:
-            int                 m_proc;
             int                 m_data_id;
             command_set const * m_isa;
             analyzer *          m_analyzer; // 'ana'

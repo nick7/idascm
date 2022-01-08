@@ -5,16 +5,13 @@
 
 namespace idascm
 {
-    // virtual machine address
-    using vmsize_t = std::uint32_t;
-
     class memory_api
     {
         public:
-            virtual auto read(vmsize_t address, void * dst, vmsize_t size) -> vmsize_t = 0;
+            virtual auto read(std::uint32_t address, void * dst, std::uint32_t size) ->std::uint32_t = 0;
 
             template <typename type>
-            auto read(vmsize_t address, type * dst) -> vmsize_t
+            auto read(std::uint32_t address, type * dst) -> std::uint32_t
             {
                 return read(address, dst, sizeof(type));
             }
@@ -23,9 +20,9 @@ namespace idascm
     class memory_api_buffer : public memory_api
     {
         public:
-            virtual auto read(vmsize_t offset, void * dst, vmsize_t size) -> vmsize_t override
+            virtual auto read(std::uint32_t offset, void * dst, std::uint32_t size) -> std::uint32_t override
             {
-                auto left = static_cast<vmsize_t>(std::min<std::size_t>(m_size - offset, size));
+                auto left = static_cast<std::uint32_t>(std::min<std::size_t>(m_size - offset, size));
                 if (left)
                     std::memcpy(dst, m_memory + offset, left);
                 return left;

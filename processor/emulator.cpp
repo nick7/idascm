@@ -28,6 +28,7 @@ namespace idascm
                         op_dec(insn.ea, op.n);
                         break;
                     case dt_float:
+                    case dt_packreal:
                         op_flt(insn.ea, op.n);
                         break;
                     default:

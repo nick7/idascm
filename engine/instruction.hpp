@@ -5,21 +5,24 @@ namespace idascm
 {
     struct command;
 
-    enum operand_type : std::uint8_t
+    enum class operand_type // : std::uint8_t
     {
-        operand_none        = 0x00,
-        operand_int32       = 0x01,
-        operand_global      = 0x02,
-        operand_local       = 0x03,
-        operand_int8        = 0x04,
-        operand_int16       = 0x05,
-        operand_float32     = 0x06,
-        operand_string64    = 0x10, // special
+        unknown = -1,
+        none,
+        int8,           // immediate signed 8-bit integer
+        int16,          // immediate signed 16-bit integer
+        int32,          // immediate signed 32-bit integer
+        int64,          // immediate signed 64-bit integer (reserved)
+        global,         // global variable reference
+        local,          // local variable reference
+        float32,        // immediate 32-bit floating point
+        float16i,       // immediate floating point packed into 16-bit integer
+        string64,       // immediate 8 character string
     };
 
     struct operand
     {
-        std::uint8_t    type;
+        operand_type    type;
         std::uint8_t    offset;
         std::uint8_t    size;
         union
@@ -30,11 +33,11 @@ namespace idascm
             std::int64_t    value_int64;
             float           value_float32;
             char            value_string64[8];
-            vmsize_t        value_ptr;
         };
     };
 
     auto to_int(operand const & op, std::int32_t & value) noexcept -> bool;
+    auto to_float(operand const & op, float & value) noexcept -> bool;
 
     enum instruction_flag : std::uint8_t
     {
@@ -45,12 +48,12 @@ namespace idascm
     struct instruction
     {
         command const *     command;
-        vmsize_t            address;
+        std::uint32_t       address;
         std::uint16_t       opcode;
         std::uint8_t        flags;
         std::uint8_t        size;
         std::uint8_t        operand_count;
-        operand             operand_list[16];
+        operand             operand_list[24];
     };
 
     auto name(instruction const & ins) noexcept -> char const *;

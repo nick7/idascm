@@ -9,18 +9,19 @@ namespace idascm
     struct instruction;
     struct operand;
 
+    enum class operand_type;
+
     // decoder?
     class decoder
     {
         public:
-            auto decode_instruction(std::uint32_t address, instruction & in) const -> std::uint32_t;
-            auto decode_operand(std::uint32_t address, operand & op) const -> std::uint32_t;
+            virtual auto decode_instruction(std::uint32_t address, instruction & in) const -> std::uint32_t;
+            virtual auto decode_operand(std::uint32_t address, operand & op) const -> std::uint32_t;
+            virtual auto decode_operand_type(std::uint32_t address, operand_type & type) const -> std::uint32_t = 0;
 
         public:
-            decoder(void)
-                : m_isa(nullptr)
-                , m_memory(nullptr)
-            {}
+            decoder(void);
+            virtual ~decoder(void) noexcept;
 
             void set_command_set(command_set const * isa)
             {
@@ -32,7 +33,7 @@ namespace idascm
                 m_memory = api;
             }
 
-        private:
+        protected:
             command_set const * m_isa;
             memory_api *        m_memory;
     };

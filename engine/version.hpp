@@ -107,6 +107,10 @@ namespace idascm
     auto to_string(version version) noexcept -> char const *;
     auto to_version(char const * string) noexcept -> version;
 
+    constexpr auto version_game(version ver) noexcept -> game
+    {
+        return static_cast<game>(to_uint(ver) & (0x03 << 5));
+    }
     constexpr auto version_edition(version ver) noexcept -> edition
     {
         return static_cast<edition>(to_uint(ver) & 0x1f);

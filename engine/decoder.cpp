@@ -6,7 +6,12 @@
 
 namespace idascm
 {
-    namespace
+    decoder::decoder(void)
+        : m_isa(nullptr)
+        , m_memory(nullptr)
+    {}
+
+    decoder::~decoder(void)
     {
     }
 
@@ -36,7 +41,7 @@ namespace idascm
             switch (in.command->argument_list[op])
             {
                 case argument_type::string64:
-                    in.operand_list[op].type = operand_string64;
+                    in.operand_list[op].type = operand_type::string64;
                     m_memory->read(ptr, in.operand_list[op].value_string64, 8);
                     in.operand_list[op].size = 8;
                     break;
@@ -58,7 +63,7 @@ namespace idascm
                     IDASCM_LOG_W("memoey read failed at 0x%08x", ptr);
                     return 0;
                 }
-                if (operand_none == type)
+                if (! type)
                 {
                     ptr += sizeof(type);
                     break;
@@ -79,40 +84,38 @@ namespace idascm
     {
         assert(m_memory && m_isa);
         std::uint32_t ptr = address;
-        ptr += m_memory->read(ptr, &op.type);
+        if (auto size = decode_operand_type(ptr, op.type))
+        {
+            ptr += size;
+        }
+        else
+        {
+            return 0;
+        }
         switch (op.type)
         {
-            case operand_int8:
+            case operand_type::int8:
                 ptr += m_memory->read(ptr, &op.value_int8);
                 break;
-            case operand_int16:
+            case operand_type::int16:
                 ptr += m_memory->read(ptr, &op.value_int16);
                 break;
-            case operand_int32:
+            case operand_type::int32:
                 ptr += m_memory->read(ptr, &op.value_int32);
                 break;
-            case operand_float32:
+            case operand_type::float32:
                 ptr += m_memory->read(ptr, &op.value_float32);
                 break;
-            case operand_global:
-            {
-                std::uint16_t var = -1;
-                ptr += m_memory->read(ptr, &var);
-                op.value_ptr = var;
+            case operand_type::float16i:
+                ptr += m_memory->read(ptr, &op.value_int16);
                 break;
-            }
-            case operand_local:
-            {
-                std::uint16_t var = -1;
-                ptr += m_memory->read(ptr, &var);
-                op.value_ptr = var;
+            case operand_type::global:
+            case operand_type::local:
+                ptr += m_memory->read(ptr, &op.value_int16);
                 break;
-            }
             default:
-            {
                 IDASCM_LOG_W("unsupported operand type: %d", op.type);
                 return 0;
-            }
         }
         op.size = (ptr - address);
         return op.size;

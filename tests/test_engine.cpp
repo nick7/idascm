@@ -1,6 +1,6 @@
 # include <engine/command_set.hpp>
 # include <engine/command_manager.hpp>
-# include <engine/decoder.hpp>
+# include <engine/decoder_gtavc.hpp>
 # include <engine/instruction.hpp>
 # include <engine/command_set.hpp>
 # include <core/json.hpp>
@@ -59,7 +59,7 @@ int main(int argc, char * argv[])
     command_set isa;
     isa.load(json_value::from_string(gs_json).to_object());
 
-    decoder dec;
+    decoder_gtavc dec;
     dec.set_command_set(&isa);
     dec.set_memory_api(&memory);
     

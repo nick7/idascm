@@ -24,7 +24,7 @@ namespace idascm
             void set_isa(command_set const * isa);
 
         public:
-            analyzer(void);
+            explicit analyzer(game game);
             ~analyzer(void);
 
         protected:
