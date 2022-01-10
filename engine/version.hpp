@@ -109,7 +109,7 @@ namespace idascm
 
     constexpr auto version_game(version ver) noexcept -> game
     {
-        return static_cast<game>(to_uint(ver) & (0x03 << 5));
+        return static_cast<game>(to_uint(ver) & 0xe0);
     }
     constexpr auto version_edition(version ver) noexcept -> edition
     {

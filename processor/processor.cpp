@@ -196,7 +196,7 @@ namespace idascm
 
     auto processor_version(int proc_id) noexcept -> version
     {
-        if (proc_id >= 0 || proc_id < std::size(gs_processor_table))
+        if (proc_id >= 0 && proc_id < std::size(gs_processor_table))
             return gs_processor_table[proc_id];
         return version::unknown;
     }
