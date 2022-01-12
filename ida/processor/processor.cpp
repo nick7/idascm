@@ -21,40 +21,9 @@ namespace idascm
 
     namespace
     {
-        class ida_logger : public logger::handler
-        {
-            public:
-                virtual void message(logger::context const & ctx, char const * message) override
-                {
-                    format("[%s][%s] %s", "idascm", to_string(ctx.level), message);
-                }
-
-                static void format(char const * format, ...)
-                {
-                    va_list args;
-                    va_start(args, format);
-                    callui(ui_msg, format, args);
-                    va_end(args);
-                }
-
-                ida_logger(void)
-                    : handler()
-                {
-                    logger::instance().add_handler(this);
-                }
-
-                ~ida_logger(void)
-                {
-                    logger::instance().remove_handler(this);
-                }
-        };
-
         void startup(void)
         {
-// EA64 version crashes at callui(ui_msg, ...) O_o
-# ifndef __EA64__
-            static ida_logger logger;
-# endif
+            initialize_ida_logger();
             IDASCM_LOG_I("idascm %s", build_version());
             IDASCM_LOG_I("IDA_SDK_VERSION: %d", IDA_SDK_VERSION);
         }
@@ -285,7 +254,7 @@ namespace idascm
 
         processor_t proc = {};
         proc.version        = IDP_INTERFACE_VERSION;
-        proc.id             = 0x8000 | 0xeaf;
+        proc.id             = processor_id;
         proc.flag           = PR_USE32 | PR_DEFSEG32 | PRN_HEX | PR_BINMEM | PR_NO_SEGMOVE | PR_CNDINSNS;
         // proc.flag2          = 0;
         proc.cnbits         = 8;

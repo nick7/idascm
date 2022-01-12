@@ -1,18 +1,14 @@
 # pragma once
+# include <ida/utils/utils.hpp>
 # include <engine/version.hpp>
-# if 1 // sdk shit fix
-#   define print_predefined_segname static print_predefined_segname
-#   include <idaidp.hpp>
-#   undef print_predefined_segname
-# else
-#   include <idaidp.hpp>
-# endif
-# if IDA_SDK_VERSION < 750
-#   define IDASCM_STATIC_MODULE_INSTANCE
-# endif
 
 namespace idascm
 {
+    enum
+    {
+        processor_id = 0x8000 | 0xeaf,
+    };
+
     class command_set;
     class command_manager;
 

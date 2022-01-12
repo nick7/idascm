@@ -1,19 +1,11 @@
-set (PROJECT ida_processor)
+set (PROJECT ida_loader)
 add_library (
     ${PROJECT}
     SHARED
         # headers
-        analyzer.hpp
-        emulator.hpp
-        module.hpp
-        output.hpp
-        processor.hpp
+        loader.hpp
         # sources
-        analyzer.cpp
-        emulator.cpp
-        module.cpp
-        output.cpp
-        processor.cpp
+        loader.cpp
 )
 target_link_libraries (
     ${PROJECT}
@@ -26,12 +18,12 @@ if (OPTION_EA64)
     set_target_properties (
         ${PROJECT}
         PROPERTIES
-            OUTPUT_NAME "idascm64"
+            OUTPUT_NAME "${PROJECT_NAME}_ldr64"
     )
 else ()
     set_target_properties (
         ${PROJECT}
         PROPERTIES
-            OUTPUT_NAME "idascm"
+            OUTPUT_NAME "${PROJECT_NAME}_ldr"
     )
 endif ()
