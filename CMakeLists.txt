@@ -29,6 +29,6 @@ add_subdirectory (3rd-party)
 
 add_subdirectory (core)
 add_subdirectory (engine)
-add_subdirectory (processor)
+add_subdirectory (ida)
 
 add_subdirectory (tests)

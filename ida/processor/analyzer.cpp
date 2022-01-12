@@ -1,4 +1,4 @@
-# include <processor/analyzer.hpp>
+# include <ida/processor/analyzer.hpp>
 # include <engine/command.hpp>
 # include <engine/command_set.hpp>
 # include <engine/decoder/decoder_gta3.hpp>

@@ -1,5 +1,5 @@
-# include <processor/processor.hpp>
-# include <processor/module.hpp>
+# include <ida/processor/processor.hpp>
+# include <ida/processor/module.hpp>
 # include <engine/command_set.hpp>
 # include <engine/command_manager.hpp>
 # include <core/logger.hpp>
