@@ -9,6 +9,7 @@ add_library (
         command_set.hpp
         decoder/decoder.hpp
         decoder/decoder_gta3.hpp
+        decoder/decoder_gtalcs.hpp
         decoder/decoder_gtavc.hpp
         instruction.hpp
         version.hpp
@@ -18,6 +19,7 @@ add_library (
         command_set.cpp
         decoder/decoder.cpp
         decoder/decoder_gta3.cpp
+        decoder/decoder_gtalcs.cpp
         decoder/decoder_gtavc.cpp
         instruction.cpp
         version.cpp

@@ -80,7 +80,37 @@ namespace idascm
             ctx.out_keyword("NOT");
             ctx.out_char(' ');
         }
-        ctx.out_custom_mnem(command->name);
+        if (command->name[0])
+        {
+            ctx.out_custom_mnem(command->name);
+        }
+        else
+        {
+            char name[32];
+            qsnprintf(name, sizeof(name) - 1, "UNKNOWN_0x%04x", ctx.insn.itype);
+            ctx.out_custom_mnem(name);
+        }
+    }
+
+    namespace
+    {
+        auto float_suffix(operand_type type) noexcept -> char const *
+        {
+            switch (type)
+            {
+                case operand_type::float0:
+                    return "f0";
+                case operand_type::float8:
+                    return "f8";
+                case operand_type::float16:
+                    return "f16";
+                case operand_type::float24:
+                    return "f24";
+                case operand_type::float32:
+                    return "f";
+            }
+            return nullptr;
+        }
     }
 
     auto output::output_operand(outctx_t & ctx, op_t const & op) -> bool
@@ -97,15 +127,20 @@ namespace idascm
                 {
                     case dt_packreal:
                     {
-                        char string[16] = { 0 };
+                        char string[32] = { 0 };
                         qsnprintf(string, sizeof(string) - 1, "%g", static_cast<int>(op.value) / 16.f);
                         ctx.out_line(string, COLOR_NUMBER);
                         break;
                     }
                     case dt_float:
                     {
-                        char string[16] = { 0 };
-                        qsnprintf(string, sizeof(string) - 1, "%g", *reinterpret_cast<float const*>(&op.value));
+                        char string[32] = { 0 };
+                        qsnprintf(string, sizeof(string) - 1, "%g", *reinterpret_cast<float const *>(&op.value));
+                        if (! strchr(string, '.'))
+                        {
+                            qstrncat(string, ".", sizeof(string) - 1);
+                        }
+                        qstrncat(string, float_suffix(op_type(op)), sizeof(string) - 1);
                         // if (print_fpval(string, sizeof(string) - 1, &op.value, 4))
                         if (true)
                         {
@@ -140,6 +175,7 @@ namespace idascm
                 }
                 return true;
             }
+            // @REG
             case o_reg:
             {
                 char string[32];
@@ -147,7 +183,23 @@ namespace idascm
                 ctx.out_register(string);
                 return true;
             }
-            case o_mem:
+            // @REG[@REG, SIZE]
+            case o_phrase:
+            {
+                char string[32];
+                qsnprintf(string, sizeof(string) - 1, "@%d", op.addr);
+                ctx.out_register(string);
+                ctx.out_symbol('[');
+                qsnprintf(string, sizeof(string) - 1, "@%d", op.reg);
+                ctx.out_register(string);
+                ctx.out_symbol(',');
+                qsnprintf(string, sizeof(string) - 1, "%d", op_array_size(op));
+                ctx.out_line(string, COLOR_NUMBER);
+                ctx.out_symbol(']');
+                return true;
+            }
+            case o_displ:   // GLOBAL[@REG, SIZE]
+            case o_mem:     // GLOBAL
             case o_far:
             case o_near:
             {
@@ -166,6 +218,16 @@ namespace idascm
                     ctx.out_btoa(op.value, 16);
                     ctx.out_tagoff(COLOR_ERROR);
                     remember_problem(PR_NONAME, ctx.insn.ea);
+                }
+                if (o_displ == op.type)
+                {
+                    ctx.out_symbol('[');
+                    char string[32];
+                    qsnprintf(string, sizeof(string) - 1, "@%d", op.reg);
+                    ctx.out_register(string);
+                    ctx.out_symbol(',');
+                    ctx.out_printf("%d", op_array_size(op));
+                    ctx.out_symbol(']');
                 }
                 return true;
             }

@@ -82,6 +82,10 @@ namespace idascm
                 return "condition";
             case command_flag_conditional:
                 return "conditional";
+            case command_flag_function_call:
+                return "function_call";
+            case command_flag_cleo:
+                return "cleo";
         }
         return nullptr;
     }
