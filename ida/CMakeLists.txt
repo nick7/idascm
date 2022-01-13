@@ -42,6 +42,6 @@ target_compile_options (
         /wd4267 # warning C4267: 'xxx': conversion from 'signed xxx' to 'unsigned xxx', possible loss of data 
 )
 
-add_subdirectory (utils)
+add_subdirectory (base)
 add_subdirectory (loader)
 add_subdirectory (processor)

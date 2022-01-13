@@ -1,7 +1,6 @@
 # include <ida/loader/loader.hpp>
 # include <ida/processor/processor.hpp>
-# include <ida/utils/utils.hpp>
-# include <engine/decoder/decoder.hpp>
+# include <engine/decoder/decoder_gta3.hpp>
 # include <core/logger.hpp>
 # include <diskio.hpp>
 # include <cassert>
@@ -67,21 +66,21 @@ namespace idascm
         // int idaapi save_file(FILE * fp, char const * fileformatname)
         // {
         // }
-    }
 
-    auto loader(void) noexcept -> loader_t
-    {
-        startup();
-        loader_t loader         = {};
-        loader.version          = IDP_INTERFACE_VERSION;
-        loader.flags            = 0;
-        loader.accept_file      = accept_file;
-        loader.load_file        = load_file;
-        // loader.save_file        = save_file;
-        loader.move_segm        = nullptr;
-        loader.process_archive  = nullptr;
-        return loader;
+        auto setup_loader(void) noexcept -> loader_t
+        {
+            startup();
+            loader_t loader         = {};
+            loader.version          = IDP_INTERFACE_VERSION;
+            loader.flags            = 0;
+            loader.accept_file      = accept_file;
+            loader.load_file        = load_file;
+            // loader.save_file        = save_file;
+            // loader.move_segm        = nullptr;
+            // loader.process_archive  = nullptr;
+            return loader;
+        }
     }
 }
 
-loader_t LDSC = idascm::loader();
+loader_t LDSC = idascm::setup_loader();

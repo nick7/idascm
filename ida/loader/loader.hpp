@@ -1,11 +1,9 @@
 # pragma once
-# include <engine/engine.hpp>
-# include <ida/processor/processor.hpp>
+# include <ida/base/base.hpp>
 # include <loader.hpp>
 
 namespace idascm
 {
-
 }
 
 idaman loader_t ida_module_data LDSC;

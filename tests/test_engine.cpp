@@ -3,6 +3,7 @@
 # include <engine/decoder/decoder_gtavc.hpp>
 # include <engine/instruction.hpp>
 # include <engine/command_set.hpp>
+# include <engine/memory.hpp>
 # include <core/json.hpp>
 # include <core/logger.hpp>
 # include <cassert>
@@ -54,14 +55,14 @@ int main(int argc, char * argv[])
         0x06,                   // float32
         0xcd, 0xcc, 0x14, 0x41, // 9.3
     };
-    auto memory = memory_api_buffer(buffer, sizeof(buffer));
+    auto mem = memory_api_buffer(buffer, sizeof(buffer));
 
     command_set isa;
     isa.load(json_value::from_string(gs_json).to_object());
 
     decoder_gtavc dec;
     dec.set_command_set(&isa);
-    dec.set_memory_api(&memory);
+    dec.set_memory_api(&mem);
     
     std::uint32_t ip = 0;
 

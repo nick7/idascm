@@ -1,5 +1,6 @@
 # include <engine/decoder/decoder_gta3.hpp>
 # include <engine/instruction.hpp>
+# include <engine/memory.hpp>
 # include <core/logger.hpp>
 # include <cassert>
 

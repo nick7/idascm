@@ -11,6 +11,8 @@ add_library (
         decoder/decoder_gta3.hpp
         decoder/decoder_gtavc.hpp
         instruction.hpp
+        loader.hpp
+        memory.hpp
         version.hpp
         # sources
         command.cpp
@@ -20,6 +22,8 @@ add_library (
         decoder/decoder_gta3.cpp
         decoder/decoder_gtavc.cpp
         instruction.cpp
+        loader.cpp
+        memory.cpp
         version.cpp
 )
 target_link_libraries (

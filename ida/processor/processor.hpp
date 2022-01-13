@@ -1,5 +1,5 @@
 # pragma once
-# include <ida/utils/utils.hpp>
+# include <ida/base/base.hpp>
 # include <engine/version.hpp>
 # if IDA_SDK_VERSION >= 750
 #   define IDASCM_DYNAMIC_MODULE_INSTANCE

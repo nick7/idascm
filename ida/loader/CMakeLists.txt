@@ -10,9 +10,7 @@ add_library (
 target_link_libraries (
     ${PROJECT}
     PUBLIC
-        engine
-        core
-        ida_utils
+        ida_base
 )
 if (OPTION_EA64)
     set_target_properties (

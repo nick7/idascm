@@ -1,4 +1,5 @@
 # include <ida/processor/analyzer.hpp>
+# include <ida/base/memory_ida.hpp>
 # include <engine/command.hpp>
 # include <engine/command_set.hpp>
 # include <engine/decoder/decoder_gta3.hpp>
@@ -9,14 +10,6 @@
 
 namespace idascm
 {
-    class memory_api_ida : public memory_api
-    {
-        virtual auto read(std::uint32_t address, void * dst, std::uint32_t size) -> std::uint32_t
-        {
-            return get_bytes(dst, size, address);
-        }
-    };
-
     void analyzer::set_isa(command_set const * isa)
     {
         assert(m_decoder);

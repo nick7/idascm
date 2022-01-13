@@ -1,5 +1,6 @@
 # include <engine/decoder/decoder_gtavc.hpp>
 # include <engine/instruction.hpp>
+# include <engine/memory.hpp>
 # include <cassert>
 
 namespace idascm

@@ -1,12 +1,14 @@
-set (PROJECT ida_utils)
+set (PROJECT ida_base)
 add_library (
     ${PROJECT}
     STATIC
         # headers
-        memory_api_loader.hpp
-        utils.hpp
+        base.hpp
+        memory_ida.hpp
+        memory_loader.hpp
         # sources
-        utils.cpp
+        base.cpp
+        memory_loader.cpp
 )
 target_link_libraries (
     ${PROJECT}
