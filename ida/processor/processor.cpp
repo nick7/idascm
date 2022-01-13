@@ -3,7 +3,6 @@
 # include <engine/command_set.hpp>
 # include <engine/command_manager.hpp>
 # include <core/logger.hpp>
-# include <array>
 # include <windows.h>
 
 namespace idascm
@@ -11,7 +10,7 @@ namespace idascm
     command_set const * g_isa;
     int                 g_proc;
 
-# if defined IDASCM_STATIC_MODULE_INSTANCE
+# if ! defined IDASCM_DYNAMIC_MODULE_INSTANCE
     auto module_instance(void) -> module &
     {
         static module instance;
@@ -33,19 +32,6 @@ namespace idascm
             "@CS", "@DS"
         };
 
-        bytes_t const g_retcode_list[] = \
-        {
-            { 2,  (uchar const *) "\x51\x00" }, // 0051 RETURN
-            { 2,  (uchar const *) "\x85\x04" }, // 0485 RETURN_TRUE
-            {}
-        };
-
-        bytes_t const g_codestart_list[] = \
-        {
-            { 3, (uchar const *) "\x02\x00\x01" }, // 0002 GOTO 
-            {}
-        };
-
         instruc_t g_instruction_list[0x1000];
 
         ssize_t idaapi notify_handler(void * user_data, int code, va_list va)
@@ -56,7 +42,7 @@ namespace idascm
                 startup();
             }
             is_initialized = true;
-# if defined IDASCM_STATIC_MODULE_INSTANCE
+# if ! defined IDASCM_DYNAMIC_MODULE_INSTANCE
             return module_instance().on_event(code, va);
 # else
             IDASCM_LOG_D("notify_handler: %d '%s'", code, to_string(processor_t::event_t(code)));
@@ -109,7 +95,7 @@ namespace idascm
         };
         IDASCM_LOG_I("processor_set_isa: %s", isa ? to_string(isa->get_version()) : nullptr);
         g_isa = isa;
-# if 0
+# ifdef IDASCM_FILL_INSTRUCTION_LIST
         for (std::uint16_t op = 0; op < 0x1000; ++ op)
         {
             g_instruction_list[op] = {};
@@ -243,7 +229,7 @@ namespace idascm
         assembler.a_include_fmt     = nullptr;
         assembler.a_vstruc_fmt      = nullptr;
         assembler.a_rva             = nullptr;
-        assembler.a_yword           = nullptr;
+        // assembler.a_yword           = nullptr;
 
         static asm_t const s_asm = assembler;
         static asm_t const * const s_asm_list[] = \
