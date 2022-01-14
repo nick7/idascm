@@ -13,11 +13,12 @@ namespace idascm
     }
 
     // virtual
-    auto memory_api_stdio::read(std::uint32_t offset, void* dst, std::uint32_t size) -> std::uint32_t
+    auto memory_api_stdio::read(std::uint32_t offset, void * dst, std::uint32_t size) -> std::uint32_t
     {
         assert(m_stream);
-        if (offset != std::fseek(m_stream, offset, SEEK_SET))
+        if (0 != std::fseek(m_stream, offset, SEEK_SET))
             return 0;
+        assert(dst);
         return std::fread(dst, 1, size, m_stream);
     }
     

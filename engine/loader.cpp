@@ -31,44 +31,87 @@ namespace idascm
 
     auto loader::load(void) -> bool
     {
-        std::uint8_t header[16];
-        if (m_memory_api->read(0, header, sizeof(header)) != sizeof(header))
+        if (! load_header())
             return false;
-        instruction ins = {};
+        if (! load_layout())
+            return false;
+        return true;
+    }
 
-        std::uint32_t ptr = 0;
-        std::int32_t  address = 0;
-        if (auto size = m_decoder->decode_instruction(ptr, ins))
+    auto loader::load_header(void) -> bool
+    {
+        std::int32_t address = 0;
+        instruction ins;
+        if (auto size = m_decoder->decode_instruction(address, ins))
         {
-            ptr += size;
             // global variables
+            m_header.address_globals = address;
             if (is_goto(ins) && to_int(ins.operand_list[0], address))
             {
-                
                 if (auto size = m_decoder->decode_instruction(address, ins))
                 {
-
+                    // objects
+                    m_header.address_objects = address;
+                    if (is_goto(ins) && to_int(ins.operand_list[0], address))
+                    {
+                        if (auto size = m_decoder->decode_instruction(address, ins))
+                        {
+                            // missions
+                            m_header.address_missions = address;
+                            if (is_goto(ins) && to_int(ins.operand_list[0], address))
+                            {
+                                if (auto size = m_decoder->decode_instruction(address, ins))
+                                {
+                                    // main
+                                    m_header.address_main = address;
+                                    return true;
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
         return false;
+    }
 
+    auto loader::load_layout(void) -> bool
+    {
+        std::uint32_t ptr = m_header.address_missions + 8;
+        ptr += m_memory_api->read(ptr, &m_header.main_size);
+        ptr += m_memory_api->read(ptr, &m_header.mission_size);
+        ptr += m_memory_api->read(ptr, &m_header.mission_count);
+        ptr += m_memory_api->read(ptr, &m_header.mission_script_count);
 
-        // if (header[0] == 0x02 && header[1] == 0x00) // GOTO
-        // {
-        //     if (header[2] == 0x01) // int32
-        //     {
-        //         return load_gta3();
-        //     }
-        // }
-        // if (header[8 + 0] == 0x02 && header[8 + 1] == 0x00) // GOTO
-        // {
-        //     if (header[8 + 2] == 0x06) // int32
-        //     {
-        //         // TODO: implementation
-        //         return game::gtalcs;
-        //     }
-        // }
-        // return game::unknown;
+        m_layout.segments.reserve(m_header.mission_count + 1);
+        auto main = segment \
+        {
+            m_header.base,
+            std::numeric_limits<std::uint32_t>::max(),
+            segment_type::mixed,
+            "main"
+        };
+        m_layout.segments.push_back(main);
+
+        for (std::uint32_t i = 0; i < m_header.mission_count; ++ i)
+        {
+            std::uint32_t address = 0;
+            if (sizeof(address) != m_memory_api->read(ptr, &address))
+                return false;
+            m_layout.segments.back().size = address - m_layout.segments.back().address;
+            char name[32] = {};
+            std::snprintf(name, sizeof(name) - 1, "mission:%02u", i);
+            auto mission = segment \
+            {
+                address,
+                std::numeric_limits<std::uint32_t>::max(),
+                segment_type::code,
+                name,
+            };
+            m_layout.segments.push_back(mission);
+            ptr += sizeof(address);
+        }
+
+        return true;
     }
 }

@@ -1,5 +1,7 @@
 # include <ida/base/base.hpp>
+# include <engine/command_manager.hpp>
 # include <core/logger.hpp>
+# include <windows.h>
 
 namespace idascm
 {
@@ -40,5 +42,31 @@ namespace idascm
 # ifndef __EA64__
         static ida_logger logger;
 # endif
+    }
+
+    namespace
+    {
+        auto data_root_path(void) -> char const *
+        {
+            static char root[1024];
+
+            CHAR path[1024] = {};
+            GetModuleFileNameA(GetModuleHandleA(NULL), path, sizeof(path) - 1);
+
+            CHAR * file = nullptr;
+            GetFullPathNameA(path, sizeof(root), root, &file);
+            if (file)
+            {
+                *file = 0;
+            }
+            qstrncat(root, "cfg\\idascm\\", sizeof(root) - 1);
+            return root;
+        }
+    }
+
+    auto base_command_manager(void) -> command_manager &
+    {
+        static command_manager manager(data_root_path());
+        return manager;
     }
 }

@@ -19,3 +19,14 @@ target_link_libraries (
     PUBLIC
         core
 )
+
+set (PROJECT test_loader)
+add_executable (
+    ${PROJECT}
+        test_loader.cpp
+)
+target_link_libraries (
+    ${PROJECT}
+    PUBLIC
+        engine
+)

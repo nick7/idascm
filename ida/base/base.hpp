@@ -9,5 +9,9 @@
 
 namespace idascm
 {
+    class command_manager;
+
     void initialize_ida_logger(void);
+
+    auto base_command_manager(void) -> command_manager &;
 }
