@@ -1,4 +1,4 @@
-# include <engine/decoder/decoder_gtavc.hpp>
+# include <engine/gtavc/decoder_gtavc.hpp>
 # include <engine/instruction.hpp>
 # include <engine/memory.hpp>
 # include <cassert>

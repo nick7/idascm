@@ -1,7 +1,7 @@
 # include <engine/loader.hpp>
 # include <engine/memory.hpp>
 # include <engine/command_set.hpp>
-# include <engine/decoder/decoder_gtavc.hpp>
+# include <engine/gtavc/decoder_gtavc.hpp>
 # include <engine/instruction.hpp>
 # include <core/json.hpp>
 # include <cassert>

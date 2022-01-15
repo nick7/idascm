@@ -2,8 +2,8 @@
 # include <ida/processor/processor.hpp>
 # include <ida/base/memory_loader.hpp>
 # include <engine/command_manager.hpp>
-# include <engine/decoder/decoder_gta3.hpp>
-# include <engine/decoder/decoder_gtavc.hpp>
+# include <engine/gta3/decoder_gta3.hpp>
+# include <engine/gtavc/decoder_gtavc.hpp>
 # include <engine/loader.hpp>
 # include <core/logger.hpp>
 # include <diskio.hpp>

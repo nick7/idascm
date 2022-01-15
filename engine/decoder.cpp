@@ -1,4 +1,5 @@
-# include <engine/decoder/decoder.hpp>
+# include <engine/decoder.hpp>
+# include <engine/instruction.hpp>
 # include <engine/command_set.hpp>
 # include <engine/instruction.hpp>
 # include <engine/memory.hpp>
