@@ -1,6 +1,5 @@
-# include <engine/decoder/decoder_gta3.hpp>
+# include <engine/gtavc/decoder_gtavc.hpp>
 # include <engine/instruction.hpp>
-# include <core/logger.hpp>
 # include <cassert>
 
 namespace idascm
@@ -15,12 +14,12 @@ namespace idascm
             operand_type::local,
             operand_type::int8,
             operand_type::int16,
-            operand_type::float16i,
+            operand_type::float32,
         };
     }
 
     // virtual
-    auto decoder_gta3::decode_operand_type(std::uint32_t address, operand_type & type) const -> std::uint32_t
+    auto decoder_gtavc::decode_operand_type(std::uint32_t address, operand_type & type) const -> std::uint32_t
     {
         std::uint8_t value_type = -1;
         assert(m_memory);

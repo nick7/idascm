@@ -1,9 +1,9 @@
 # include <processor/analyzer.hpp>
 # include <engine/command.hpp>
 # include <engine/command_set.hpp>
-# include <engine/decoder/decoder_gta3.hpp>
-# include <engine/decoder/decoder_gtavc.hpp>
-# include <engine/decoder/decoder_gtalcs.hpp>
+# include <engine/gta3/decoder_gta3.hpp>
+# include <engine/gtavc/decoder_gtavc.hpp>
+# include <engine/gtalcs/decoder_gtalcs.hpp>
 # include <engine/instruction.hpp>
 # include <core/logger.hpp>
 # include <cassert>

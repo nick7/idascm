@@ -1,5 +1,5 @@
 # pragma once
-# include <engine/decoder/decoder.hpp>
+# include <engine/decoder.hpp>
 
 namespace idascm
 {
