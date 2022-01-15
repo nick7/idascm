@@ -3,6 +3,7 @@
 # include <engine/command_set.hpp>
 # include <engine/gta3/decoder_gta3.hpp>
 # include <engine/gtavc/decoder_gtavc.hpp>
+# include <engine/gtasa/decoder_gtasa.hpp>
 # include <engine/gtalcs/decoder_gtalcs.hpp>
 # include <engine/instruction.hpp>
 # include <core/logger.hpp>
@@ -35,6 +36,9 @@ namespace idascm
                 break;
             case game::gtavc:
                 m_decoder = new decoder_gtavc;
+                break;
+            case game::gtasa:
+                m_decoder = new decoder_gtasa;
                 break;
             case game::gtalcs:
                 m_decoder = new decoder_gtalcs;
