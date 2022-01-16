@@ -1,5 +1,5 @@
-# include <processor/emulator.hpp>
-# include <processor/analyzer.hpp>
+# include <ida/processor/emulator.hpp>
+# include <ida/processor/analyzer.hpp>
 # include <engine/command_set.hpp>
 # include <engine/command.hpp>
 # include <core/logger.hpp>
@@ -144,7 +144,7 @@ namespace idascm
             if (command->comment[0])
             {
                 comment.append(" - ");
-                comment.append(command->comment);
+                comment.append(command->comment.c_str());
             }
 
             qstring flags;

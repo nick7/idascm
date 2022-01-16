@@ -11,19 +11,17 @@ namespace idascm
 {
     namespace
     {
-        char const gs_json[] = R"(
+        char const gs_commands[] = R"(
         {
-            "commands": {
-                "0x004f": {
-                    "name": "START_NEW_SCRIPT",
-                    "arguments": [ "address", "..." ],
-                    "flags": [ "call" ],
-                },
-                "0x03cb": {
-                    "name": "LOAD_SCENE",
-                    "arguments": [ "any", "any", "any" ]
-                },
-            }
+            "0x004f": {
+                "name": "START_NEW_SCRIPT",
+                "args": [ "address", "..." ],
+                "flags": [ "call" ],
+            },
+            "0x03cb": {
+                "name": "LOAD_SCENE",
+                "args": [ "any", "any", "any" ]
+            },
         }
         )";
     }
@@ -56,8 +54,8 @@ int main(int argc, char * argv[])
     };
     auto memory = memory_api_buffer(buffer, sizeof(buffer));
 
-    command_set isa;
-    isa.load(json_value::from_string(gs_json).to_object());
+    command_set isa(version::gtavc);
+    isa.load(json_value::from_string(gs_commands).to_object());
 
     decoder_gtavc dec;
     dec.set_command_set(&isa);

@@ -1,5 +1,6 @@
 # pragma once
 # include <engine/engine.hpp>
+# include <string>
 
 namespace idascm
 {
@@ -52,7 +53,7 @@ namespace idascm
         std::uint8_t    flags;
         std::uint8_t    argument_count;
         argument_type   argument_list[24];
-        char            comment[64];
+        std::string     comment;
     };
 
     auto operator == (command const & first, command const & second) noexcept -> bool;

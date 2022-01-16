@@ -1,6 +1,6 @@
-# include <processor/output.hpp>
-# include <processor/analyzer.hpp>
-# include <processor/module.hpp>
+# include <ida/processor/output.hpp>
+# include <ida/processor/analyzer.hpp>
+# include <ida/processor/module.hpp>
 # include <engine/command_set.hpp>
 # include <engine/instruction.hpp>
 # include <core/logger.hpp>

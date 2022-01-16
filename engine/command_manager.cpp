@@ -12,25 +12,20 @@ namespace idascm
 {
     namespace
     {
-        auto load_command_set(std::string root, version ver) -> command_set *
+        auto load_json_object(std::string root, version ver) -> json_object
         {
             std::string const path = root + "/" + std::string(to_string(ver)) + ".json";
             IDASCM_LOG_I("Loading commands from '%s'", path.c_str());
-            auto const set = new command_set;
             auto const json = json_value::from_file(path.c_str());
             if (json.is_valid())
             {
                 auto const object = json.to_object();
                 if (object.is_valid())
                 {
-                    if (set->load(object))
-                    {
-                        return set;
-                    }
+                    return object;
                 }
             }
-            delete set;
-            return nullptr;
+            return {};
         }
     }
 
@@ -50,10 +45,41 @@ namespace idascm
             return nullptr;
         if (! m_set_map[index])
         {
-            m_set_map[index] = load_command_set(m_root_path, ver);
+            m_set_map[index] = load_set(ver);
             reload();
         }
         return m_set_map[index];
+    }
+
+    auto command_manager::load_set(version ver) -> command_set *
+    {
+        auto object = load_json_object(m_root_path, ver);
+        if (! object.is_valid())
+            return nullptr;
+        if (to_version(object["version"].to_primitive().c_str()) != ver)
+            return false;
+        command_set const * parent_set = nullptr;
+        auto parent = object["parent"].to_primitive();
+        if (parent.is_valid())
+        {
+            parent_set = get_set(to_version(parent.c_str()));
+            if (! parent_set)
+                return nullptr;
+        }
+        auto commands = object["commands"].to_object();
+        if (commands.is_valid())
+        {
+            auto set = new command_set(ver);
+            if (set->set_parent(parent_set))
+            {
+                if (set->load(commands))
+                {
+                    return set;
+                }
+            }
+            delete set;
+        }
+        return nullptr;
     }
 
     void command_manager::reload(void)

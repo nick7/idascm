@@ -1,7 +1,7 @@
-# include <processor/module.hpp>
-# include <processor/analyzer.hpp>
-# include <processor/emulator.hpp>
-# include <processor/output.hpp>
+# include <ida/processor/module.hpp>
+# include <ida/processor/analyzer.hpp>
+# include <ida/processor/emulator.hpp>
+# include <ida/processor/output.hpp>
 # include <engine/command.hpp>
 # include <engine/command_manager.hpp>
 # include <engine/command_set.hpp>
