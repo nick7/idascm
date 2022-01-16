@@ -144,7 +144,7 @@ namespace idascm
             if (command->comment[0])
             {
                 comment.append(" - ");
-                comment.append(command->comment);
+                comment.append(command->comment.c_str());
             }
 
             qstring flags;

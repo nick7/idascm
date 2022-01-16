@@ -53,6 +53,7 @@ namespace idascm
             { version::gtasa_ps2,           "gtasa_ps2",            "GTA San Andreas (PlayStation 2)"               },
             { version::gtasa_xbox,          "gtasa_xbox",           "GTA San Andreas (XBOX Original)"               },
             { version::gtasa_pc,            "gtasa_pc",             "GTA San Andreas (PC)"                          },
+            { version::gtasa_pc_cleo,       "gtasa_pc_cleo",        "GTA San Andreas (PC with CLEO)"                },
             { version::gtasa_anniversary,   "gtasa_anniversary",    "GTA San Andreas (Anniversary Edition 2013)"    },
             { version::gtasa_definitive,    "gtasa_definitive",     "GTA San Andreas (Definitive Edition 2021)"     },
 
