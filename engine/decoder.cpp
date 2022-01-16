@@ -1,4 +1,4 @@
-# include <engine/decoder/decoder.hpp>
+# include <engine/decoder.hpp>
 # include <engine/instruction.hpp>
 # include <engine/command_set.hpp>
 # include <core/logger.hpp>
@@ -42,8 +42,15 @@ namespace idascm
             {
                 case argument_type::string64:
                     in.operand_list[op].type = operand_type::string64;
-                    m_memory->read(ptr, in.operand_list[op].value_string64, 8);
-                    in.operand_list[op].size = 8;
+                    in.operand_list[op].size = m_memory->read(ptr, in.operand_list[op].value_string64, 8);
+                    break;
+                case argument_type::int8:
+                    in.operand_list[op].type = operand_type::int8;
+                    in.operand_list[op].size = m_memory->read(ptr, &in.operand_list[op].value_int8);
+                    break;
+                case argument_type::int32:
+                    in.operand_list[op].type = operand_type::int32;
+                    in.operand_list[op].size = m_memory->read(ptr, &in.operand_list[op].value_int32);
                     break;
                 default:
                     if (! decode_operand(ptr, in.operand_list[op]))
@@ -55,20 +62,26 @@ namespace idascm
         }
         if (in.command->argument_list[op] == argument_type::variadic)
         {
-            while (op < std::size(in.operand_list))
+            auto max_operand_count = std::size(in.operand_list);
+            if (in.command->flags & command_flag_function_call)
             {
-                std::uint8_t type = 0;
-                if (! m_memory->read(ptr, &type))
+                max_operand_count = 4 + in.operand_list[0].value_uint8 + in.operand_list[1].value_uint8;
+            }
+            while (op < max_operand_count)
+            {
+                auto type = operand_type::unknown;
+                auto size = decode_operand_type(ptr, type);
+                if (! size)
                 {
-                    IDASCM_LOG_W("memoey read failed at 0x%08x", ptr);
+                    IDASCM_LOG_W("decode_operand_type failed at 0x%08x", ptr);
                     return 0;
                 }
-                if (! type)
+                if (operand_type::none == type)
                 {
-                    ptr += sizeof(type);
+                    ptr += size;
                     break;
                 }
-                in.operand_list[op].offset  = static_cast<std::uint8_t>(ptr - address);
+                in.operand_list[op].offset = static_cast<std::uint8_t>(ptr - address);
                 if (! decode_operand(ptr, in.operand_list[op]))
                     return 0;
                 ptr += in.operand_list[op].size;
