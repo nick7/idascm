@@ -82,6 +82,10 @@ namespace idascm
                 return "condition";
             case command_flag_conditional:
                 return "conditional";
+            case command_flag_function_call:
+                return "function_call";
+            case command_flag_cleo:
+                return "cleo";
         }
         return nullptr;
     }
@@ -122,7 +126,7 @@ namespace idascm
             }
         }
 
-        auto const arguments = object["arguments"];
+        auto const arguments = object["args"];
         if (arguments.type() == json_type::primitive)
         {
             command.argument_count = std::atoi(arguments.to_primitive().c_str());
@@ -150,7 +154,7 @@ namespace idascm
         auto comment = object["comment"].to_primitive();
         if (comment.is_valid())
         {
-            std::strncpy(command.comment, comment.c_str(), std::size(command.comment) - 1);
+            command.comment = comment.to_string();
         }
 
         return command;

@@ -1,6 +1,7 @@
 # pragma once
 # include <ida/base/base.hpp>
 # include <engine/version.hpp>
+# include <engine/instruction.hpp>
 # if IDA_SDK_VERSION >= 750
 #   define IDASCM_DYNAMIC_MODULE_INSTANCE
 # endif
@@ -51,6 +52,30 @@ namespace idascm
     auto insn_inversion_flag(insn_t & insn) noexcept -> bool
     {
         return (insn.insnpref & 0x20) != 0;
+    }
+
+    constexpr
+    auto op_set_type(op_t & op, operand_type type) noexcept
+    {
+        op.specflag1 = static_cast<char>(to_uint(type));
+    }
+
+    constexpr
+    auto op_type(op_t const & op) noexcept
+    {
+        return to_operand_type(static_cast<std::uint8_t>(op.specflag1));
+    }
+
+    constexpr
+    auto op_set_array_size(op_t & op, std::uint8_t size) noexcept
+    {
+        op.specflag2 = static_cast<char>(size);
+    }
+
+    constexpr
+    auto op_array_size(op_t const & op) noexcept
+    {
+        return static_cast<std::uint8_t>(op.specflag2);
     }
 }
 

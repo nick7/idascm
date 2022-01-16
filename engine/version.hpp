@@ -35,7 +35,7 @@ namespace idascm
         xbox_ex         = 0x08,
         pc              = 0x0a,
         pc_ex           = 0x0b,
-        pc_ex_reserved  = 0x0c,
+        pc_cleo         = 0x0c,
         psp             = 0x0d,
 
         anniversary     = 0x10,
@@ -81,6 +81,7 @@ namespace idascm
         gtasa_xbox          = combine(game::gtasa,  edition::xbox),         // GTA: San Andreas (XBOX)
         gtasa_pc            = combine(game::gtasa,  edition::pc),           // GTA: San Andreas (PC) - 1.0
         gtasa_pc_ex         = combine(game::gtasa,  edition::pc_ex),        // GTA: San Andreas (PC) - 2.0
+        gtasa_pc_cleo       = combine(game::gtasa,  edition::pc_cleo),      // GTA: San Andreas (PC with CLEO)
         gtasa_anniversary   = combine(game::gtasa,  edition::anniversary),  // GTA: San Andreas - Anniversary Edition 2013
         gtasa_definitive    = combine(game::gtasa,  edition::definitive),   // GTA: San Andreas - Defective Edition 2021
 

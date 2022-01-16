@@ -37,7 +37,13 @@ namespace idascm
                 }
                 break;
             }
+            case o_reg:
+            case o_phrase:
+            {
+                break;
+            }
             case o_mem:
+            case o_displ:
             {
                 insn.create_op_data(op.addr, op);
                 // TODO: deal with dr_R / dw_W
@@ -138,7 +144,7 @@ namespace idascm
             if (command->comment[0])
             {
                 comment.append(" - ");
-                comment.append(command->comment);
+                comment.append(command->comment.c_str());
             }
 
             qstring flags;

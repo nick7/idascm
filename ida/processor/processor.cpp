@@ -146,6 +146,10 @@ namespace idascm
             version::gtavc_pc,              // 2003
             version::gtavc_anniversary,     // 2012
             version::gtavc_definitive,      // 2021
+
+            version::gtalcs_psp,            //
+            version::gtalcs_ps2,            //
+            version::gtalcs_anniversary,    // 2015
         };
     }
 

@@ -2,8 +2,9 @@
 # include <ida/base/memory_ida.hpp>
 # include <engine/command.hpp>
 # include <engine/command_set.hpp>
-# include <engine/decoder/decoder_gta3.hpp>
-# include <engine/decoder/decoder_gtavc.hpp>
+# include <engine/gta3/decoder_gta3.hpp>
+# include <engine/gtavc/decoder_gtavc.hpp>
+# include <engine/gtalcs/decoder_gtalcs.hpp>
 # include <engine/instruction.hpp>
 # include <core/logger.hpp>
 # include <cassert>
@@ -27,6 +28,9 @@ namespace idascm
                 break;
             case game::gtavc:
                 m_decoder = new decoder_gtavc;
+                break;
+            case game::gtalcs:
+                m_decoder = new decoder_gtalcs;
                 break;
         }
         assert(m_decoder);
@@ -92,6 +96,7 @@ namespace idascm
             return false;
         dst.offb = static_cast<char>(src.operand_list[index].offset);
         dst.flags |= OF_SHOW;
+        op_set_type(dst, src.operand_list[index].type);
 
         // logical types
         switch (command->argument_list[index])
@@ -131,6 +136,13 @@ namespace idascm
                 dst.addr    = src.address + src.operand_list[index].offset;
                 break;
             }
+            case operand_type::int0:
+            {
+                dst.type    = o_imm;
+                dst.dtype   = dt_dword;
+                dst.value   = 0;
+                break;
+            }
             case operand_type::int8:
             {
                 dst.type    = o_imm;
@@ -152,6 +164,16 @@ namespace idascm
                 dst.value   = src.operand_list[index].value_int32;
                 break;
             }
+            case operand_type::float0:
+            {
+                dst.type    = o_imm;
+                dst.dtype   = dt_float;
+                dst.value   = 0;
+                break;
+            }
+            case operand_type::float8:
+            case operand_type::float16:
+            case operand_type::float24:
             case operand_type::float32:
             {
                 dst.type    = o_imm;
@@ -170,16 +192,41 @@ namespace idascm
             {
                 dst.type    = o_mem;
                 dst.dtype   = dt_dword;
-                dst.addr    = src.operand_list[index].value_int16;
+                dst.addr    = src.operand_list[index].value_address;
+                break;
+            }
+            case operand_type::global_array:
+            {
+                dst.type    = o_displ;
+                dst.dtype   = dt_dword;
+                dst.reg     = src.operand_list[index].array_index;
+                dst.addr    = src.operand_list[index].value_address;
+                op_set_array_size(dst, src.operand_list[index].array_size);
+                break;
+            }
+            case operand_type::local_array:
+            {
+                dst.type    = o_phrase;
+                dst.dtype   = dt_dword;
+                dst.reg     = src.operand_list[index].array_index;
+                dst.addr    = src.operand_list[index].value_address;
+                op_set_array_size(dst, src.operand_list[index].array_size);
                 break;
             }
             case operand_type::local:
             {
                 dst.type    = o_reg;
                 dst.dtype   = dt_dword;
-                dst.reg     = src.operand_list[index].value_int16;
+                dst.reg     = src.operand_list[index].value_address;
                 break;
             }
+            // case operand_type::timer:
+            // {
+            //     dst.type    = o_reg;
+            //     dst.type    = dt_dword;
+            //     dst.reg     = src.operand_list[index].value_address;
+            //     break;
+            // }
             default:
             {
                 dst.flags &= ~OF_SHOW;

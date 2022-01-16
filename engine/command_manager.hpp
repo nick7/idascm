@@ -41,6 +41,7 @@ namespace idascm
 
         protected:
             void reload(void);
+            auto load_set(version ver) -> command_set *;
 
         private:
             char                m_root_path[1024];

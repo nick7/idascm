@@ -1,5 +1,6 @@
 # pragma once
 # include <engine/engine.hpp>
+# include <string>
 
 namespace idascm
 {
@@ -20,7 +21,8 @@ namespace idascm
         variadic    = 0x7 << 4,
         address     = 0x8 << 4,     // same as integer
 
-        // fixed-size types
+        // Fixed size forced types
+        // NOTE: type byte will be ignored (e.g. GTA III 8 byte string literal)
         int8        = integer   | 1, // 8-bit integer
         int16       = integer   | 2, // 16-bit integer
         int32       = integer   | 4, // 32-bit integer
@@ -38,6 +40,8 @@ namespace idascm
         command_flag_return         = 1 << 3,
         command_flag_condition      = 1 << 4, // sets condition flag
         command_flag_conditional    = 1 << 5, // uses condition flag
+        command_flag_function_call  = 1 << 6, // call function with arguments (LCS/VCS call_func)
+        command_flag_cleo           = 1 << 7, // CLEO extension function
     };
     auto to_string(command_flag flag) noexcept -> char const *;
     
@@ -49,7 +53,7 @@ namespace idascm
         std::uint8_t    flags;
         std::uint8_t    argument_count;
         argument_type   argument_list[24];
-        char            comment[64];
+        std::string     comment;
     };
 
     auto operator == (command const & first, command const & second) noexcept -> bool;

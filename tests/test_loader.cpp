@@ -1,7 +1,7 @@
 # include <engine/loader.hpp>
 # include <engine/memory.hpp>
 # include <engine/command_set.hpp>
-# include <engine/decoder/decoder_gtavc.hpp>
+# include <engine/gtavc/decoder_gtavc.hpp>
 # include <engine/instruction.hpp>
 # include <core/json.hpp>
 # include <cassert>
@@ -10,22 +10,20 @@ namespace idascm
 {
     namespace
     {
-        char const gs_json[] = R"(
+        char const gs_commands[] = R"(
         {
-            "commands": {
-                "0x0002": {
-                    "name": "GOTO",
-                    "arguments": [ "address" ],
-                    "flags": [ "call", "stop" ],
-                },
-                "0x004e": {
-                    "name": "TERMINATE_THIS_SCRIPT",
-                    "flags": [ "stop" ],
-                },
-                "0x03a4": {
-                    "name": "SCRIPT_NAME",
-                    "arguments": [ "string64" ],
-                }
+            "0x0002": {
+                "name": "GOTO",
+                "arguments": [ "address" ],
+                "flags": [ "call", "stop" ],
+            },
+            "0x004e": {
+                "name": "TERMINATE_THIS_SCRIPT",
+                "flags": [ "stop" ],
+            },
+            "0x03a4": {
+                "name": "SCRIPT_NAME",
+                "arguments": [ "string64" ],
             }
         }
         )";
@@ -68,8 +66,8 @@ int main(int argc, char * argv[])
     auto mem = memory_api_buffer(buffer, sizeof(buffer));
     // auto mem = memory_api_stdio(std::fopen(argv[1], "rb"), true);
 
-    command_set isa;
-    isa.load(json_value::from_string(gs_json).to_object());
+    command_set isa(version::gtavc);
+    isa.load(json_value::from_string(gs_commands).to_object());
 
     decoder_gtavc dec;
     dec.set_command_set(&isa);

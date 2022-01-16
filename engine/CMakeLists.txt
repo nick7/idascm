@@ -7,9 +7,10 @@ add_library (
         command.hpp
         command_manager.hpp
         command_set.hpp
-        decoder/decoder.hpp
-        decoder/decoder_gta3.hpp
-        decoder/decoder_gtavc.hpp
+        decoder.hpp
+        gta3/decoder_gta3.hpp
+        gtalcs/decoder_gtalcs.hpp
+        gtavc/decoder_gtavc.hpp
         instruction.hpp
         loader.hpp
         memory.hpp
@@ -18,9 +19,10 @@ add_library (
         command.cpp
         command_manager.cpp
         command_set.cpp
-        decoder/decoder.cpp
-        decoder/decoder_gta3.cpp
-        decoder/decoder_gtavc.cpp
+        decoder.cpp
+        gta3/decoder_gta3.cpp
+        gtalcs/decoder_gtalcs.cpp
+        gtavc/decoder_gtavc.cpp
         instruction.cpp
         loader.cpp
         memory.cpp

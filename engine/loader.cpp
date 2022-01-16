@@ -1,5 +1,5 @@
 # include <engine/loader.hpp>
-# include <engine/decoder/decoder_gta3.hpp>
+# include <engine/gta3/decoder_gta3.hpp>
 # include <engine/instruction.hpp>
 # include <engine/command.hpp>
 # include <engine/memory.hpp>
