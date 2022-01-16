@@ -195,6 +195,11 @@ namespace idascm
             version::gtalcs_psp,            //
             version::gtalcs_ps2,            //
             version::gtalcs_anniversary,    // 2015
+
+            version::gtasa_ps2,             // 2004
+            version::gtasa_pc,              // 2005
+            version::gtasa_anniversary,     // 2013
+            version::gtasa_definitive,      // 2021
         };
     }
 

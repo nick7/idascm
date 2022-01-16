@@ -119,6 +119,7 @@ namespace idascm
             {
                 auto insn = va_arg(args, insn_t *);
                 assert(insn);
+                assert(m_analyzer);
                 return m_analyzer->analyze_instruction(*insn) ? insn->size : 0;
             }
             case processor_t::ev_emu_insn:

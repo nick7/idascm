@@ -34,6 +34,7 @@ namespace idascm
         }
         const g_version_table[] = \
         {
+            { version::gta3,                "gta3",                 "GTA III (Core)"                                },
             { version::gta3_ps2,            "gta3_ps2",             "GTA III (PlayStation 2)"                       },
             { version::gta3_ps2_ex,         "gta3_ps2_ex",          "GTA III (PlayStation 2 Extended)"              },
             { version::gta3_xbox,           "gta3_xbox",            "GTA III (XBOX Original)"                       },
@@ -42,6 +43,7 @@ namespace idascm
             { version::gta3_anniversary,    "gta3_anniversary",     "GTA III (Anniversary Edition 2011)"            },
             { version::gta3_definitive,     "gta3_definitive",      "GTA III (Definitive Edition 2021)"             },
 
+            { version::gtavc,               "gtavc",                "GTA Vice City (Core)"                          },
             { version::gtavc_ps2,           "gtavc_ps2",            "GTA Vice City (PlayStation 2)"                 },
             { version::gtavc_ps2_jpn,       "gtavc_ps2_jpn",        "GTA Vice City (PlayStation 2 Japanese)"        },
             { version::gtavc_ps2_ger,       "gtavc_ps2_ger",        "GTA Vice City (PlayStation 2 German)"          },
@@ -50,6 +52,7 @@ namespace idascm
             { version::gtavc_anniversary,   "gtavc_anniversary",    "GTA Vice City (Anniversary Edition 2012)"      },
             { version::gtavc_definitive,    "gtavc_definitive",     "GTA Vice City (Definitive Edition 2021)"       },
 
+            { version::gtasa,               "gtasa",                "GTA San Andreas (Core)"                        },
             { version::gtasa_ps2,           "gtasa_ps2",            "GTA San Andreas (PlayStation 2)"               },
             { version::gtasa_xbox,          "gtasa_xbox",           "GTA San Andreas (XBOX Original)"               },
             { version::gtasa_pc,            "gtasa_pc",             "GTA San Andreas (PC)"                          },

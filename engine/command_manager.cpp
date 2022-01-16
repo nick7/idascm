@@ -62,23 +62,37 @@ namespace idascm
         auto parent = object["parent"].to_primitive();
         if (parent.is_valid())
         {
-            parent_set = get_set(to_version(parent.c_str()));
-            if (! parent_set)
+            auto const parent_version = to_version(parent.c_str());
+            if (parent_version == version::unknown)
+            {
+                IDASCM_LOG_W("invalid parent version: '%s'", parent.c_str());
                 return nullptr;
+            }
+            parent_set = get_set(parent_version);
+            if (! parent_set)
+            {
+                IDASCM_LOG_W("unable to load parent command set: '%s'", to_string(parent_version));
+                return nullptr;
+            }
         }
-        auto commands = object["commands"].to_object();
-        if (commands.is_valid())
+        auto set = new command_set(ver);
+        if (nullptr == parent_set || set->set_parent(parent_set))
         {
-            auto set = new command_set(ver);
-            if (set->set_parent(parent_set))
+            auto commands = object["commands"].to_object();
+            if (commands.is_valid())
             {
                 if (set->load(commands))
                 {
                     return set;
                 }
             }
-            delete set;
+            else
+            {
+                IDASCM_LOG_W("invalid 'commands' object");
+                return set;
+            }
         }
+        delete set;
         return nullptr;
     }
 
