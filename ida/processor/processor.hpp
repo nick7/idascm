@@ -64,17 +64,33 @@ namespace idascm
         return to_operand_type(static_cast<std::uint8_t>(op.specflag1));
     }
 
+    // constexpr
+    // auto op_set_array_size(op_t & op, std::uint8_t size) noexcept
+    // {
+    //     op.specflag2 = static_cast<char>(size);
+    // }
+
+    // constexpr
+    // auto op_array_size(op_t const & op) noexcept
+    // {
+    //     return static_cast<std::uint8_t>(op.specflag2);
+    // }
+
     constexpr
-    auto op_set_array_size(op_t & op, std::uint8_t size) noexcept
+    void op_set_value_uint64(op_t & op, std::uint64_t value) noexcept
     {
-        op.specflag2 = static_cast<char>(size);
+        op.value    = static_cast<std::uint32_t>(value >>  0);
+        op.specval  = static_cast<std::uint32_t>(value >> 32);
     }
 
     constexpr
-    auto op_array_size(op_t const & op) noexcept
+    auto op_value_uint64(op_t const & op) noexcept -> std::uint64_t
     {
-        return static_cast<std::uint8_t>(op.specflag2);
+        return static_cast<std::uint64_t>(op.value) | (static_cast<std::uint64_t>(op.specval) << 32);
     }
+
+    void op_set_value(op_t & op, operand_value const & value) noexcept;
+    auto op_value(op_t const & op) noexcept -> operand_value;
 }
 
 idaman processor_t ida_module_data LPH;

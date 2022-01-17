@@ -42,15 +42,19 @@ namespace idascm
             {
                 case argument_type::string64:
                     in.operand_list[op].type = operand_type::string64;
-                    in.operand_list[op].size = m_memory->read(ptr, in.operand_list[op].value_string64, 8);
+                    in.operand_list[op].size = decode_operand_value(ptr, in.operand_list[op].type, in.operand_list[op].value);
                     break;
                 case argument_type::int8:
                     in.operand_list[op].type = operand_type::int8;
-                    in.operand_list[op].size = m_memory->read(ptr, &in.operand_list[op].value_int8);
+                    in.operand_list[op].size = decode_operand_value(ptr, in.operand_list[op].type, in.operand_list[op].value);
+                    break;
+                case argument_type::int16:
+                    in.operand_list[op].type = operand_type::int16;
+                    in.operand_list[op].size = decode_operand_value(ptr, in.operand_list[op].type, in.operand_list[op].value);
                     break;
                 case argument_type::int32:
                     in.operand_list[op].type = operand_type::int32;
-                    in.operand_list[op].size = m_memory->read(ptr, &in.operand_list[op].value_int32);
+                    in.operand_list[op].size = decode_operand_value(ptr, in.operand_list[op].type, in.operand_list[op].value);
                     break;
                 default:
                     if (! decode_operand(ptr, in.operand_list[op]))
@@ -65,7 +69,7 @@ namespace idascm
             auto max_operand_count = std::size(in.operand_list);
             if (in.command->flags & command_flag_function_call)
             {
-                max_operand_count = 4 + in.operand_list[0].value_uint8 + in.operand_list[1].value_uint8;
+                max_operand_count = 4 + in.operand_list[0].value.uint8 + in.operand_list[1].value.uint8;
             }
             while (op < max_operand_count)
             {
@@ -93,42 +97,66 @@ namespace idascm
         return ptr - address;
     }
 
+    auto decoder::decode_operand_value(std::uint32_t address, operand_type type, operand_value & value) const -> std::uint32_t
+    {
+        assert(m_memory);
+        std::uint32_t ptr = address;
+        switch (type)
+        {
+            case operand_type::int8:
+                ptr += m_memory->read(ptr, &value.int8);
+                break;
+            case operand_type::int16:
+                ptr += m_memory->read(ptr, &value.int16);
+                break;
+            case operand_type::int32:
+                ptr += m_memory->read(ptr, &value.int32);
+                break;
+            case operand_type::int64:
+                ptr += m_memory->read(ptr, &value.int64);
+                break;
+            case operand_type::float32:
+                ptr += m_memory->read(ptr, &value.float32);
+                break;
+            case operand_type::float16i:
+                ptr += m_memory->read(ptr, &value.int16);
+                break;
+            case operand_type::global:
+            case operand_type::local:
+                ptr += m_memory->read(ptr, &value.int16);
+                value.address = value.uint16;
+                break;
+            case operand_type::string64:
+                ptr += m_memory->read(ptr, value.string64, sizeof(value.string64));
+                break;
+            default:
+                IDASCM_LOG_W("unsupported operand type: %d", type);
+                return 0;
+        }
+        return ptr - address;
+    }
+
     auto decoder::decode_operand(std::uint32_t address, operand & op) const -> std::uint32_t
     {
         assert(m_memory && m_isa);
         std::uint32_t ptr = address;
         if (auto size = decode_operand_type(ptr, op.type))
         {
+            IDASCM_LOG_W("unable to decode operand type");
             ptr += size;
         }
         else
         {
             return 0;
         }
-        switch (op.type)
+        if (auto size = decode_operand_value(ptr, op.type, op.value))
         {
-            case operand_type::int8:
-                ptr += m_memory->read(ptr, &op.value_int8);
-                break;
-            case operand_type::int16:
-                ptr += m_memory->read(ptr, &op.value_int16);
-                break;
-            case operand_type::int32:
-                ptr += m_memory->read(ptr, &op.value_int32);
-                break;
-            case operand_type::float32:
-                ptr += m_memory->read(ptr, &op.value_float32);
-                break;
-            case operand_type::float16i:
-                ptr += m_memory->read(ptr, &op.value_int16);
-                break;
-            case operand_type::global:
-            case operand_type::local:
-                ptr += m_memory->read(ptr, &op.value_int16);
-                break;
-            default:
-                IDASCM_LOG_W("unsupported operand type: %d", op.type);
-                return 0;
+            IDASCM_LOG_W("unable to decode operand value");
+            ptr += size;
+        }
+        else
+        {
+            return 0;
         }
         op.size = (ptr - address);
         return op.size;

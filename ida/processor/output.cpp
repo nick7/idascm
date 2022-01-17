@@ -125,41 +125,59 @@ namespace idascm
             {
                 switch (op.dtype)
                 {
-                    case dt_packreal:
-                    {
-                        char string[32] = { 0 };
-                        qsnprintf(string, sizeof(string) - 1, "%g", static_cast<int>(op.value) / 16.f);
-                        ctx.out_line(string, COLOR_NUMBER);
-                        break;
-                    }
+                    // case dt_packreal:
+                    // {
+                    //     auto const value = op_value(op);
+                    //     char string[32] = { 0 };
+                    //     qsnprintf(string, sizeof(string) - 1, "%g", value.int16 / 16.f);
+                    //     ctx.out_line(string, COLOR_NUMBER);
+                    //     break;
+                    // }
                     case dt_float:
                     {
+                        float value = 0;
                         char string[32] = { 0 };
-                        qsnprintf(string, sizeof(string) - 1, "%g", *reinterpret_cast<float const *>(&op.value));
-                        if (! strchr(string, '.'))
+                        if (to_float(op_type(op), op_value(op), value))
                         {
-                            qstrncat(string, ".", sizeof(string) - 1);
+                            qsnprintf(string, sizeof(string) - 1, "%g", value);
+                            if (! strchr(string, '.'))
+                            {
+                                qstrncat(string, ".", sizeof(string) - 1);
+                            }
+                            qstrncat(string, float_suffix(op_type(op)), sizeof(string) - 1);
+                            // if (print_fpval(string, sizeof(string) - 1, &op.value, 4))
+                            if (true)
+                            {
+                                ctx.out_line(string, COLOR_NUMBER);
+                            }
+                            break;
                         }
-                        qstrncat(string, float_suffix(op_type(op)), sizeof(string) - 1);
-                        // if (print_fpval(string, sizeof(string) - 1, &op.value, 4))
-                        if (true)
-                        {
-                            ctx.out_line(string, COLOR_NUMBER);
-                        }
-                        else
-                        {
-                            ctx.out_tagon(COLOR_ERROR);
-                            ctx.out_btoa(op.value, 16);
-                            ctx.out_tagoff(COLOR_ERROR);
-                            remember_problem(PR_DISASM, ctx.insn.ea);
-                        }
+                        ctx.out_tagon(COLOR_ERROR);
+                        ctx.out_btoa(op.value, 16);
+                        ctx.out_tagoff(COLOR_ERROR);
+                        remember_problem(PR_DISASM, ctx.insn.ea);
                         break;
                     }
                     case dt_string:
                     {
-                        char string[16] = { 0 };
-                        get_bytes(string, 8, op.addr);
-                        // IDASCM_LOG_T("string: '%s'", string);
+                        char string[256] = { 0 };
+                        auto const value = op_value(op);
+                        switch (op_type(op))
+                        {
+                            case operand_type::string64:
+                                std::memcpy(string, value.string64, sizeof(value.string64));
+                                break;
+                            case operand_type::string:
+                                if (value.string.length != get_bytes(string, value.string.length, value.string.address))
+                                {
+                                    IDASCM_LOG_W("get_bytes failed");
+                                }
+                                break;
+                            default:
+                                IDASCM_LOG_W("unknown operand type");
+                                // remember_problem(PR_DISASM, ctx.insn.ea);
+                                break;
+                        }
                         ctx.out_tagon(COLOR_DSTR);
                         ctx.out_char('\'');
                         ctx.out_line(string);
@@ -186,6 +204,7 @@ namespace idascm
             // @REG[@REG, SIZE]
             case o_phrase:
             {
+                auto const value = op_value(op);
                 char string[32];
                 qsnprintf(string, sizeof(string) - 1, "@%d", op.addr);
                 ctx.out_register(string);
@@ -193,7 +212,7 @@ namespace idascm
                 qsnprintf(string, sizeof(string) - 1, "@%d", op.reg);
                 ctx.out_register(string);
                 ctx.out_symbol(',');
-                qsnprintf(string, sizeof(string) - 1, "%d", op_array_size(op));
+                qsnprintf(string, sizeof(string) - 1, "%d", value.array.size);
                 ctx.out_line(string, COLOR_NUMBER);
                 ctx.out_symbol(']');
                 return true;
@@ -215,18 +234,20 @@ namespace idascm
                 if (! ctx.out_name_expr(op, address))
                 {
                     ctx.out_tagon(COLOR_ERROR);
-                    ctx.out_btoa(op.value, 16);
+                    ctx.out_btoa(op.addr, 16);
                     ctx.out_tagoff(COLOR_ERROR);
                     remember_problem(PR_NONAME, ctx.insn.ea);
                 }
                 if (o_displ == op.type)
                 {
+                    auto const value = op_value(op);
                     ctx.out_symbol('[');
                     char string[32];
                     qsnprintf(string, sizeof(string) - 1, "@%d", op.reg);
                     ctx.out_register(string);
                     ctx.out_symbol(',');
-                    ctx.out_printf("%d", op_array_size(op));
+                    qsnprintf(string, sizeof(string) - 1, "%d", value.array.size);
+                    ctx.out_line(string, COLOR_NUMBER);
                     ctx.out_symbol(']');
                 }
                 return true;

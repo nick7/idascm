@@ -407,6 +407,18 @@ namespace idascm
         return nullptr;
     }
 # endif
+
+    void op_set_value(op_t & op, operand_value const & value) noexcept
+    {
+        op_set_value_uint64(op, value.uint64);
+    }
+
+    auto op_value(op_t const & op) noexcept -> operand_value
+    {
+        operand_value value;
+        value.uint64 = op_value_uint64(op);
+        return value;
+    }
 }
 
 processor_t LPH = idascm::processor();

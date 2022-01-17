@@ -14,6 +14,7 @@ namespace idascm
         timer,          // special local variable type
         local_array,
         global_array,
+        string,
         int0,
         int8,           // immediate signed 8-bit integer
         int16,          // immediate signed 16-bit integer
@@ -40,35 +41,72 @@ namespace idascm
         return static_cast<operand_type>(type);
     }
 
+    struct operand_array
+    {
+        std::int32_t    address;
+        std::uint8_t    index;
+        std::uint8_t    size;
+    };
+
+    struct operand_string
+    {
+        std::int32_t    address;
+        std::uint16_t   length;
+    };
+
+    struct operand_value
+    {
+        union
+        {
+            operand_array   array;
+            operand_string  string;
+            std::int32_t    address;
+            std::int8_t     int8;
+            std::uint8_t    uint8;
+            std::int16_t    int16;
+            std::uint16_t   uint16;
+            std::int32_t    int32;
+            std::uint32_t   uint32;
+            std::int64_t    int64;
+            std::uint64_t   uint64;
+            float           float32;
+            char            string64[8];
+        };
+    };
+
+    static_assert (sizeof(operand_value) <= 8);
+
     struct operand
     {
         operand_type    type;
+        std::uint8_t    type_internal;
         std::uint8_t    offset;
         std::uint8_t    size;
-        union
-        {
-            struct
-            {
-                std::int32_t    array_address;
-                std::uint8_t    array_index;
-                std::uint8_t    array_size;
-            };
-            std::int32_t    value_address;
-            std::int8_t     value_int8;
-            std::uint8_t    value_uint8;
-            std::int16_t    value_int16;
-            std::int32_t    value_int32;
-            std::uint32_t   value_uint32;
-            std::int64_t    value_int64;
-            std::uint64_t   value_uint64;
-            float           value_float32;
-            char            value_string64[8];
-            std::uint8_t    value_placeholder[8];
-        };
+        operand_value   value;
+        // union
+        // {
+        //     struct
+        //     {
+        //         std::int32_t    array_address;
+        //         std::uint8_t    array_index;
+        //         std::uint8_t    array_size;
+        //     };
+        //     std::int32_t    value_address;
+        //     std::int8_t     value_int8;
+        //     std::uint8_t    value_uint8;
+        //     std::int16_t    value_int16;
+        //     std::int32_t    value_int32;
+        //     std::uint32_t   value_uint32;
+        //     std::int64_t    value_int64;
+        //     std::uint64_t   value_uint64;
+        //     float           value_float32;
+        //     char            value_string64[8];
+        // };
     };
 
     auto to_int(operand const & op, std::int32_t & value) noexcept -> bool;
     auto to_float(operand const & op, float & value) noexcept -> bool;
+    auto to_float(operand_type type, operand_value const & src, float & dst) noexcept -> bool;
 
     enum instruction_flag : std::uint8_t
     {

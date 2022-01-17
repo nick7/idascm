@@ -15,6 +15,7 @@ namespace idascm
         global_array    = 0x07,
         local_array     = 0x08,
         string64        = 0x09,
+        string          = 0x0e,
     };
 
     constexpr auto to_uint(operand_type_gtasa value) noexcept -> std::uint8_t
@@ -26,5 +27,7 @@ namespace idascm
     {
         public:
             virtual auto decode_operand_type(std::uint32_t address, operand_type & type) const -> std::uint32_t override;
+            virtual auto decode_operand_value(std::uint32_t address, operand_type type, operand_value & value) const -> std::uint32_t override;
+            virtual auto decode_operand(std::uint32_t address, operand & op) const -> std::uint32_t override;
     };
 }

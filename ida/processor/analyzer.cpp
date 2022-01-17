@@ -144,7 +144,14 @@ namespace idascm
             {
                 dst.type    = o_imm;
                 dst.dtype   = dt_string;
-                dst.addr    = src.address + src.operand_list[index].offset;
+                dst.addr    = src.address + src.operand_list[index].offset + src.operand_list[index].size - 8u;
+                break;
+            }
+            case operand_type::string:
+            {
+                dst.type    = o_imm;
+                dst.dtype   = dt_string;
+                dst.addr    = src.operand_list[index].value.string.address;
                 break;
             }
             case operand_type::int0:
@@ -158,77 +165,64 @@ namespace idascm
             {
                 dst.type    = o_imm;
                 dst.dtype   = dt_byte;
-                dst.value   = src.operand_list[index].value_int8;
                 break;
             }
             case operand_type::int16:
             {
                 dst.type    = o_imm;
                 dst.dtype   = dt_word;
-                dst.value   = src.operand_list[index].value_int16;
                 break;
             }
             case operand_type::int32:
             {
                 dst.type    = o_imm;
                 dst.dtype   = dt_dword;
-                dst.value   = src.operand_list[index].value_int32;
                 break;
             }
             case operand_type::float0:
             {
                 dst.type    = o_imm;
                 dst.dtype   = dt_float;
-                dst.value   = 0;
                 break;
             }
             case operand_type::float8:
             case operand_type::float16:
             case operand_type::float24:
             case operand_type::float32:
-            {
-                dst.type    = o_imm;
-                dst.dtype   = dt_float;
-                dst.value   = src.operand_list[index].value_int32;
-                break;
-            }
             case operand_type::float16i:
             {
                 dst.type    = o_imm;
-                dst.dtype   = dt_packreal;
-                dst.value   = src.operand_list[index].value_int16;
+                dst.dtype   = dt_float;
                 break;
             }
             case operand_type::global:
             {
                 dst.type    = o_mem;
                 dst.dtype   = dt_dword;
-                dst.addr    = src.operand_list[index].value_address;
+                dst.addr    = src.operand_list[index].value.address;
                 break;
             }
             case operand_type::global_array:
             {
                 dst.type    = o_displ;
                 dst.dtype   = dt_dword;
-                dst.reg     = src.operand_list[index].array_index;
-                dst.addr    = src.operand_list[index].value_address;
-                op_set_array_size(dst, src.operand_list[index].array_size);
+                dst.reg     = src.operand_list[index].value.array.index;
+                dst.addr    = src.operand_list[index].value.array.address;
                 break;
             }
             case operand_type::local_array:
             {
                 dst.type    = o_phrase;
                 dst.dtype   = dt_dword;
-                dst.reg     = src.operand_list[index].array_index;
-                dst.addr    = src.operand_list[index].value_address;
-                op_set_array_size(dst, src.operand_list[index].array_size);
+                dst.reg     = src.operand_list[index].value.array.index;
+                dst.addr    = src.operand_list[index].value.array.address;
                 break;
             }
             case operand_type::local:
             {
                 dst.type    = o_reg;
                 dst.dtype   = dt_dword;
-                dst.reg     = src.operand_list[index].value_address;
+                dst.reg     = src.operand_list[index].value.address;
                 break;
             }
             // case operand_type::timer:
@@ -245,6 +239,7 @@ namespace idascm
                 break;
             }
         }
+        op_set_value(dst, src.operand_list[index].value);
         return true;
     }
 }
