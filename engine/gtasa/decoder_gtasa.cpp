@@ -31,7 +31,9 @@ namespace idascm
     {
         std::uint8_t value_type = -1;
         assert(m_memory);
-        m_memory->read(address, &value_type);
+        auto reader = memory_reader(*m_memory, address);
+        if (! reader.read(value_type))
+            return 0;
         if (value_type < std::size(gs_operand_type_table))
         {
             type = gs_operand_type_table[value_type];
@@ -43,25 +45,46 @@ namespace idascm
     // virtual
     auto decoder_gtasa::decode_operand_value(std::uint32_t address, operand_type type, operand_value & value) const -> std::uint32_t
     {
-        std::uint32_t ptr = address;
+        assert(m_memory);
+        auto reader = memory_reader(*m_memory, address);
         switch (type)
         {
             case operand_type::string:
             {
                 std::uint8_t length = 0;
-                ptr += m_memory->read(ptr, &length);
+                if (! reader.read(length))
+                    return 0;
                 value.string.length  = length;
-                value.string.address = ptr;
-                ptr += length;
+                value.string.address = reader.pointer();
+                if (! reader.skip(length))
+                    return 0;
+                break;
+            }
+            case operand_type::global_array:
+            case operand_type::local_array:
+            {
+                std::uint16_t off, index;
+                if (! reader.read(off))
+                    return 0;
+                if (! reader.read(index))
+                    return 0;
+                std::uint8_t size, flags;
+                if (! reader.read(size) || ! reader.read(flags))
+                    return 0;
+                value.array.address = off;
+                value.array.index   = index;
+                value.array.size    = size;
+                value.array.flags   = flags;
                 break;
             }
             default:
             {
-                ptr += decoder::decode_operand_value(ptr, type, value);
+                if (! reader.skip(decoder::decode_operand_value(reader.pointer(), type, value)))
+                    return 0;
                 break;
             }
         }
-        return ptr - address;
+        return reader.pointer() - address;
     }
 
     // virtual

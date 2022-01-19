@@ -42,11 +42,17 @@ namespace idascm
         return static_cast<operand_type>(type);
     }
 
+    enum operand_array_flag : std::uint8_t
+    {
+        operand_array_flag_is_global = 0x80,
+    };
+
     struct operand_array
     {
         std::int32_t    address;
-        std::uint8_t    index;
+        std::uint16_t   index;
         std::uint8_t    size;
+        std::uint8_t    flags;
     };
 
     struct operand_string

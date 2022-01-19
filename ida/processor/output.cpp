@@ -201,23 +201,54 @@ namespace idascm
                 ctx.out_register(string);
                 return true;
             }
-            // @REG[@REG, SIZE]
-            case o_phrase:
+            case o_phrase:  // @REG[@REG, SIZE]
+            case o_displ:   // GLOBAL[@REG, SIZE]
             {
                 auto const value = op_value(op);
                 char string[32];
-                qsnprintf(string, sizeof(string) - 1, "@%d", op.addr);
-                ctx.out_register(string);
+                if (o_displ == op.type)
+                {
+                    if (! ctx.out_name_expr(op, op.addr))
+                    {
+                        ctx.out_tagon(COLOR_ERROR);
+                        ctx.out_btoa(op.addr, 16);
+                        ctx.out_tagoff(COLOR_ERROR);
+                        remember_problem(PR_NONAME, ctx.insn.ea);
+                    }
+                }
+                else
+                {
+                    qsnprintf(string, sizeof(string) - 1, "@%d", op.addr);
+                    ctx.out_register(string);
+                }
                 ctx.out_symbol('[');
-                qsnprintf(string, sizeof(string) - 1, "@%d", op.reg);
-                ctx.out_register(string);
+                if (value.array.flags & operand_array_flag_is_global)
+                {
+                    if (! ctx.out_name_expr(op, value.array.index))
+                    {
+                        ctx.out_tagon(COLOR_ERROR);
+                        ctx.out_btoa(value.array.index, 16);
+                        ctx.out_tagoff(COLOR_ERROR);
+                        remember_problem(PR_NONAME, ctx.insn.ea);
+                    }
+                }
+                else
+                {
+                    qsnprintf(string, sizeof(string) - 1, "@%d", op.reg);
+                    ctx.out_register(string);
+                }
                 ctx.out_symbol(',');
                 qsnprintf(string, sizeof(string) - 1, "%d", value.array.size);
                 ctx.out_line(string, COLOR_NUMBER);
+                if (true)
+                {
+                    ctx.out_symbol(',');
+                    qsnprintf(string, sizeof(string) - 1, "0x%02x", value.array.flags);
+                    ctx.out_line(string, COLOR_SYMBOL);
+                }
                 ctx.out_symbol(']');
                 return true;
             }
-            case o_displ:   // GLOBAL[@REG, SIZE]
             case o_mem:     // GLOBAL
             case o_far:
             case o_near:
@@ -237,18 +268,6 @@ namespace idascm
                     ctx.out_btoa(op.addr, 16);
                     ctx.out_tagoff(COLOR_ERROR);
                     remember_problem(PR_NONAME, ctx.insn.ea);
-                }
-                if (o_displ == op.type)
-                {
-                    auto const value = op_value(op);
-                    ctx.out_symbol('[');
-                    char string[32];
-                    qsnprintf(string, sizeof(string) - 1, "@%d", op.reg);
-                    ctx.out_register(string);
-                    ctx.out_symbol(',');
-                    qsnprintf(string, sizeof(string) - 1, "%d", value.array.size);
-                    ctx.out_line(string, COLOR_NUMBER);
-                    ctx.out_symbol(']');
                 }
                 return true;
             }
