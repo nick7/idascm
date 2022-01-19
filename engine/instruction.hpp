@@ -1,5 +1,6 @@
 # pragma once
 # include <engine/engine.hpp>
+# include <string_view>
 
 namespace idascm
 {
@@ -125,5 +126,5 @@ namespace idascm
         operand             operand_list[24];
     };
 
-    auto name(instruction const & ins) noexcept -> char const *;
+    auto instruction_name(instruction const & in) noexcept -> std::string_view;
 }

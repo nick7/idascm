@@ -80,9 +80,9 @@ namespace idascm
             ctx.out_keyword("NOT");
             ctx.out_char(' ');
         }
-        if (command->name[0])
+        if (! command->name.empty())
         {
-            ctx.out_custom_mnem(command->name);
+            ctx.out_custom_mnem(command->name.data());
         }
         else
         {

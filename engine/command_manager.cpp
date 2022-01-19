@@ -25,6 +25,7 @@ namespace idascm
                     return object;
                 }
             }
+            IDASCM_LOG_W("Unable to load file '%s'", path.c_str());
             return {};
         }
     }

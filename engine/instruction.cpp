@@ -56,8 +56,8 @@ namespace idascm
         return to_float(op.type, op.value, value);
     }
 
-    auto name(instruction const & ins) noexcept -> char const *
+    auto instruction_name(instruction const & in) noexcept -> std::string_view
     {
-        return ins.command ? ins.command->name : nullptr;
+        return in.command ? in.command->name : std::string_view();
     }
 }

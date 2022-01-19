@@ -66,14 +66,24 @@ namespace idascm
                         IDASCM_LOG_W("no segment found");
                     }
                 }
-                if (command->flags & command_flag_jump)
-                {
-                    insn.add_cref(address, op.offb, fl_JN);
-                    break;
-                }
                 if (command->flags & command_flag_call)
                 {
+                    if (op.type == o_far)
+                    {
+                        insn.add_cref(address, op.offb, fl_CF);
+                        break;
+                    }
                     insn.add_cref(address, op.offb, fl_CN);
+                    break;
+                }
+                if (command->flags & command_flag_jump)
+                {
+                    if (op.type == o_far)
+                    {
+                        insn.add_cref(address, op.offb, fl_JF);
+                        break;
+                    }
+                    insn.add_cref(address, op.offb, fl_JN);
                     break;
                 }
                 insn.add_dref(address, op.offb, dr_O);
@@ -143,7 +153,7 @@ namespace idascm
 
             if (command->comment[0])
             {
-                comment.append(" - ");
+                // comment.append(" - ");
                 comment.append(command->comment.c_str());
             }
 

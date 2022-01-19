@@ -1,7 +1,8 @@
 # pragma once
 # include <core/core.hpp>
-# include <cstring>
 # include <algorithm>
+# include <cstring>
+# include <string_view>
 
 namespace idascm
 {

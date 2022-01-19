@@ -73,7 +73,7 @@ namespace idascm
         instruction src = {};
         if (! analyze_instruction(insn.ea, src))
             return false;
-        IDASCM_LOG_D("analyze +0x%04x %s", insn.ea, src.command->name);
+        IDASCM_LOG_D("analyze +0x%08x 0x%04x %s", insn.ea, src.opcode, instruction_name(src).data());
         if (! handle_instruction(src, insn))
             return false;
         return true;
@@ -86,7 +86,7 @@ namespace idascm
         {
             if (i >= std::size(insn.ops))
             {
-                IDASCM_LOG_W("%s: too many operands (%d)", name(src), src.operand_count);
+                IDASCM_LOG_W("%s: too many operands (%d)", instruction_name(src).data(), src.operand_count);
                 break;
             }
             handle_operand(src, i, insn.ops[i]);

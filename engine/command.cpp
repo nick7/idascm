@@ -58,7 +58,9 @@ namespace idascm
             return false;
         if (first.argument_count != second.argument_count)
             return false;
-        if (0 != std::strncmp(first.name, second.name, std::size(first.name) - 1))
+        if (first.name != second.name)
+            return false;
+        if (first.comment != second.comment)
             return false;
         for (std::size_t i = 0; i < std::min<std::size_t>(first.argument_count, std::size(first.argument_list)); ++ i)
             if (first.argument_list[i] != second.argument_list[i])
@@ -84,6 +86,10 @@ namespace idascm
                 return "conditional";
             case command_flag_function_call:
                 return "function_call";
+            case command_flag_unsupported:
+                return "unsupported";
+            case command_flag_macro:
+                return "macro";
             case command_flag_cleo:
                 return "cleo";
         }
@@ -109,7 +115,7 @@ namespace idascm
         auto const name = object["name"].to_primitive();
         if (name.is_valid())
         {
-            std::strncpy(command.name, name.c_str(), std::size(command.name) - 1);
+            command.name = name.to_string();
         }
 
         auto const flags = object["flags"].to_array();
@@ -117,9 +123,10 @@ namespace idascm
         {
             for (std::size_t i = 0; i < flags.size(); ++ i)
             {
-                for (std::uint8_t flag = 1; flag < 0x80; flag <<= 1)
+                for (std::uint8_t b = 0; b < sizeof(command_flag) << 3; ++ b)
                 {
-                    auto const name = to_string(command_flag(flag));
+                    auto const flag = command_flag(1 << b);
+                    auto const name = to_string(flag);
                     if (name && 0 == std::strcmp(flags.at(i).to_primitive().c_str(), name))
                         command.flags |= flag;
                 }

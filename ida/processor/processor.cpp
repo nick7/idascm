@@ -230,7 +230,7 @@ namespace idascm
         };
 
         asm_t assembler = {};
-        assembler.flag              = AS_COLON | ASH_HEXF3 | ASO_OCTF4 | ASB_BINF4;
+        assembler.flag              = AS_COLON | ASH_HEXF3 | ASO_OCTF1 | ASB_BINF3;
         assembler.uflag             = 0;
         assembler.name              = "GTA SCM";
         assembler.help              = 0;

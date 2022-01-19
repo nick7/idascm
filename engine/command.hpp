@@ -32,24 +32,25 @@ namespace idascm
     auto argument_type_from_string(char const * string) noexcept -> argument_type;
     auto argument_type_from_json(json_value const & value) noexcept -> argument_type;
 
-    enum command_flag : std::uint8_t
+    enum command_flag : std::uint16_t
     {
-        command_flag_stop           = 1 << 0,
-        command_flag_jump           = 1 << 1,
-        command_flag_call           = 1 << 2,
-        command_flag_return         = 1 << 3,
-        command_flag_condition      = 1 << 4, // sets condition flag
-        command_flag_conditional    = 1 << 5, // uses condition flag
-        command_flag_function_call  = 1 << 6, // call function with arguments (LCS/VCS call_func)
-        command_flag_cleo           = 1 << 7, // CLEO extension function
+        command_flag_stop           = 1 <<  0, // terminate instruction flow
+        command_flag_jump           = 1 <<  1, // simple jump
+        command_flag_call           = 1 <<  2, // call function
+        command_flag_return         = 1 <<  3, // 
+        command_flag_condition      = 1 <<  4, // sets condition flag
+        command_flag_conditional    = 1 <<  5, // uses condition flag
+        command_flag_function_call  = 1 <<  6, // call function with arguments (LCS/VCS call_func)
+        command_flag_unsupported    = 1 <<  7, // opcode is not supported by given executable
+        command_flag_macro          = 1 <<  8, // compiler internal high-level command (e.g. "{")
+        command_flag_cleo           = 1 << 15, // CLEO extension function
     };
     auto to_string(command_flag flag) noexcept -> char const *;
     
     // command is an instruction definition (specification) used by analyzer
-    // TODO: move out opcode field
     struct command
     {
-        char            name[64];
+        std::string     name;
         std::uint8_t    flags;
         std::uint8_t    argument_count;
         argument_type   argument_list[24];
