@@ -17,9 +17,7 @@ namespace idascm
     {
         public:
             virtual auto decode_instruction(std::uint32_t address, instruction & in) const -> std::uint32_t;
-            virtual auto decode_operand_type(std::uint32_t address, operand_type & type) const -> std::uint32_t = 0;
-            virtual auto decode_operand_value(std::uint32_t address, operand_type type, operand_value & value) const -> std::uint32_t;
-            virtual auto decode_operand(std::uint32_t address, operand & op) const -> std::uint32_t;
+            virtual auto decode_operand(std::uint32_t address, operand & op) const -> std::uint32_t = 0;
 
         public:
             decoder(void);
@@ -34,6 +32,9 @@ namespace idascm
             {
                 m_memory = api;
             }
+
+        protected:
+            virtual auto decode_operand_value(std::uint32_t address, operand_type type, operand_value & value) const -> std::uint32_t;
 
         protected:
             command_set const * m_isa;

@@ -140,7 +140,7 @@ namespace idascm
         // actual types
         switch (src.operand_list[index].type)
         {
-            case operand_type::string64:
+            case operand_type::string8:
             {
                 dst.type    = o_imm;
                 dst.dtype   = dt_string;
@@ -148,6 +148,7 @@ namespace idascm
                 break;
             }
             case operand_type::string:
+            case operand_type::string16:
             {
                 dst.type    = o_imm;
                 dst.dtype   = dt_string;

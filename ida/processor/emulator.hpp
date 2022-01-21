@@ -14,8 +14,6 @@ namespace idascm
             void set_isa(command_set const * isa);
 
             auto is_return(insn_t const & insn) const -> bool;
-            
-            auto get_autocomment(insn_t const & insn) const -> qstring;
 
         public:
             emulator(void)

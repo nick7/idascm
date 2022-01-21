@@ -72,6 +72,17 @@ namespace idascm
                 return read(&dst, sizeof(type));
             }
 
+            template <typename type, std::size_t count>
+            auto read(type (& dst)[count]) -> bool
+            {
+                for (auto & item : dst)
+                {
+                    if (! read(item))
+                        return false;
+                }
+                return true;
+            }
+
             auto pointer(void) const
             {
                 return m_pointer;

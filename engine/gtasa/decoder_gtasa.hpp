@@ -14,29 +14,27 @@ namespace idascm
         float32                 = 0x06,
         global_array            = 0x07,
         local_array             = 0x08,
-        string8                 = 0x09, // aka short string
-        global_string8          = 0x0a, // aka short string
-        local_string8           = 0x0b, // aka short string
-        global_array_string8    = 0x0c, // aka short string
-        local_array_string8     = 0x0d, // aka short string
-        string                  = 0x0e, // aka pascal string
-        string16                = 0x0f, // aka long string
-        global_string16         = 0x10, // aka long string
-        local_string16          = 0x11, // aka long string
-        global_array_string16   = 0x12, // aka long string
-        local_array_string16    = 0x13, // aka long string
+        string8                 = 0x09, // known as short string
+        global_string8          = 0x0a, // known as short string
+        local_string8           = 0x0b, // known as short string
+        global_array_string8    = 0x0c, // known as short string
+        local_array_string8     = 0x0d, // known as short string
+        string                  = 0x0e, // known as pascal string
+        string16                = 0x0f, // known as long string
+        global_string16         = 0x10, // known as long string
+        local_string16          = 0x11, // known as long string
+        global_array_string16   = 0x12, // known as long string
+        local_array_string16    = 0x13, // known as long string
     };
 
-    constexpr auto to_uint(operand_type_gtasa value) noexcept -> std::uint8_t
-    {
-        return static_cast<std::uint8_t>(value);
-    }
+    auto to_operand_type(operand_type_gtasa internal_type) noexcept -> operand_type;
 
     class decoder_gtasa : public decoder
     {
         public:
-            virtual auto decode_operand_type(std::uint32_t address, operand_type & type) const -> std::uint32_t override;
-            virtual auto decode_operand_value(std::uint32_t address, operand_type type, operand_value & value) const -> std::uint32_t override;
             virtual auto decode_operand(std::uint32_t address, operand & op) const -> std::uint32_t override;
+
+        public:
+            auto decode_operand_value(std::uint32_t address, operand_type_gtasa type, operand_value & value) const -> std::uint32_t;
     };
 }

@@ -87,7 +87,7 @@ namespace idascm
         else
         {
             char name[32];
-            qsnprintf(name, sizeof(name) - 1, "UNKNOWN_0x%04x", ctx.insn.itype);
+            qsnprintf(name, sizeof(name) - 1, "UNKNOWN_%04x", ctx.insn.itype);
             ctx.out_custom_mnem(name);
         }
     }
@@ -164,8 +164,8 @@ namespace idascm
                         auto const value = op_value(op);
                         switch (op_type(op))
                         {
-                            case operand_type::string64:
-                                std::memcpy(string, value.string64, sizeof(value.string64));
+                            case operand_type::string8:
+                                std::memcpy(string, value.string8, sizeof(value.string8));
                                 break;
                             case operand_type::string:
                                 if (value.string.length != get_bytes(string, value.string.length, value.string.address))
@@ -273,6 +273,49 @@ namespace idascm
             }
         }
         return false;
+    }
+
+    auto output::get_autocomment(insn_t const & insn) const -> qstring
+    {
+        assert(m_isa);
+        auto const command = m_isa->get_command(insn.itype);
+        assert(command);
+
+        qstring comment;
+        comment.reserve(128);
+        if (command)
+        {
+            char buffer[32];
+            qsnprintf(buffer, sizeof(buffer) - 1, "0x%04x", insn.itype);
+            comment.append(buffer);
+
+            if (command->comment[0])
+            {
+                comment.append(" ");
+                comment.append(command->comment.c_str());
+            }
+
+            qstring flags;
+            flags.reserve(128);
+            for (std::uint8_t i = 0; i < 8; ++ i)
+            {
+                std::uint8_t const flag = 1 << i;
+                if (command->flags & flag)
+                {
+                    if (! flags.empty())
+                        flags.append(", ");
+                    flags.append(to_string(command_flag(flag)));
+                }
+            }
+            if (! flags.empty())
+            {
+                comment.append(" (flags: ");
+                comment.append(flags);
+                comment.append(")");
+            }
+        }
+
+        return comment;
     }
 }
 

@@ -55,13 +55,13 @@ namespace idascm
     constexpr
     auto op_set_type(op_t & op, operand_type type) noexcept
     {
-        op.specflag1 = static_cast<char>(to_uint(type));
+        op.specflag1 = static_cast<char>(type);
     }
 
     constexpr
     auto op_type(op_t const & op) noexcept
     {
-        return to_operand_type(static_cast<std::uint8_t>(op.specflag1));
+        return static_cast<operand_type>(op.specflag1);
     }
 
     // constexpr

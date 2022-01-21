@@ -46,7 +46,7 @@ namespace idascm
         command_flag_cleo           = 1 << 15, // CLEO extension function
     };
     auto to_string(command_flag flag) noexcept -> char const *;
-    
+
     // command is an instruction definition (specification) used by analyzer
     struct command
     {

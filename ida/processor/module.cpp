@@ -192,7 +192,7 @@ namespace idascm
                 auto const buf  = va_arg(args, qstring *);
                 auto const insn = va_arg(args, insn_t const *);
                 assert(buf && insn);
-                auto const comment = m_emulator->get_autocomment(*insn);
+                auto const comment = m_output->get_autocomment(*insn);
                 if (comment.empty())
                     return 0;
                 *buf = comment;

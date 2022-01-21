@@ -15,6 +15,8 @@ namespace idascm
             void output_mnemonics(outctx_t & ctx);
             auto output_operand(outctx_t & ctx, op_t const & op) -> bool;
 
+            auto get_autocomment(insn_t const & insn) const -> qstring;
+
             void set_isa(command_set const * isa)
             {
                 m_isa = isa;
