@@ -67,7 +67,7 @@ int main(int argc, char * argv[])
     if (ip += dec.decode_instruction(ip, ins))
     {
         assert(ins.opcode == 0x004f);
-        assert(ins.operand_count == 4);
+        assert(ins.operand_count == 5);
     }
     if (ip += dec.decode_instruction(ip, ins))
     {

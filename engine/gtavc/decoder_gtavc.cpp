@@ -69,16 +69,20 @@ namespace idascm
         operand_type_gtavc type;
         if (reader.read(type))
         {
-            if (auto size = decode_operand_value(reader.pointer(), type, op.value))
+            auto size = decode_operand_value(reader.pointer(), type, op.value);
+            assert(size <= 0x08);
+            if (to_operand_type(type) != operand_type::unknown)
             {
-                assert(size < 0x100);
                 reader.skip(size);
                 op.size             = static_cast<std::uint8_t>(reader.pointer() - address);
                 op.type_internal    = to_uint(type);
                 op.type             = to_operand_type(type);
                 return op.size;
             }
-            IDASCM_LOG_W("unable to decode operand: 0x%02x", type);
+            else
+            {
+                IDASCM_LOG_W("unable to decode operand: 0x%02x", type);
+            }
         }
         return 0;
     }

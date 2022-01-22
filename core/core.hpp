@@ -20,4 +20,10 @@ namespace idascm
     {
         return static_cast<std::underlying_type_t<type>>(value);
     }
+
+    template <typename type>
+    constexpr auto to_enum(std::underlying_type_t<type> value) noexcept -> std::enable_if_t<std::is_enum_v<type>, type>
+    {
+        return static_cast<type>(value);
+    }
 }

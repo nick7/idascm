@@ -67,6 +67,7 @@ namespace idascm
                     reader.skip(size);
                     if (operand_type::none == in.operand_list[op].type)
                     {
+                        ++ op;
                         break;
                     }
                 }

@@ -1,4 +1,5 @@
 # pragma once
+# include <core/core.hpp>
 # include <cstdio>
 # include <cstdint>
 
@@ -15,11 +16,6 @@ namespace idascm
         gtavcs      = 0x05 << 5, // Vice City Stories
     };
     auto to_string(game game) noexcept -> char const *;
-
-    constexpr auto to_uint(game game) noexcept -> std::uint8_t
-    {
-        return static_cast<std::uint8_t>(game);
-    }
 
     enum class edition : std::uint8_t
     {
@@ -41,11 +37,6 @@ namespace idascm
         anniversary     = 0x10,
         definitive      = 0x11,
     };
-
-    constexpr auto to_uint(edition ed) noexcept -> std::uint8_t
-    {
-        return static_cast<std::uint8_t>(ed);
-    }
 
     constexpr auto combine(game game, edition edition) noexcept -> std::uint8_t
     {
@@ -94,16 +85,6 @@ namespace idascm
         gtavcs_ps2          = combine(game::gtavcs, edition::ps2),
         gtavcs_psp          = combine(game::gtavcs, edition::psp),
     };
-
-    constexpr auto to_uint(version ver) noexcept -> std::uint8_t
-    {
-        return static_cast<std::uint8_t>(ver);
-    }
-
-    constexpr auto to_version(std::uint8_t value) noexcept -> version
-    {
-        return static_cast<version>(value);
-    }
 
     auto to_string(version version) noexcept -> char const *;
     auto to_version(char const * string) noexcept -> version;
