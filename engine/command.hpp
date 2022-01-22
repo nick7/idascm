@@ -10,29 +10,35 @@ namespace idascm
     class json_value;
 
     // NOTE:
-    // - variable type (local, global) means value may be changed by function
+    // - variable type (local, global) implies value modification
+    // - constant type implies immediate value (not a variable)
+    // TODO:
+    // - think about variable_constant_xxx
     enum class type : std::uint8_t
     {
         unknown             = 0x0,
         any                 = 0x1,
         integer             = 0x2,                          // signed integer
         real                = 0x3,                          // floating point
-        character           = 0x4,
-        string              = 0x5,
-        variadic            = 0x6,
+        string              = 0x4,
+        variadic            = 0x5,
+        constant            = 0x6,                          // any immediate value operand
         variable            = 0x7,                          // any variable
         global              = 0x8,                          // global variable
         local               = 0x9,                          // local variable
         address             = 0xa,                          // code address (label or sub),
+        constant_integer    = constant | (integer   << 4),
+        constant_real       = constant | (real      << 4),
+        constant_string     = constant | (string    << 4),
         variable_integer    = variable | (integer   << 4),
         variable_real       = variable | (real      << 4),
         variable_string     = variable | (string    << 4),
-        global_integer      = variable | (integer   << 4),  // VAR_INT
-        global_real         = variable | (real      << 4),  // VAR_FLOAT
-        global_string       = variable | (string    << 4),
-        local_integer       = variable | (integer   << 4),  // LVAR_INT
-        local_real          = variable | (real      << 4),  // LVAR_FLOAT
-        local_string        = variable | (string    << 4),
+        global_integer      = global   | (integer   << 4),  // VAR_INT
+        global_real         = global   | (real      << 4),  // VAR_FLOAT
+        global_string       = global   | (string    << 4),  // (GTASA)
+        local_integer       = local    | (integer   << 4),  // LVAR_INT
+        local_real          = local    | (real      << 4),  // LVAR_FLOAT
+        local_string        = local    | (string    << 4),  // (GTASA)
     };
     auto type_from_string(char const * string) noexcept -> type;
     auto type_from_json(json_primitive const & value) noexcept -> type;
@@ -48,6 +54,12 @@ namespace idascm
                 return true;
         }
         return false;
+    }
+
+    constexpr
+    auto is_constant(type src) noexcept -> bool
+    {
+
     }
 
     constexpr

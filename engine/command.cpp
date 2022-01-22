@@ -10,7 +10,7 @@ namespace idascm
         struct
         {
             type            type;
-            char const *    strings[4];
+            char const *    strings[2];
         }
         static const g_type_table[] = \
         {
@@ -18,19 +18,22 @@ namespace idascm
             { type::any,                { "any"                                             } },
             { type::integer,            { "integer",            "int"                       } },
             { type::real,               { "real",               "float"                     } },
-            { type::character,          { "character",          "char"                      } },
             { type::string,             { "string"                                          } },
             { type::variadic,           { "variadic",           "..."                       } },
+            { type::constant,           { "constant",           "const"                     } },
             { type::variable,           { "variable",                                       } },
             { type::global,             { "global"                                          } },
             { type::local,              { "local"                                           } },
             { type::address,            { "address",            "label"                     } },
+            { type::constant_integer,   { "constant_integer",   "const_int"                 } },
+            { type::constant_real,      { "constant_real",      "const_float"               } },
+            { type::constant_string,    { "constant_string",    "const_string"              } },
             { type::variable_integer,   { "variable_integer",   "variable_int"              } },
             { type::variable_real,      { "variable_real",      "variable_float"            } },
             { type::variable_string,    { "variable_string"                                 } },
-            { type::global_integer,     { "variable_integer",   "global_int"                } },
-            { type::global_real,        { "variable_real",      "global_float"              } },
-            { type::global_string,      { "variable_string"                                 } },
+            { type::global_integer,     { "global_integer",     "global_int"                } },
+            { type::global_real,        { "global_real",        "global_float"              } },
+            { type::global_string,      { "global_string"                                   } },
             { type::local_integer,      { "variable_integer",   "local_int"                 } },
             { type::local_real,         { "variable_real",      "local_float"               } },
             { type::local_string,       { "variable_string"                                 } },
