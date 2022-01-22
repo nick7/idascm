@@ -87,7 +87,8 @@ namespace idascm
                 case operand_type::global:
                     if (operand_type::unknown == in.operand_list[i].value.variable.type)
                     {
-                        switch (remove_reference(in.command->argument_list[i].type))
+                        auto const type = remove_constant(remove_reference(in.command->argument_list[i].type));
+                        switch (type)
                         {
                             case type::integer:
                                 in.operand_list[i].value.variable.type = operand_type::int32;

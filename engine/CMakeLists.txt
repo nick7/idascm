@@ -3,6 +3,7 @@ add_library (
     ${PROJECT}
     STATIC
         # headers
+        argument.hpp
         engine.hpp
         command.hpp
         command_manager.hpp
@@ -16,6 +17,7 @@ add_library (
         operand.hpp
         version.hpp
         # sources
+        argument.cpp
         command.cpp
         command_manager.cpp
         command_set.cpp
