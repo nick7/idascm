@@ -110,9 +110,9 @@ namespace idascm
         op_set_type(dst, src.operand_list[index].type);
 
         // logical types
-        switch (command->argument_list[index])
+        switch (command->argument_list[index].type)
         {
-            case argument_type::address:
+            case type::address:
             {
                 std::int32_t value = 0;
                 if (to_int(src.operand_list[index], value))

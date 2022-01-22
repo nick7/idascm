@@ -9,51 +9,89 @@ namespace idascm
     {
         struct
         {
-            argument_type   type;
+            type            type;
             char const *    strings[4];
         }
-        static const g_argument_type_table[] = \
+        static const g_type_table[] = \
         {
-            { argument_type::unknown,       { "unknown"             }   },
-            { argument_type::any,           { "any"                 }   },
-            { argument_type::integer,       { "integer",    "int"   }   },
-            { argument_type::real,          { "real"                }   },
-            { argument_type::character,     { "character",  "char"  }   },
-            { argument_type::global,        { "global"              }   },
-            { argument_type::local,         { "local"               }   },
-            { argument_type::variadic,      { "variadic",   "..."   }   },
-            { argument_type::address,       { "address"             }   },
-            { argument_type::int8,          { "int8"                }   },
-            { argument_type::int16,         { "int16"               }   },
-            { argument_type::int32,         { "int32"               }   },
-            { argument_type::float32,       { "float32"             }   },
-            { argument_type::string64,      { "string64"            }   },
+            { type::unknown,            { "unknown"                                         } },
+            { type::any,                { "any"                                             } },
+            { type::integer,            { "integer",            "int"                       } },
+            { type::real,               { "real",               "float"                     } },
+            { type::character,          { "character",          "char"                      } },
+            { type::string,             { "string"                                          } },
+            { type::variadic,           { "variadic",           "..."                       } },
+            { type::variable,           { "variable",                                       } },
+            { type::global,             { "global"                                          } },
+            { type::local,              { "local"                                           } },
+            { type::address,            { "address",            "label"                     } },
+            { type::variable_integer,   { "variable_integer",   "variable_int"              } },
+            { type::variable_real,      { "variable_real",      "variable_float"            } },
+            { type::variable_string,    { "variable_string"                                 } },
+            { type::global_integer,     { "variable_integer",   "global_int"                } },
+            { type::global_real,        { "variable_real",      "global_float"              } },
+            { type::global_string,      { "variable_string"                                 } },
+            { type::local_integer,      { "variable_integer",   "local_int"                 } },
+            { type::local_real,         { "variable_real",      "local_float"               } },
+            { type::local_string,       { "variable_string"                                 } },
         };
     }
 
-    auto argument_type_from_string(char const * string) noexcept -> argument_type
+    auto type_from_string(char const * string) noexcept -> type
     {
         if (string && string[0])
         {
-            for (auto const & row : g_argument_type_table)
+            for (auto const & row : g_type_table)
             {
                 for (auto s : row.strings)
                     if (s && s[0] && 0 == std::strcmp(string, s))
                         return row.type;
             }
         }
-        return argument_type::unknown;
+        return type::unknown;
     }
 
-    auto argument_type_from_json(json_value const & value) noexcept -> argument_type
+    auto type_from_json(json_primitive const & value) noexcept -> type
     {
-        return argument_type_from_string(value.to_primitive().c_str());
+        return type_from_string(value.c_str());
+    }
+
+    auto argument_from_json(json_value const & value) noexcept -> argument
+    {
+        argument arg = {};
+        if (value.type() == json_type::primitive)
+        {
+            arg.type = type_from_json(value.to_primitive());
+        }
+        else
+        {
+            auto const object = value.to_object();
+            auto const type = object["type"].to_primitive();
+            if (type.is_valid())
+                arg.type = type_from_json(type);
+            auto const operand_type = object["operand_type"].to_primitive();
+            if (operand_type.is_valid())
+                arg.operand_type = operand_type_from_json(operand_type);
+        }
+        return arg;
+    }
+
+    auto operator == (argument const & first, argument const & second) noexcept -> bool
+    {
+        if (first.type != second.type)
+            return false;
+        if (first.operand_type != second.operand_type)
+            return false;
+        return true;
+    }
+
+    auto operator != (argument const & first, argument const & second) noexcept -> bool
+    {
+        return ! (first == second);
     }
 
     auto operator == (command const & first, command const & second) noexcept -> bool
     {
-        // if (first.opcode != second.opcode)
-        //     return false;
         if (first.flags != second.flags)
             return false;
         if (first.argument_count != second.argument_count)
@@ -96,22 +134,10 @@ namespace idascm
         return nullptr;
     }
 
-    // auto opcode_from_json(json_value const & value) -> std::uint16_t
-    // {
-    //     if (value.c_str()[0] == '0' && value.c_str()[1] == 'x')
-    //         return static_cast<std::uint16_t>(std::strtoul(value.c_str(), nullptr, 16));
-    //     return static_cast<std::uint16_t>(std::strtoul(value.c_str(), nullptr, 10));
-    // }
-
     auto command_from_json(json_object const & object) -> command
     {
         command command = {};
-        
-        // auto const opcode = value["opcode"];
-        // if (! opcode.is_valid())
-        //     return command;
-        // command.opcode = opcode_from_json(opcode);
-        
+
         auto const name = object["name"].to_primitive();
         if (name.is_valid())
         {
@@ -139,7 +165,7 @@ namespace idascm
             command.argument_count = std::atoi(arguments.to_primitive().c_str());
             for (std::size_t i = 0; i < command.argument_count; ++ i)
             {
-                command.argument_list[i] = argument_type::any;
+                command.argument_list[i] = { type::any };
             }
         }
         else
@@ -148,13 +174,7 @@ namespace idascm
             command.argument_count = (std::uint8_t) argument_array.size();
             for (std::size_t i = 0; i < command.argument_count; ++ i)
             {
-                auto const argument = argument_array[i];
-                if (json_type::primitive == argument.type())
-                {
-                    command.argument_list[i] = argument_type_from_json(argument_array[i]);
-                    continue;
-                }
-                command.argument_list[i] = argument_type_from_json(argument_array[i].to_object()["type"]);
+                command.argument_list[i] = argument_from_json(argument_array[i]);
             }
         }
 

@@ -17,6 +17,12 @@ namespace idascm
     class command_set;
     class command_manager;
 
+    constexpr
+    auto processor_id(void) noexcept -> std::uint16_t
+    {
+        return 0x8000 | 0x0eaf;
+    }
+
     auto processor_command_manager(void) -> command_manager &;
 
     void processor_set_current_isa(command_set const * set);

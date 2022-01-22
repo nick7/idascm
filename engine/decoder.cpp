@@ -37,36 +37,23 @@ namespace idascm
         std::uint8_t op = 0;
         while (op < in.command->argument_count)
         {
-            if (in.command->argument_list[op] == argument_type::variadic)
+            if (in.command->argument_list[op].type == type::variadic)
                 break;
             in.operand_list[op].offset  = static_cast<std::uint8_t>(reader.pointer() - address);
-            switch (in.command->argument_list[op])
+            if (in.command->argument_list[op].operand_type != operand_type::unknown)
             {
-                case argument_type::string64:
-                    in.operand_list[op].type = operand_type::string8;
-                    in.operand_list[op].size = decode_operand_value(reader.pointer(), in.operand_list[op].type, in.operand_list[op].value);
-                    break;
-                case argument_type::int8:
-                    in.operand_list[op].type = operand_type::int8;
-                    in.operand_list[op].size = decode_operand_value(reader.pointer(), in.operand_list[op].type, in.operand_list[op].value);
-                    break;
-                case argument_type::int16:
-                    in.operand_list[op].type = operand_type::int16;
-                    in.operand_list[op].size = decode_operand_value(reader.pointer(), in.operand_list[op].type, in.operand_list[op].value);
-                    break;
-                case argument_type::int32:
-                    in.operand_list[op].type = operand_type::int32;
-                    in.operand_list[op].size = decode_operand_value(reader.pointer(), in.operand_list[op].type, in.operand_list[op].value);
-                    break;
-                default:
-                    if (! decode_operand(reader.pointer(), in.operand_list[op]))
-                        return 0;
-                    break;
+                in.operand_list[op].type = in.command->argument_list[op].operand_type;
+                in.operand_list[op].size = decode_operand_value(reader.pointer(), in.operand_list[op].type, in.operand_list[op].value);
+            }
+            else
+            {
+                if (! decode_operand(reader.pointer(), in.operand_list[op]))
+                    return 0;
             }
             reader.skip(in.operand_list[op].size);
             ++ op;
         }
-        if (in.command->argument_list[op] == argument_type::variadic)
+        if (in.command->argument_list[op].type == type::variadic)
         {
             auto max_operand_count = std::size(in.operand_list);
             if (in.command->flags & command_flag_function_call)
@@ -92,6 +79,30 @@ namespace idascm
         }
         in.operand_count = op;
         in.size = static_cast<std::uint16_t>(reader.pointer() - address);
+        // post-processing
+        for (std::size_t i = 0; i < in.operand_count; ++ i)
+        {
+            switch (in.operand_list[i].type)
+            {
+                case operand_type::global:
+                    if (operand_type::unknown == in.operand_list[i].value.variable.type)
+                    {
+                        switch (remove_reference(in.command->argument_list[i].type))
+                        {
+                            case type::integer:
+                                in.operand_list[i].value.variable.type = operand_type::int32;
+                                break;
+                            case type::real:
+                                in.operand_list[i].value.variable.type = operand_type::float32;
+                                break;
+                            // case type::string:
+                            //     in.operand_list[i].value.variable.type = operand_type::string;
+                            //     break;
+                        }
+                    }
+                    break;
+            }
+        }
         return reader.pointer() - address;
     }
 

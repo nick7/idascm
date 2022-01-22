@@ -245,8 +245,8 @@ namespace idascm
         assembler.a_byte            = ".byte";
         assembler.a_word            = ".word";
         assembler.a_dword           = ".dword";
-        assembler.a_qword           = nullptr;
-        assembler.a_oword           = nullptr;
+        assembler.a_qword           = ".qword";     // 8 bytes
+        assembler.a_oword           = ".oword";     // 16 bytes
         assembler.a_float           = ".float";
         assembler.a_double          = nullptr;
         assembler.a_tbyte           = nullptr;
@@ -294,7 +294,7 @@ namespace idascm
 
         processor_t proc = {};
         proc.version        = IDP_INTERFACE_VERSION;
-        proc.id             = 0x8000 | 0xeaf;
+        proc.id             = processor_id();
         proc.flag           = PR_USE32 | PR_DEFSEG32 | PRN_HEX | PR_BINMEM | PR_NO_SEGMOVE | PR_CNDINSNS;
         // proc.flag2          = 0;
         proc.cnbits         = 8;

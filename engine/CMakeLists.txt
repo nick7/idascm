@@ -13,6 +13,7 @@ add_library (
         gtasa/decoder_gtasa.hpp
         gtavc/decoder_gtavc.hpp
         instruction.hpp
+        operand.hpp
         version.hpp
         # sources
         command.cpp
@@ -24,6 +25,7 @@ add_library (
         gtasa/decoder_gtasa.cpp
         gtavc/decoder_gtavc.cpp
         instruction.cpp
+        operand.cpp
         version.cpp
 )
 target_link_libraries (
