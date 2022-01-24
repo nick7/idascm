@@ -21,7 +21,7 @@ namespace idascm
         std::uint16_t       size;
         std::uint8_t        flags;
         std::uint8_t        operand_count;
-        operand             operand_list[24];
+        operand             operand_list[32];
     };
 
     auto instruction_name(instruction const & in) noexcept -> std::string_view;

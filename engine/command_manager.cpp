@@ -14,7 +14,7 @@ namespace idascm
     {
         auto load_json_object(std::string root, version ver) -> json_object
         {
-            std::string const path = root + "/" + std::string(to_string(ver)) + ".json";
+            std::string const path = root + "/" + to_string(version_game(ver)) + "/" + to_string(ver) + ".json";
             IDASCM_LOG_I("Loading commands from '%s'", path.c_str());
             auto const json = json_value::from_file(path.c_str());
             if (json.is_valid())

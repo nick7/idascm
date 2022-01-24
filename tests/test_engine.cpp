@@ -54,6 +54,8 @@ int main(int argc, char * argv[])
     };
     auto memory = memory_api_buffer(buffer, sizeof(buffer));
 
+    assert(0 == std::strcmp("string16", operand_type_to_string(operand_type::string16)));
+
     command_set isa(version::gtavc);
     isa.load(json_value::from_string(gs_commands).to_object());
 

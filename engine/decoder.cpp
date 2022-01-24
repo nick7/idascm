@@ -130,8 +130,28 @@ namespace idascm
                 if (! reader.read(value.int64))
                     return 0;
                 break;
+            case operand_type::uint8:
+                if (! reader.read(value.uint8))
+                    return 0;
+                break;
+            case operand_type::uint16:
+                if (! reader.read(value.uint16))
+                    return 0;
+                break;
+            case operand_type::uint32:
+                if (! reader.read(value.uint32))
+                    return 0;
+                break;
+            case operand_type::uint64:
+                if (! reader.read(value.uint64))
+                    return 0;
+                break;
             case operand_type::float32:
                 if (! reader.read(value.float32))
+                    return 0;
+                break;
+            case operand_type::float64:
+                if (! reader.read(value.float64))
                     return 0;
                 break;
             case operand_type::string8:

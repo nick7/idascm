@@ -55,7 +55,7 @@ namespace idascm
                     return 0;
                 break;
             case operand_type::int16:
-                if (! reader.read(value.int32))
+                if (! reader.read(value.int16))
                     return 0;
                 break;
             case operand_type::int32:
@@ -137,7 +137,8 @@ namespace idascm
         operand_type_gtalcs type;
         if (reader.read(type))
         {
-            if (auto size = decode_operand_value(reader.pointer(), type, op.value))
+            auto size = decode_operand_value(reader.pointer(), type, op.value);
+            if (to_operand_type(type) != operand_type::unknown)
             {
                 assert(size < 0x100);
                 reader.skip(size);

@@ -18,20 +18,29 @@ namespace idascm
         global_array,
         string,             // variable size string
         int0,
-        int8,               // immediate signed 8-bit integer
-        int16,              // immediate signed 16-bit integer
-        int32,              // immediate signed 32-bit integer
-        int64,              // immediate signed 64-bit integer (reserved)
-        float0,
-        float8,             // packed float
-        float16,            // packed float
+        int8,               // Immediate signed 8-bit integer
+        int16,              // Immediate signed 16-bit integer
+        int32,              // Immediate signed 32-bit integer
+        int64,              // Immediate signed 64-bit integer (reserved)
+        uint8,              // (unused)
+        uint16,             // (unused)
+        uint32,             // (unused)
+        uint64,             // (unused)
+        float0,             // Immediate 0.f constant (LCS / VCS)
+        float8,             // Packed float
+        float16,            // Packed float
         float16i,           // immediate floating point packed into 16-bit integer
         float24,            // packed float
         float32,            // immediate 32-bit floating point
+        float64,            // (unused)
         string8,            // immediate 8 character string
         string16,           // immediate 16 character string
     };
+    auto operand_type_from_string(char const * string) noexcept -> operand_type;
+    auto operand_type_to_string(operand_type type) noexcept -> char const *;
     auto operand_type_from_json(json_primitive const & value) noexcept -> operand_type;
+    auto operand_type_suffix(operand_type type) noexcept -> char const *;
+    auto operand_type_is_signed(operand_type type) noexcept -> bool;
 
     enum operand_array_flag : std::uint8_t
     {
@@ -75,6 +84,7 @@ namespace idascm
             std::int64_t        int64;
             std::uint64_t       uint64;
             float               float32;
+            double              float64;
             char                string8[8];
         };
     };

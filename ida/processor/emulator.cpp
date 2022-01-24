@@ -111,7 +111,7 @@ namespace idascm
         {
             return false;
         }
-        IDASCM_LOG_D("emulate +0x%04x %s flags=0x%02x", insn.ea, command->name, command->flags);
+        IDASCM_LOG_D("emulate +0x%04x %s flags=0x%02x", insn.ea, command->name.c_str(), command->flags);
         for (std::uint8_t i = 0; i < std::size(insn.ops); ++ i)
         {
             emulate_operand(insn, insn.ops[i]);

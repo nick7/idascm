@@ -69,7 +69,9 @@ namespace idascm
         operand_type_gta3 type;
         if (reader.read(type))
         {
-            if (auto size = decode_operand_value(reader.pointer(), type, op.value))
+            auto size = decode_operand_value(reader.pointer(), type, op.value);
+            assert(size <= 0x08);
+            if (to_operand_type(type) != operand_type::unknown)
             {
                 assert(size < 0x100);
                 reader.skip(size);

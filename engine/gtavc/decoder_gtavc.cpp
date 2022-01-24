@@ -79,10 +79,7 @@ namespace idascm
                 op.type             = to_operand_type(type);
                 return op.size;
             }
-            else
-            {
-                IDASCM_LOG_W("unable to decode operand: 0x%02x", type);
-            }
+            IDASCM_LOG_W("unable to decode operand: 0x%02x", type);
         }
         return 0;
     }

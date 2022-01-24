@@ -92,27 +92,6 @@ namespace idascm
         }
     }
 
-    namespace
-    {
-        auto float_suffix(operand_type type) noexcept -> char const *
-        {
-            switch (type)
-            {
-                case operand_type::float0:
-                    return "f0";
-                case operand_type::float8:
-                    return "f8";
-                case operand_type::float16:
-                    return "f16";
-                case operand_type::float24:
-                    return "f24";
-                case operand_type::float32:
-                    return "f";
-            }
-            return nullptr;
-        }
-    }
-
     auto output::output_operand(outctx_t & ctx, op_t const & op) -> bool
     {
         switch (op.type)
@@ -144,7 +123,12 @@ namespace idascm
                             {
                                 qstrncat(string, ".", sizeof(string) - 1);
                             }
-                            qstrncat(string, float_suffix(op_type(op)), sizeof(string) - 1);
+                            auto const suffix = operand_type_suffix(op_type(op));
+                            assert(suffix);
+                            if (suffix)
+                            {
+                                qstrncat(string, suffix, sizeof(string) - 1);
+                            }
                             // if (print_fpval(string, sizeof(string) - 1, &op.value, 4))
                             if (true)
                             {
@@ -183,6 +167,19 @@ namespace idascm
                         ctx.out_line(string);
                         ctx.out_char('\'');
                         ctx.out_tagoff(COLOR_DSTR);
+                        break;
+                    }
+                    case dt_byte:
+                    case dt_word:
+                    case dt_dword:
+                    {
+                        ctx.out_value(op, OOF_NUMBER | OOFS_IFSIGN | OOFW_IMM | (operand_type_is_signed(op_type(op)) ? OOF_SIGNED : 0));
+                        auto const suffix = operand_type_suffix(op_type(op));
+                        assert(suffix);
+                        if (suffix)
+                        {
+                            ctx.out_line(suffix, COLOR_NUMBER);
+                        }
                         break;
                     }
                     default:
