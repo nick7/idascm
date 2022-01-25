@@ -178,28 +178,44 @@ namespace idascm
     {
         version const gs_processor_table[] = \
         {
-            version::gta3_ps2,              // 2001
-            version::gta3_ps2_ex,           // 2001
-            version::gta3_xbox,             //
-            version::gta3_pc,               // 2002
-            version::gta3_pc_ex,            // 2002
-            version::gta3_anniversary,      // 2011
-            version::gta3_definitive,       // 2021
+            version::gta3_ps2,
+            version::gta3_ps2_ex,
+            version::gta3_xbox,
+            version::gta3_pc,
+            version::gta3_pc_ex,
 
-            version::gtavc_ps2,             // 2002
-            version::gtavc_xbox,            // 2003
-            version::gtavc_pc,              // 2003
-            version::gtavc_anniversary,     // 2012
-            version::gtavc_definitive,      // 2021
+            version::gtavc_ps2,
+            version::gtavc_xbox,
+            version::gtavc_pc,
 
-            version::gtalcs_psp,            //
-            version::gtalcs_ps2,            //
-            version::gtalcs_anniversary,    // 2015
+            version::gtasa_ps2,
+            version::gtasa_xbox,
+            version::gtasa_pc,
 
-            version::gtasa_ps2,             // 2004
-            version::gtasa_pc,              // 2005
-            version::gtasa_anniversary,     // 2013
-            version::gtasa_definitive,      // 2021
+            version::gtalcs_psp,
+            version::gtalcs_ps2,
+
+            version::gtavcs_psp,
+            version::gtavcs_ps2,
+
+            version::gta3_pc_cleo,
+            version::gtavc_pc_cleo,
+            version::gtasa_pc_cleo,
+
+            version::gta3_custom,
+            version::gtavc_custom,
+            version::gtasa_custom,
+            version::gtalcs_custom,
+            version::gtavcs_custom,
+
+            version::gta3_anniversary,
+            version::gtavc_anniversary,
+            version::gtasa_anniversary,
+            version::gtalcs_anniversary,
+
+            version::gta3_definitive,
+            version::gtavc_definitive,
+            version::gtasa_definitive,
         };
     }
 

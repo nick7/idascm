@@ -5,6 +5,7 @@
 # include <engine/gtavc/decoder_gtavc.hpp>
 # include <engine/gtasa/decoder_gtasa.hpp>
 # include <engine/gtalcs/decoder_gtalcs.hpp>
+# include <engine/gtavcs/decoder_gtavcs.hpp>
 # include <engine/instruction.hpp>
 # include <core/logger.hpp>
 # include <cassert>
@@ -42,6 +43,9 @@ namespace idascm
                 break;
             case game::gtalcs:
                 m_decoder = new decoder_gtalcs;
+                break;
+            case game::gtavcs:
+                m_decoder = new decoder_gtavcs;
                 break;
         }
         assert(m_decoder);

@@ -13,6 +13,7 @@ add_library (
         gtalcs/decoder_gtalcs.hpp
         gtasa/decoder_gtasa.hpp
         gtavc/decoder_gtavc.hpp
+        gtavcs/decoder_gtavcs.hpp
         instruction.hpp
         operand.hpp
         version.hpp
@@ -26,6 +27,7 @@ add_library (
         gtalcs/decoder_gtalcs.cpp
         gtasa/decoder_gtasa.cpp
         gtavc/decoder_gtavc.cpp
+        gtavcs/decoder_gtavcs.cpp
         instruction.cpp
         operand.cpp
         version.cpp
