@@ -159,6 +159,7 @@ namespace idascm
             }
             case operand_type::string:
             case operand_type::string16:
+            case operand_type::string128:
             {
                 dst.type    = o_imm;
                 dst.dtype   = dt_string;

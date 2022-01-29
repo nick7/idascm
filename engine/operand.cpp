@@ -33,6 +33,7 @@ namespace idascm
             "float64",
             "string8",
             "string16",
+            "string128",
         };
 
         auto as_float(std::uint32_t src) noexcept -> float

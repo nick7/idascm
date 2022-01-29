@@ -164,6 +164,25 @@ namespace idascm
                 if (! reader.read(value.string8))
                     return 0;
                 break;
+            case operand_type::string16:
+            case operand_type::string128:
+            {
+                value.string.address = reader.pointer();
+                char buffer[256] = {};
+                switch (type)
+                {
+                    case operand_type::string16:
+                        if (! reader.read(buffer, 16))
+                            return 0;
+                        break;
+                    case operand_type::string128:
+                        if (! reader.read(buffer, 128))
+                            return 0;
+                        break;
+                }
+                value.string.length = static_cast<std::uint16_t>(std::strlen(buffer));
+                break;
+            }
             default:
                 IDASCM_LOG_W("unsupported operand type: %d", type);
                 return 0;

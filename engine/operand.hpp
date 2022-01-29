@@ -26,7 +26,7 @@ namespace idascm
         uint16,             // (unused)
         uint32,             // (unused)
         uint64,             // (unused)
-        float0,             // Immediate 0.f constant (LCS / VCS)
+        float0,             // Immediate 0.f constant (GTA:LCS, GTA:VCS)
         float8p,            // Packed float
         float16p,           // Packed float
         float16i,           // immediate floating point packed into 16-bit integer
@@ -34,7 +34,8 @@ namespace idascm
         float32,            // immediate 32-bit floating point
         float64,            // (unused)
         string8,            // immediate 8 character string
-        string16,           // immediate 16 character string
+        string16,           // immediate 16 character string (GTA:SA)
+        string128,          // immediate 128 character string (GTA:SA)
     };
     auto operand_type_from_string(char const * string) noexcept -> operand_type;
     auto operand_type_to_string(operand_type type) noexcept -> char const *;

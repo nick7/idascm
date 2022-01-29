@@ -152,14 +152,15 @@ namespace idascm
                                 std::memcpy(string, value.string8, sizeof(value.string8));
                                 break;
                             case operand_type::string:
+                            case operand_type::string16:
+                            case operand_type::string128:
                                 if (value.string.length != get_bytes(string, value.string.length, value.string.address))
                                 {
                                     IDASCM_LOG_W("get_bytes failed");
                                 }
                                 break;
                             default:
-                                IDASCM_LOG_W("unknown operand type");
-                                // remember_problem(PR_DISASM, ctx.insn.ea);
+                                IDASCM_LOG_W("unknown string type");
                                 break;
                         }
                         ctx.out_tagon(COLOR_DSTR);
