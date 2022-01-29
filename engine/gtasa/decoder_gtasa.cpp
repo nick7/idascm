@@ -105,12 +105,26 @@ namespace idascm
                 std::uint8_t size, flags;
                 if (! reader.read(size) || ! reader.read(flags))
                     return 0;
-                // 0x00 - int
-                // 0x01 - float
-                value.array.address = off;
-                value.array.index   = index;
-                value.array.size    = size;
-                value.array.flags   = flags;
+                value.array.address     = off;
+                value.array.index       = index;
+                value.array.size        = size;
+                if (flags & 0x80)
+                    value.array.flags |= to_uint(operand_array_flag::is_global);
+                switch (flags & ~0x80)
+                {
+                    case 0x00:
+                        value.array.type = operand_type::int32;
+                        break;
+                    case 0x01:
+                        value.array.type = operand_type::float32;
+                        break;
+                    case 0x02:
+                        value.array.type = operand_type::string8;
+                        break;
+                    default:
+                        IDASCM_LOG_W("unknown type: 0x%02x", flags & ~0x80);
+                        break;
+                }
                 break;
             }
             case operand_type_gtasa::local_string8:

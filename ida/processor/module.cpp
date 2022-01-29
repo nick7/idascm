@@ -42,6 +42,7 @@ namespace idascm
 
         m_analyzer->set_isa(m_isa);
         m_emulator->set_isa(m_isa);
+        m_emulator->set_analyzer(m_analyzer);
         m_output->set_isa(m_isa);
         m_output->set_analyzer(m_analyzer);
 

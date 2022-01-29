@@ -219,7 +219,7 @@ namespace idascm
                     ctx.out_register(string);
                 }
                 ctx.out_symbol('[');
-                if (value.array.flags & operand_array_flag_is_global)
+                if (value.array.flags & to_uint(operand_array_flag::is_global))
                 {
                     if (! ctx.out_name_expr(op, value.array.index))
                     {

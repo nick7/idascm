@@ -144,6 +144,12 @@ namespace idascm
         // actual types
         switch (src.operand_list[index].type)
         {
+            case operand_type::none:
+            {
+                dst.type    = o_imm;
+                dst.dtype   = dt_void;
+                break;
+            }
             case operand_type::string8:
             {
                 dst.type    = o_imm;
@@ -190,11 +196,16 @@ namespace idascm
                 dst.dtype   = dt_float;
                 break;
             }
-            case operand_type::float8:
-            case operand_type::float16:
-            case operand_type::float24:
-            case operand_type::float32:
+            case operand_type::float8p:
+            case operand_type::float16p:
             case operand_type::float16i:
+            case operand_type::float24p:
+            {
+                dst.type    = o_imm;
+                dst.dtype   = dt_packreal;
+                break;
+            }
+            case operand_type::float32:
             {
                 dst.type    = o_imm;
                 dst.dtype   = dt_float;
@@ -205,6 +216,13 @@ namespace idascm
                 dst.type    = o_mem;
                 dst.dtype   = dt_dword;
                 dst.addr    = src.operand_list[index].value.address;
+                break;
+            }
+            case operand_type::local:
+            {
+                dst.type    = o_reg;
+                dst.dtype   = dt_dword;
+                dst.reg     = src.operand_list[index].value.address;
                 break;
             }
             case operand_type::global_array:
@@ -223,20 +241,6 @@ namespace idascm
                 dst.addr    = src.operand_list[index].value.array.address;
                 break;
             }
-            case operand_type::local:
-            {
-                dst.type    = o_reg;
-                dst.dtype   = dt_dword;
-                dst.reg     = src.operand_list[index].value.address;
-                break;
-            }
-            // case operand_type::timer:
-            // {
-            //     dst.type    = o_reg;
-            //     dst.type    = dt_dword;
-            //     dst.reg     = src.operand_list[index].value_address;
-            //     break;
-            // }
             default:
             {
                 dst.flags &= ~OF_SHOW;

@@ -12,9 +12,9 @@ namespace idascm
             operand_type::none,
             operand_type::int0,
             operand_type::float0,
-            operand_type::float8,
-            operand_type::float16,
-            operand_type::float24,
+            operand_type::float8p,
+            operand_type::float16p,
+            operand_type::float24p,
             operand_type::int32,
             operand_type::int8,
             operand_type::int16,
@@ -65,15 +65,15 @@ namespace idascm
             case operand_type::float0:
                 value.int64 = 0;
                 break;
-            case operand_type::float8:
+            case operand_type::float8p:
                 if (! reader.read(value.uint8))
                     return 0;
                 break;
-            case operand_type::float16:
+            case operand_type::float16p:
                 if (! reader.read(value.uint16))
                     return 0;
                 break;
-            case operand_type::float24:
+            case operand_type::float24p:
                 std::uint8_t buffer[3];
                 if (! reader.read(buffer, sizeof(buffer)))
                     return 0;

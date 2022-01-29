@@ -45,7 +45,27 @@ namespace idascm
             case o_mem:
             case o_displ:
             {
-                insn.create_op_data(op.addr, op);
+                auto const value = op_value(op);
+                if (op.type == o_displ)
+                {
+                    switch (value.array.type)
+                    {
+                        case operand_type::int32:
+                            create_dword(op.addr, value.array.size);
+                            break;
+                        case operand_type::float32:
+                            create_float(op.addr, value.array.size);
+                            break;
+                        case operand_type::string8:
+                            break;
+                        case operand_type::string16:
+                            break;
+                    }
+                }
+                else
+                {
+                    insn.create_op_data(op.addr, op);
+                }
                 // TODO: deal with dr_R / dw_W
                 insn.add_dref(op.addr, op.offb, dr_O);
                 break;
@@ -102,6 +122,11 @@ namespace idascm
         m_isa = isa;
     }
 
+    void emulator::set_analyzer(analyzer * analyzer)
+    {
+        m_analyzer = analyzer;
+    }
+
     auto emulator::emulate_instruction(insn_t const & insn) -> bool
     {
         assert(m_isa);
@@ -112,10 +137,31 @@ namespace idascm
             return false;
         }
         IDASCM_LOG_D("emulate +0x%04x %s flags=0x%02x", insn.ea, command->name.c_str(), command->flags);
-        for (std::uint8_t i = 0; i < std::size(insn.ops); ++ i)
+
+        auto const count = insn_operand_count(insn);
+        instruction src = {};
+        if (m_analyzer && count > std::size(insn.ops))
         {
-            emulate_operand(insn, insn.ops[i]);
+            m_analyzer->analyze_instruction(insn.ea, src);
         }
+
+        for (std::uint8_t n = 0; n < count; ++ n)
+        {
+            if (n < std::size(insn.ops))
+            {
+                emulate_operand(insn, insn.ops[n]);
+            }
+            else
+            {
+                op_t op = {};
+                op.n = n;
+                if (m_analyzer->handle_operand(src, n, op))
+                {
+                    emulate_operand(insn, op);
+                }
+            }
+        }
+
         if (! (command->flags & command_flag_stop))
         {
             add_cref(insn.ea, insn.ea + insn.size, fl_F);

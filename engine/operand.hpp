@@ -9,28 +9,28 @@ namespace idascm
 
     enum class operand_type : std::uint8_t
     {
-        unknown,            // invalid type
-        none,               // no type (variadic list end)
-        local,              // local variable reference
-        global,             // global variable reference
+        unknown,            // Invalid Type
+        none,               // Void type (variadic list end)
+        local,              // Local variable reference
+        global,             // Global variable reference
         timer,              // special local variable type
-        local_array,
-        global_array,
-        string,             // variable size string
-        int0,
+        local_array,        // Local variable array reference (GTA:SA, GTA:LCS, GTA:VCS)
+        global_array,       // Global variable array reference (GTA:SA, GTA:LCS, GTA:VCS)
+        string,             // Variable size string
+        int0,               // Immediate 0i constant (GTA:LCS, GTA:VCS)
         int8,               // Immediate signed 8-bit integer
         int16,              // Immediate signed 16-bit integer
         int32,              // Immediate signed 32-bit integer
-        int64,              // Immediate signed 64-bit integer (reserved)
+        int64,              // Immediate signed 64-bit integer (unused)
         uint8,              // (unused)
         uint16,             // (unused)
         uint32,             // (unused)
         uint64,             // (unused)
         float0,             // Immediate 0.f constant (LCS / VCS)
-        float8,             // Packed float
-        float16,            // Packed float
+        float8p,            // Packed float
+        float16p,           // Packed float
         float16i,           // immediate floating point packed into 16-bit integer
-        float24,            // packed float
+        float24p,           // Packed float
         float32,            // immediate 32-bit floating point
         float64,            // (unused)
         string8,            // immediate 8 character string
@@ -42,29 +42,32 @@ namespace idascm
     auto operand_type_suffix(operand_type type) noexcept -> char const *;
     auto operand_type_is_signed(operand_type type) noexcept -> bool;
 
-    enum operand_array_flag : std::uint8_t
+    enum class operand_array_flag : std::uint8_t
     {
-        operand_array_flag_is_global = 0x80,
+        is_global       = 1 << 0, // (GTA:SA)
     };
 
+    // Variable reference
+    struct operand_variable
+    {
+        std::int32_t    address;    // data segment offset / register index
+        operand_type    type;       // (optional) underlying type
+    };
+
+    // One dimensional array element reference (GTA:SA, GTA:LCS, GTA:VCS)
     struct operand_array
     {
-        std::int32_t    address;
+        std::int32_t    address;        // data segment offset / register index
         std::uint16_t   index;
         std::uint8_t    size;
-        std::uint8_t    flags;
+        operand_type    type    : 6;    // (optional) element type
+        std::uint8_t    flags   : 2;    // (optional)
     };
 
     struct operand_string
     {
-        std::int32_t    address;
+        std::int32_t    address;    // any segment address
         std::uint16_t   length;
-    };
-
-    struct operand_variable
-    {
-        std::int32_t    address;
-        operand_type    type;
     };
 
     struct operand_value

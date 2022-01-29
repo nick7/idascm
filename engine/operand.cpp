@@ -25,10 +25,10 @@ namespace idascm
             "uint32",
             "uint64",
             "float0",
-            "float8",
-            "float16",
+            "float8p",
+            "float16p",
             "float16i",
-            "float24",
+            "float24p",
             "float32",
             "float64",
             "string8",
@@ -80,13 +80,13 @@ namespace idascm
                 return "i64";
             case operand_type::float0:
                 return "f0";
-            case operand_type::float8:
+            case operand_type::float8p:
                 return "f8";
-            case operand_type::float16:
+            case operand_type::float16p:
                 return "f16";
             case operand_type::float16i:
                 return "f16i";
-            case operand_type::float24:
+            case operand_type::float24p:
                 return "f24";
             case operand_type::float32:
                 return "f32";
@@ -103,10 +103,10 @@ namespace idascm
             case operand_type::int32:
             case operand_type::int64:
             case operand_type::float0:
-            case operand_type::float8:
-            case operand_type::float16:
+            case operand_type::float8p:
+            case operand_type::float16p:
             case operand_type::float16i:
-            case operand_type::float24:
+            case operand_type::float24p:
             case operand_type::float32:
                 return true;
         }
@@ -140,13 +140,13 @@ namespace idascm
             case operand_type::float16i:
                 dst = src.int16 / 16.f;
                 return true;
-            case operand_type::float24:
+            case operand_type::float24p:
                 dst = as_float(src.uint32 << 8u);
                 return true;
-            case operand_type::float16:
+            case operand_type::float16p:
                 dst = as_float(src.uint16 << 16u);
                 return true;
-            case operand_type::float8:
+            case operand_type::float8p:
                 dst = as_float(src.uint8 << 24u);
                 return true;
         }

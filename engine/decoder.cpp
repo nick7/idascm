@@ -103,6 +103,12 @@ namespace idascm
                         }
                     }
                     break;
+                case operand_type::global_array:
+                    if (operand_type::unknown == in.operand_list[i].value.array.type)
+                    {
+
+                    }
+                    break;
             }
         }
         return reader.pointer() - address;
