@@ -23,9 +23,10 @@ namespace idascm
         variadic            = 0x5,
         constant            = 0x6,                          // any immediate value operand
         variable            = 0x7,                          // any variable
-        global              = 0x8,                          // global variable
-        local               = 0x9,                          // local variable
-        address             = 0xa,                          // code address (label or sub),
+        global              = 0x8,                          // global variable (data address)
+        local               = 0x9,                          // local variable (register index)
+        address             = 0xa      | (integer   << 4),  // executable address (label or sub),
+        mission             = 0xb      | (integer   << 4),  // mission identifier (can be translated to segment address)
         constant_integer    = constant | (integer   << 4),
         constant_real       = constant | (real      << 4),
         constant_string     = constant | (string    << 4),
