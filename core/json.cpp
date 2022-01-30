@@ -193,9 +193,8 @@ namespace idascm
             return nullptr;
         }
 
-        auto file_contents(char const * path) -> std::string
+        auto file_contents(char const * path, std::string & contents) -> bool
         {
-            std::string contents;
             if (auto stream = std::fopen(path, "rb"))
             {
                 std::fseek(stream, 0, SEEK_END);
@@ -204,8 +203,9 @@ namespace idascm
                 contents.resize(length);
                 std::fread(&contents[0], 1, length, stream);
                 std::fclose(stream);
+                return true;
             }
-            return contents;
+            return false;
         }
     }
 
@@ -213,11 +213,12 @@ namespace idascm
     // TODO: error handling
     auto json_value::from_string(char const * string) -> json_value
     {
-        return from_string(string, string ? std::strlen(string) : 0);
+        int error_code;
+        return from_string(string, string ? std::strlen(string) : 0, error_code);
     }
 
     // static
-    auto json_value::from_string(char const * string, std::size_t length, int * error_code) -> json_value
+    auto json_value::from_string(char const * string, std::size_t length, int & error_code) -> json_value
     {
         std::size_t capacity = 128;
         while (true)
@@ -225,8 +226,7 @@ namespace idascm
             json_data * data = json_data_create(length, capacity);
             if (! data)
             {
-                if (error_code)
-                    *error_code = JSMN_ERROR_NOMEM;
+                error_code = JSMN_ERROR_NOMEM;
                 break;
             }
             std::memcpy(data->source, string, length + 1);
@@ -242,8 +242,7 @@ namespace idascm
                 value.m_begin   = 0;
                 value.m_end     = data->count;
                 fix_strings(data);
-                if (error_code)
-                    *error_code = 0;
+                error_code = 0;
                 return value;
             }
             json_data_release(data);
@@ -253,8 +252,7 @@ namespace idascm
                     capacity <<= 1;
                     continue;
             }
-            if (error_code)
-                *error_code = result;
+            error_code = result;
             break;
         }
         return {};
@@ -264,8 +262,20 @@ namespace idascm
     // TODO: error handling
     auto json_value::from_file(char const * path) -> json_value
     {
-        auto const contents = file_contents(path);
-        return from_string(contents.c_str(), contents.length());
+        int error_code = 0;
+        return from_file(path, error_code);
+    }
+
+    // static
+    auto json_value::from_file(char const * path, int & error_code) -> json_value
+    {
+        std::string contents;
+        if (! file_contents(path, contents))
+        {
+            error_code = -5;
+            return {};
+        }
+        return from_string(contents.c_str(), contents.length(), error_code);
     }
 
     auto json_value::type(void) const noexcept -> json_type

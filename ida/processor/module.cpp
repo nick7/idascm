@@ -80,7 +80,7 @@ namespace idascm
     }
 
     // virtual
-    ssize_t idaapi module::on_event(ssize_t msgid, va_list args)
+    auto idaapi module::on_event(ssize_t msgid, va_list args) -> ssize_t
     {
         IDASCM_LOG_T("module::on_event: %zd '%s'", msgid, to_string(processor_t::event_t(msgid)));
         switch (msgid)
@@ -102,7 +102,7 @@ namespace idascm
             }
             case processor_t::ev_newprc: // 2
             {
-                auto const id = va_arg(args, int);
+                auto const id       = va_arg(args, int);
                 auto const keep_cfg = va_arg(args, bool);
                 IDASCM_LOG_D("ev_newprc: %d, %d", id, keep_cfg);
                 auto const ver = processor_version(id);
@@ -116,6 +116,14 @@ namespace idascm
                 IDASCM_LOG_D("ev_newfile: '%s'", va_arg(args, char const *));
                 return 1;
             }
+            case processor_t::ev_set_proc_options: // 3
+            {
+                auto const options      = va_arg(args, char const *);
+                auto const confidence   = va_arg(args, int);
+                auto const object = json_value::from_string(options).to_object();
+                //TODO: handle object
+                break;
+            }
             case processor_t::ev_ana_insn:
             {
                 auto insn = va_arg(args, insn_t *);
@@ -127,6 +135,7 @@ namespace idascm
             {
                 auto const insn = va_arg(args, insn_t const *);
                 assert(insn);
+                assert(m_emulator);
                 return m_emulator->emulate_instruction(*insn) ? 1 : 0;
             }
             case processor_t::ev_out_header:
@@ -138,6 +147,7 @@ namespace idascm
             case processor_t::ev_out_insn:
             {
                 auto const ctx = va_arg(args, outctx_t *);
+                assert(m_output);
                 return m_output->output_instruction(*ctx) ? 1 : -1;
             }
             case processor_t::ev_out_operand:
@@ -151,7 +161,7 @@ namespace idascm
             {
                 auto const cmd = get_command(m_isa, va_arg(args, insn_t const *));
                 assert(cmd);
-                if (cmd->flags & command_flag_condition)
+                if (cmd && cmd->flags & command_flag_condition)
                     return 1;
                 return -1;
             }
@@ -159,7 +169,7 @@ namespace idascm
             {
                 auto const cmd = get_command(m_isa, va_arg(args, insn_t const *));
                 assert(cmd);
-                if (cmd->flags & command_flag_call)
+                if (cmd && cmd->flags & command_flag_call)
                     return 1;
                 return -1;
             }
@@ -201,6 +211,7 @@ namespace idascm
             }
         }
 
+        IDASCM_LOG_D("module::on_event: unhandled %zd '%s'", msgid, to_string(processor_t::event_t(msgid)));
         return 0;
     }
 }

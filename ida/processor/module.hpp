@@ -17,7 +17,7 @@ namespace idascm
 # endif
     {
         public:
-            virtual ssize_t idaapi on_event(ssize_t msgid, va_list va);
+            virtual auto idaapi on_event(ssize_t msgid, va_list va) -> ssize_t;
 
             void set_data_id(int data_id)
             {

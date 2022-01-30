@@ -20,8 +20,9 @@ namespace idascm
     {
         public:
             static auto from_string(char const * string) -> json_value;
-            static auto from_string(char const * string, std::size_t length, int * error_code = nullptr) -> json_value;
+            static auto from_string(char const * string, std::size_t length, int & error_code) -> json_value;
             static auto from_file(char const * path) -> json_value;
+            static auto from_file(char const * path, int & error_code) -> json_value;
 
         public:
             auto type(void) const noexcept -> json_type;
