@@ -17,7 +17,7 @@ namespace idascm
     constexpr
     auto processor_id(void) noexcept -> std::uint16_t
     {
-        return 0x8000 | 0x0eaf;
+        return 0x8000 | ('s' << 0) | ('c' << 8);
     }
 
     auto processor_command_manager(void) -> command_manager &;
