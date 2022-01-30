@@ -1,5 +1,6 @@
 # include <engine/command.hpp>
 # include <core/json.hpp>
+# include <core/logger.hpp>
 
 namespace idascm
 {
@@ -88,6 +89,13 @@ namespace idascm
             for (std::size_t i = 0; i < argument_count; ++ i)
             {
                 command.arguments.push_back(argument_from_json(argument_array[i]));
+                if (command.arguments.back().type == type::variadic)
+                {
+                    if (i != argument_count - 1)
+                    {
+                        IDASCM_LOG_W("only last argument can be variadic");
+                    }
+                }
             }
         }
 

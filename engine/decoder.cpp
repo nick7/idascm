@@ -53,7 +53,7 @@ namespace idascm
             reader.skip(in.operand_list[op].size);
             ++ op;
         }
-        if (in.command->arguments[op].type == type::variadic)
+        if (op < in.command->arguments.size() && in.command->arguments[op].type == type::variadic)
         {
             auto max_operand_count = std::size(in.operand_list);
             if (in.command->flags & command_flag_function_call)
@@ -86,7 +86,7 @@ namespace idascm
             switch (in.operand_list[i].type)
             {
                 case operand_type::global:
-                    if (operand_type::unknown == in.operand_list[i].value.variable.type)
+                    if (operand_type::unknown == in.operand_list[i].value.variable.type && i < in.command->arguments.size())
                     {
                         auto const type = remove_constant(remove_reference(in.command->arguments[i].type));
                         switch (type)

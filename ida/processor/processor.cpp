@@ -51,10 +51,7 @@ namespace idascm
 
         void startup(void)
         {
-// EA64 version crashes at callui(ui_msg, ...) O_o
-# ifndef __EA64__
             static ida_logger logger;
-# endif
             IDASCM_LOG_I("idascm %s", build_version());
             IDASCM_LOG_I("IDA_SDK_VERSION: %d", IDA_SDK_VERSION);
         }
