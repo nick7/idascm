@@ -114,7 +114,8 @@ namespace idascm
         op_set_type(dst, src.operand_list[index].type);
 
         // logical types
-        switch (command->argument_list[index].type)
+        assert(index < command->arguments.size());
+        switch (command->arguments[index].type)
         {
             case type::address:
             {

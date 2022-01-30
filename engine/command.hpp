@@ -2,6 +2,7 @@
 # include <engine/engine.hpp>
 # include <engine/argument.hpp>
 # include <string>
+# include <vector>
 
 namespace idascm
 {
@@ -10,7 +11,7 @@ namespace idascm
     enum command_flag : std::uint16_t
     {
         command_flag_stop           = 1 <<  0, // terminate instruction flow
-        command_flag_jump           = 1 <<  1, // simple jump
+        command_flag_branch         = 1 <<  1, // simple jump
         command_flag_call           = 1 <<  2, // call function
         command_flag_return         = 1 <<  3, // 
         command_flag_condition      = 1 <<  4, // sets condition flag
@@ -25,11 +26,11 @@ namespace idascm
     // command is an instruction definition (specification) used by analyzer
     struct command
     {
-        std::string     name;
-        std::uint8_t    flags;
-        std::uint8_t    argument_count;
-        argument        argument_list[32];
-        std::string     comment;
+        std::string             name;
+        std::uint8_t            flags;
+        std::vector<argument>   arguments;
+        std::string             description;        // optional
+        std::string             comment;            // optional
     };
 
     auto operator == (command const & first, command const & second) noexcept -> bool;

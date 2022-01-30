@@ -112,7 +112,7 @@ namespace idascm
                     insn.add_cref(address, op.offb, fl_CN);
                     break;
                 }
-                if (command->flags & command_flag_jump)
+                if (command->flags & command_flag_branch)
                 {
                     if (op.type == o_far)
                     {

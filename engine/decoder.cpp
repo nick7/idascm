@@ -34,15 +34,15 @@ namespace idascm
         }
         in.operand_count = 0;
 
-        std::uint8_t op = 0;
-        while (op < in.command->argument_count)
+        std::size_t op = 0;
+        while (op < std::min(in.command->arguments.size(), std::size(in.operand_list)))
         {
-            if (in.command->argument_list[op].type == type::variadic)
+            if (in.command->arguments[op].type == type::variadic)
                 break;
             in.operand_list[op].offset  = static_cast<std::uint8_t>(reader.pointer() - address);
-            if (in.command->argument_list[op].operand_type != operand_type::unknown)
+            if (in.command->arguments[op].operand_type != operand_type::unknown)
             {
-                in.operand_list[op].type = in.command->argument_list[op].operand_type;
+                in.operand_list[op].type = in.command->arguments[op].operand_type;
                 in.operand_list[op].size = decode_operand_value(reader.pointer(), in.operand_list[op].type, in.operand_list[op].value);
             }
             else
@@ -53,7 +53,7 @@ namespace idascm
             reader.skip(in.operand_list[op].size);
             ++ op;
         }
-        if (in.command->argument_list[op].type == type::variadic)
+        if (in.command->arguments[op].type == type::variadic)
         {
             auto max_operand_count = std::size(in.operand_list);
             if (in.command->flags & command_flag_function_call)
@@ -88,7 +88,7 @@ namespace idascm
                 case operand_type::global:
                     if (operand_type::unknown == in.operand_list[i].value.variable.type)
                     {
-                        auto const type = remove_constant(remove_reference(in.command->argument_list[i].type));
+                        auto const type = remove_constant(remove_reference(in.command->arguments[i].type));
                         switch (type)
                         {
                             case type::integer:
