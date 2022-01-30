@@ -6,6 +6,28 @@
 
 namespace idascm
 {
+    namespace
+    {
+        auto create_data(ea_t address, operand_type type, std::uint8_t count) -> bool
+        {
+            switch (type)
+            {
+                case operand_type::int32:
+                    return create_dword(address, count * 4);
+                case operand_type::float32:
+                    return create_float(address, count * 4);
+                case operand_type::string8:
+                    return create_qword(address, count * 8);
+                case operand_type::string16:
+                    return create_oword(address, count * 16);
+                default:
+                    IDASCM_LOG_W("unsupported data type: %d", type);
+                    break;
+            }
+            return false;
+        }
+    }
+
     void emulator::emulate_operand(insn_t const & insn, op_t const & op)
     {
         assert(m_isa);
@@ -48,23 +70,17 @@ namespace idascm
                 auto const value = op_value(op);
                 if (op.type == o_displ)
                 {
-                    switch (value.array.type)
+                    if (! create_data(op.addr, value.array.type, value.array.size))
                     {
-                        case operand_type::int32:
-                            create_dword(op.addr, value.array.size);
-                            break;
-                        case operand_type::float32:
-                            create_float(op.addr, value.array.size);
-                            break;
-                        case operand_type::string8:
-                            break;
-                        case operand_type::string16:
-                            break;
+                        IDASCM_LOG_W("create_data failed (ea=0x%08x, type=%d, count=%d)", op.addr, value.array.type, value.array.size);
                     }
                 }
                 else
                 {
-                    insn.create_op_data(op.addr, op);
+                    if (! create_data(op.addr, value.variable.type,1))
+                    {
+                        IDASCM_LOG_W("create_data failed (ea=0x%08x, type=%d)", op.addr, value.variable.type);
+                    }
                 }
                 // TODO: deal with dr_R / dw_W
                 insn.add_dref(op.addr, op.offb, dr_O);

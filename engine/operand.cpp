@@ -91,15 +91,26 @@ namespace idascm
                 return "f24";
             case operand_type::float32:
                 return "f32";
+            case operand_type::string:
+                return "s";
+            case operand_type::string8:
+                return "s8";
+            case operand_type::string16:
+                return "s16";
+            case operand_type::string128:
+                return "s128";
         }
         return nullptr;
     }
 
+    // all user accessible numeric types are signed
+    // some internal types are not
     auto operand_type_is_signed(operand_type type) noexcept -> bool
     {
         switch (type)
         {
             case operand_type::int0:
+            case operand_type::int8:
             case operand_type::int16:
             case operand_type::int32:
             case operand_type::int64:

@@ -104,18 +104,11 @@ namespace idascm
             {
                 switch (op.dtype)
                 {
-                    // case dt_packreal:
-                    // {
-                    //     auto const value = op_value(op);
-                    //     char string[32] = { 0 };
-                    //     qsnprintf(string, sizeof(string) - 1, "%g", value.int16 / 16.f);
-                    //     ctx.out_line(string, COLOR_NUMBER);
-                    //     break;
-                    // }
                     case dt_float:
+                    case dt_packreal:
                     {
                         float value = 0;
-                        char string[32] = { 0 };
+                        char string[32] = {};
                         if (to_float(op_type(op), op_value(op), value))
                         {
                             qsnprintf(string, sizeof(string) - 1, "%g", value);
@@ -123,16 +116,16 @@ namespace idascm
                             {
                                 qstrncat(string, ".", sizeof(string) - 1);
                             }
-                            auto const suffix = operand_type_suffix(op_type(op));
-                            assert(suffix);
-                            if (suffix)
-                            {
-                                qstrncat(string, suffix, sizeof(string) - 1);
-                            }
                             // if (print_fpval(string, sizeof(string) - 1, &op.value, 4))
                             if (true)
                             {
                                 ctx.out_line(string, COLOR_NUMBER);
+                            }
+                            auto const suffix = operand_type_suffix(op_type(op));
+                            assert(suffix);
+                            if (suffix)
+                            {
+                                ctx.out_line(suffix, COLOR_SYMBOL);
                             }
                             break;
                         }
@@ -144,7 +137,7 @@ namespace idascm
                     }
                     case dt_string:
                     {
-                        char string[256] = { 0 };
+                        char string[256] = {};
                         auto const value = op_value(op);
                         switch (op_type(op))
                         {
@@ -164,10 +157,16 @@ namespace idascm
                                 break;
                         }
                         ctx.out_tagon(COLOR_DSTR);
-                        ctx.out_char('\'');
+                        ctx.out_char('"');
                         ctx.out_line(string);
-                        ctx.out_char('\'');
+                        ctx.out_char('"');
                         ctx.out_tagoff(COLOR_DSTR);
+                        auto const suffix = operand_type_suffix(op_type(op));
+                        assert(suffix);
+                        if (suffix)
+                        {
+                            ctx.out_line(suffix, COLOR_SYMBOL);
+                        }
                         break;
                     }
                     case dt_byte:
@@ -179,7 +178,7 @@ namespace idascm
                         assert(suffix);
                         if (suffix)
                         {
-                            ctx.out_line(suffix, COLOR_NUMBER);
+                            ctx.out_line(suffix, COLOR_SYMBOL);
                         }
                         break;
                     }
@@ -235,16 +234,25 @@ namespace idascm
                     qsnprintf(string, sizeof(string) - 1, "@%d", op.reg);
                     ctx.out_register(string);
                 }
-                ctx.out_symbol(',');
+                ctx.out_symbol(':');
                 qsnprintf(string, sizeof(string) - 1, "%d", value.array.size);
                 ctx.out_line(string, COLOR_NUMBER);
-                if (true)
-                {
-                    ctx.out_symbol(',');
-                    qsnprintf(string, sizeof(string) - 1, "0x%02x", value.array.flags);
-                    ctx.out_line(string, COLOR_SYMBOL);
-                }
+                // if (true)
+                // {
+                //     ctx.out_symbol(',');
+                //     qsnprintf(string, sizeof(string) - 1, "0x%02x", value.array.flags);
+                //     ctx.out_line(string, COLOR_SYMBOL);
+                // }
                 ctx.out_symbol(']');
+                if (operand_type::unknown != value.array.type)
+                {
+                    auto const suffix = operand_type_suffix(value.array.type);
+                    assert(suffix);
+                    if (suffix)
+                    {
+                        ctx.out_line(suffix, COLOR_SYMBOL);
+                    }
+                }
                 return true;
             }
             case o_mem:     // GLOBAL

@@ -16,7 +16,7 @@ namespace idascm
         timer,              // special local variable type
         local_array,        // Local variable array reference (GTA:SA, GTA:LCS, GTA:VCS)
         global_array,       // Global variable array reference (GTA:SA, GTA:LCS, GTA:VCS)
-        string,             // Variable size string
+        string,             // Variable size string (GTA:SA)
         int0,               // Immediate 0i constant (GTA:LCS, GTA:VCS)
         int8,               // Immediate signed 8-bit integer
         int16,              // Immediate signed 16-bit integer
