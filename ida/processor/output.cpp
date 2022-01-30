@@ -80,36 +80,15 @@ namespace idascm
             ctx.out_keyword("NOT");
             ctx.out_char(' ');
         }
-        if (command->name[0])
+        if (! command->name.empty())
         {
-            ctx.out_custom_mnem(command->name);
+            ctx.out_custom_mnem(command->name.data());
         }
         else
         {
             char name[32];
-            qsnprintf(name, sizeof(name) - 1, "UNKNOWN_0x%04x", ctx.insn.itype);
+            qsnprintf(name, sizeof(name) - 1, "UNKNOWN_%04x", ctx.insn.itype);
             ctx.out_custom_mnem(name);
-        }
-    }
-
-    namespace
-    {
-        auto float_suffix(operand_type type) noexcept -> char const *
-        {
-            switch (type)
-            {
-                case operand_type::float0:
-                    return "f0";
-                case operand_type::float8:
-                    return "f8";
-                case operand_type::float16:
-                    return "f16";
-                case operand_type::float24:
-                    return "f24";
-                case operand_type::float32:
-                    return "f";
-            }
-            return nullptr;
         }
     }
 
@@ -125,46 +104,82 @@ namespace idascm
             {
                 switch (op.dtype)
                 {
+                    case dt_float:
                     case dt_packreal:
                     {
-                        char string[32] = { 0 };
-                        qsnprintf(string, sizeof(string) - 1, "%g", static_cast<int>(op.value) / 16.f);
-                        ctx.out_line(string, COLOR_NUMBER);
-                        break;
-                    }
-                    case dt_float:
-                    {
-                        char string[32] = { 0 };
-                        qsnprintf(string, sizeof(string) - 1, "%g", *reinterpret_cast<float const *>(&op.value));
-                        if (! strchr(string, '.'))
+                        float value = 0;
+                        char string[32] = {};
+                        if (to_float(op_type(op), op_value(op), value))
                         {
-                            qstrncat(string, ".", sizeof(string) - 1);
+                            qsnprintf(string, sizeof(string) - 1, "%g", value);
+                            if (! strchr(string, '.'))
+                            {
+                                qstrncat(string, ".", sizeof(string) - 1);
+                            }
+                            // if (print_fpval(string, sizeof(string) - 1, &op.value, 4))
+                            if (true)
+                            {
+                                ctx.out_line(string, COLOR_NUMBER);
+                            }
+                            auto const suffix = operand_type_suffix(op_type(op));
+                            assert(suffix);
+                            if (suffix)
+                            {
+                                ctx.out_line(suffix, COLOR_SYMBOL);
+                            }
+                            break;
                         }
-                        qstrncat(string, float_suffix(op_type(op)), sizeof(string) - 1);
-                        // if (print_fpval(string, sizeof(string) - 1, &op.value, 4))
-                        if (true)
-                        {
-                            ctx.out_line(string, COLOR_NUMBER);
-                        }
-                        else
-                        {
-                            ctx.out_tagon(COLOR_ERROR);
-                            ctx.out_btoa(op.value, 16);
-                            ctx.out_tagoff(COLOR_ERROR);
-                            remember_problem(PR_DISASM, ctx.insn.ea);
-                        }
+                        ctx.out_tagon(COLOR_ERROR);
+                        ctx.out_btoa(op.value, 16);
+                        ctx.out_tagoff(COLOR_ERROR);
+                        remember_problem(PR_DISASM, ctx.insn.ea);
                         break;
                     }
                     case dt_string:
                     {
-                        char string[16] = { 0 };
-                        get_bytes(string, 8, op.addr);
-                        // IDASCM_LOG_T("string: '%s'", string);
+                        char string[256] = {};
+                        auto const value = op_value(op);
+                        switch (op_type(op))
+                        {
+                            case operand_type::string8:
+                                std::memcpy(string, value.string8, sizeof(value.string8));
+                                break;
+                            case operand_type::string:
+                            case operand_type::string16:
+                            case operand_type::string128:
+                                if (value.string.length != get_bytes(string, value.string.length, value.string.address))
+                                {
+                                    IDASCM_LOG_W("get_bytes failed");
+                                }
+                                break;
+                            default:
+                                IDASCM_LOG_W("unknown string type");
+                                break;
+                        }
                         ctx.out_tagon(COLOR_DSTR);
-                        ctx.out_char('\'');
+                        ctx.out_char('"');
                         ctx.out_line(string);
-                        ctx.out_char('\'');
+                        ctx.out_char('"');
                         ctx.out_tagoff(COLOR_DSTR);
+                        auto const suffix = operand_type_suffix(op_type(op));
+                        assert(suffix);
+                        if (suffix)
+                        {
+                            ctx.out_line(suffix, COLOR_SYMBOL);
+                        }
+                        break;
+                    }
+                    case dt_byte:
+                    case dt_word:
+                    case dt_dword:
+                    {
+                        ctx.out_value(op, OOF_NUMBER | OOFS_IFSIGN | OOFW_IMM | (operand_type_is_signed(op_type(op)) ? OOF_SIGNED : 0));
+                        auto const suffix = operand_type_suffix(op_type(op));
+                        assert(suffix);
+                        if (suffix)
+                        {
+                            ctx.out_line(suffix, COLOR_SYMBOL);
+                        }
                         break;
                     }
                     default:
@@ -183,22 +198,63 @@ namespace idascm
                 ctx.out_register(string);
                 return true;
             }
-            // @REG[@REG, SIZE]
-            case o_phrase:
+            case o_phrase:  // @REG[@REG, SIZE]
+            case o_displ:   // GLOBAL[@REG, SIZE]
             {
+                auto const value = op_value(op);
                 char string[32];
-                qsnprintf(string, sizeof(string) - 1, "@%d", op.addr);
-                ctx.out_register(string);
+                if (o_displ == op.type)
+                {
+                    if (! ctx.out_name_expr(op, op.addr))
+                    {
+                        ctx.out_tagon(COLOR_ERROR);
+                        ctx.out_btoa(op.addr, 16);
+                        ctx.out_tagoff(COLOR_ERROR);
+                        remember_problem(PR_NONAME, ctx.insn.ea);
+                    }
+                }
+                else
+                {
+                    qsnprintf(string, sizeof(string) - 1, "@%d", op.addr);
+                    ctx.out_register(string);
+                }
                 ctx.out_symbol('[');
-                qsnprintf(string, sizeof(string) - 1, "@%d", op.reg);
-                ctx.out_register(string);
-                ctx.out_symbol(',');
-                qsnprintf(string, sizeof(string) - 1, "%d", op_array_size(op));
+                if (value.array.flags & to_uint(operand_array_flag::is_global))
+                {
+                    if (! ctx.out_name_expr(op, value.array.index))
+                    {
+                        ctx.out_tagon(COLOR_ERROR);
+                        ctx.out_btoa(value.array.index, 16);
+                        ctx.out_tagoff(COLOR_ERROR);
+                        remember_problem(PR_NONAME, ctx.insn.ea);
+                    }
+                }
+                else
+                {
+                    qsnprintf(string, sizeof(string) - 1, "@%d", op.reg);
+                    ctx.out_register(string);
+                }
+                ctx.out_symbol(':');
+                qsnprintf(string, sizeof(string) - 1, "%d", value.array.size);
                 ctx.out_line(string, COLOR_NUMBER);
+                // if (true)
+                // {
+                //     ctx.out_symbol(',');
+                //     qsnprintf(string, sizeof(string) - 1, "0x%02x", value.array.flags);
+                //     ctx.out_line(string, COLOR_SYMBOL);
+                // }
                 ctx.out_symbol(']');
+                if (operand_type::unknown != value.array.type)
+                {
+                    auto const suffix = operand_type_suffix(value.array.type);
+                    assert(suffix);
+                    if (suffix)
+                    {
+                        ctx.out_line(suffix, COLOR_SYMBOL);
+                    }
+                }
                 return true;
             }
-            case o_displ:   // GLOBAL[@REG, SIZE]
             case o_mem:     // GLOBAL
             case o_far:
             case o_near:
@@ -215,24 +271,57 @@ namespace idascm
                 if (! ctx.out_name_expr(op, address))
                 {
                     ctx.out_tagon(COLOR_ERROR);
-                    ctx.out_btoa(op.value, 16);
+                    ctx.out_btoa(op.addr, 16);
                     ctx.out_tagoff(COLOR_ERROR);
                     remember_problem(PR_NONAME, ctx.insn.ea);
-                }
-                if (o_displ == op.type)
-                {
-                    ctx.out_symbol('[');
-                    char string[32];
-                    qsnprintf(string, sizeof(string) - 1, "@%d", op.reg);
-                    ctx.out_register(string);
-                    ctx.out_symbol(',');
-                    ctx.out_printf("%d", op_array_size(op));
-                    ctx.out_symbol(']');
                 }
                 return true;
             }
         }
         return false;
+    }
+
+    auto output::get_autocomment(insn_t const & insn) const -> qstring
+    {
+        assert(m_isa);
+        auto const command = m_isa->get_command(insn.itype);
+        assert(command);
+
+        qstring comment;
+        comment.reserve(128);
+        if (command)
+        {
+            char buffer[32];
+            qsnprintf(buffer, sizeof(buffer) - 1, "0x%04x", insn.itype);
+            comment.append(buffer);
+
+            if (command->comment[0])
+            {
+                comment.append(" ");
+                comment.append(command->comment.c_str());
+            }
+
+            qstring flags;
+            flags.reserve(128);
+            for (std::uint8_t i = 0; i < 8; ++ i)
+            {
+                std::uint8_t const flag = 1 << i;
+                if (command->flags & flag)
+                {
+                    if (! flags.empty())
+                        flags.append(", ");
+                    flags.append(to_string(command_flag(flag)));
+                }
+            }
+            if (! flags.empty())
+            {
+                comment.append(" (flags: ");
+                comment.append(flags);
+                comment.append(")");
+            }
+        }
+
+        return comment;
     }
 }
 

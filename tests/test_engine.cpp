@@ -55,6 +55,8 @@ int main(int argc, char * argv[])
     };
     auto mem = memory_api_buffer(buffer, sizeof(buffer));
 
+    assert(0 == std::strcmp("string16", operand_type_to_string(operand_type::string16)));
+
     command_set isa(version::gtavc);
     isa.load(json_value::from_string(gs_commands).to_object());
 
@@ -68,7 +70,7 @@ int main(int argc, char * argv[])
     if (ip += dec.decode_instruction(ip, ins))
     {
         assert(ins.opcode == 0x004f);
-        assert(ins.operand_count == 4);
+        assert(ins.operand_count == 5);
     }
     if (ip += dec.decode_instruction(ip, ins))
     {

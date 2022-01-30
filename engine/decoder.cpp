@@ -20,15 +20,17 @@ namespace idascm
     auto decoder::decode_instruction(std::uint32_t address, instruction & in) const -> std::uint32_t
     {
         assert(m_memory && m_isa);
-        std::uint32_t ptr    = address;
+        auto reader = memory_reader(*m_memory, address);
         std::uint16_t opcode = 0;
-        ptr += m_memory->read(ptr, &opcode);
+        if (! reader.read(opcode))
+            return 0;
         in.opcode  = opcode & ~0x8000;
         in.flags   = (opcode & 0x8000) ? instruction_flag_not : 0;
         in.address = address;
         in.command = m_isa->get_command(in.opcode);
         if (! in.command)
         {
+            IDASCM_LOG_D("unknown opcode: 0x%04x", in.opcode);
             // no command - no decoding
             return 0;
         }
@@ -37,102 +39,156 @@ namespace idascm
         std::uint8_t op = 0;
         while (op < in.command->argument_count)
         {
-            if (in.command->argument_list[op] == argument_type::variadic)
+            if (in.command->argument_list[op].type == type::variadic)
                 break;
-            in.operand_list[op].offset  = static_cast<std::uint8_t>(ptr - address);
-            switch (in.command->argument_list[op])
+            in.operand_list[op].offset  = static_cast<std::uint8_t>(reader.pointer() - address);
+            if (in.command->argument_list[op].operand_type != operand_type::unknown)
             {
-                case argument_type::string64:
-                    in.operand_list[op].type = operand_type::string64;
-                    in.operand_list[op].size = m_memory->read(ptr, in.operand_list[op].value_string64, 8);
-                    break;
-                case argument_type::int8:
-                    in.operand_list[op].type = operand_type::int8;
-                    in.operand_list[op].size = m_memory->read(ptr, &in.operand_list[op].value_int8);
-                    break;
-                case argument_type::int32:
-                    in.operand_list[op].type = operand_type::int32;
-                    in.operand_list[op].size = m_memory->read(ptr, &in.operand_list[op].value_int32);
-                    break;
-                default:
-                    if (! decode_operand(ptr, in.operand_list[op]))
-                        return 0;
-                    break;
+                in.operand_list[op].type = in.command->argument_list[op].operand_type;
+                in.operand_list[op].size = decode_operand_value(reader.pointer(), in.operand_list[op].type, in.operand_list[op].value);
             }
-            ptr += in.operand_list[op].size;
+            else
+            {
+                if (! decode_operand(reader.pointer(), in.operand_list[op]))
+                    return 0;
+            }
+            reader.skip(in.operand_list[op].size);
             ++ op;
         }
-        if (in.command->argument_list[op] == argument_type::variadic)
+        if (in.command->argument_list[op].type == type::variadic)
         {
             auto max_operand_count = std::size(in.operand_list);
             if (in.command->flags & command_flag_function_call)
             {
-                max_operand_count = 4 + in.operand_list[0].value_uint8 + in.operand_list[1].value_uint8;
+                max_operand_count = 4 + in.operand_list[0].value.uint8 + in.operand_list[1].value.uint8;
             }
             while (op < max_operand_count)
             {
-                auto type = operand_type::unknown;
-                auto size = decode_operand_type(ptr, type);
-                if (! size)
+                if (auto size = decode_operand(reader.pointer(), in.operand_list[op]))
                 {
-                    IDASCM_LOG_W("decode_operand_type failed at 0x%08x", ptr);
-                    return 0;
+                    reader.skip(size);
+                    if (operand_type::none == in.operand_list[op].type)
+                    {
+                        ++ op;
+                        break;
+                    }
                 }
-                if (operand_type::none == type)
+                else
                 {
-                    ptr += size;
-                    break;
+                    IDASCM_LOG_W("decode_operand_type failed at 0x%08x", reader.pointer());
                 }
-                in.operand_list[op].offset = static_cast<std::uint8_t>(ptr - address);
-                if (! decode_operand(ptr, in.operand_list[op]))
-                    return 0;
-                ptr += in.operand_list[op].size;
                 ++ op;
             }
         }
         in.operand_count = op;
-        in.size = (ptr - address);
-        return ptr - address;
+        in.size = static_cast<std::uint16_t>(reader.pointer() - address);
+        // post-processing
+        for (std::size_t i = 0; i < in.operand_count; ++ i)
+        {
+            switch (in.operand_list[i].type)
+            {
+                case operand_type::global:
+                    if (operand_type::unknown == in.operand_list[i].value.variable.type)
+                    {
+                        auto const type = remove_constant(remove_reference(in.command->argument_list[i].type));
+                        switch (type)
+                        {
+                            case type::integer:
+                                in.operand_list[i].value.variable.type = operand_type::int32;
+                                break;
+                            case type::real:
+                                in.operand_list[i].value.variable.type = operand_type::float32;
+                                break;
+                            // case type::string:
+                            //     in.operand_list[i].value.variable.type = operand_type::string;
+                            //     break;
+                        }
+                    }
+                    break;
+                case operand_type::global_array:
+                    if (operand_type::unknown == in.operand_list[i].value.array.type)
+                    {
+
+                    }
+                    break;
+            }
+        }
+        return reader.pointer() - address;
     }
 
-    auto decoder::decode_operand(std::uint32_t address, operand & op) const -> std::uint32_t
+    auto decoder::decode_operand_value(std::uint32_t address, operand_type type, operand_value & value) const -> std::uint32_t
     {
-        assert(m_memory && m_isa);
-        std::uint32_t ptr = address;
-        if (auto size = decode_operand_type(ptr, op.type))
-        {
-            ptr += size;
-        }
-        else
-        {
-            return 0;
-        }
-        switch (op.type)
+        assert(m_memory);
+        auto reader = memory_reader(*m_memory, address);
+        switch (type)
         {
             case operand_type::int8:
-                ptr += m_memory->read(ptr, &op.value_int8);
+                if (! reader.read(value.int8))
+                    return 0;
                 break;
             case operand_type::int16:
-                ptr += m_memory->read(ptr, &op.value_int16);
+                if (! reader.read(value.int16))
+                    return 0;
                 break;
             case operand_type::int32:
-                ptr += m_memory->read(ptr, &op.value_int32);
+                if (! reader.read(value.int32))
+                    return 0;
+                break;
+            case operand_type::int64:
+                if (! reader.read(value.int64))
+                    return 0;
+                break;
+            case operand_type::uint8:
+                if (! reader.read(value.uint8))
+                    return 0;
+                break;
+            case operand_type::uint16:
+                if (! reader.read(value.uint16))
+                    return 0;
+                break;
+            case operand_type::uint32:
+                if (! reader.read(value.uint32))
+                    return 0;
+                break;
+            case operand_type::uint64:
+                if (! reader.read(value.uint64))
+                    return 0;
                 break;
             case operand_type::float32:
-                ptr += m_memory->read(ptr, &op.value_float32);
+                if (! reader.read(value.float32))
+                    return 0;
                 break;
-            case operand_type::float16i:
-                ptr += m_memory->read(ptr, &op.value_int16);
+            case operand_type::float64:
+                if (! reader.read(value.float64))
+                    return 0;
                 break;
-            case operand_type::global:
-            case operand_type::local:
-                ptr += m_memory->read(ptr, &op.value_int16);
+            case operand_type::string8:
+                if (! reader.read(value.string8))
+                    return 0;
                 break;
+            case operand_type::string16:
+            case operand_type::string128:
+            {
+                value.string.address = reader.pointer();
+                char buffer[256] = {};
+                switch (type)
+                {
+                    case operand_type::string16:
+                        if (! reader.read(buffer, 16))
+                            return 0;
+                        break;
+                    case operand_type::string128:
+                        if (! reader.read(buffer, 128))
+                            return 0;
+                        break;
+                }
+                value.string.length = static_cast<std::uint16_t>(std::strlen(buffer));
+                break;
+            }
             default:
-                IDASCM_LOG_W("unsupported operand type: %d", op.type);
+                IDASCM_LOG_W("unsupported operand type: %d", type);
                 return 0;
         }
-        op.size = (ptr - address);
-        return op.size;
+        return reader.pointer() - address;
     }
 }

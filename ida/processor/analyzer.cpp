@@ -4,7 +4,9 @@
 # include <engine/command_set.hpp>
 # include <engine/gta3/decoder_gta3.hpp>
 # include <engine/gtavc/decoder_gtavc.hpp>
+# include <engine/gtasa/decoder_gtasa.hpp>
 # include <engine/gtalcs/decoder_gtalcs.hpp>
+# include <engine/gtavcs/decoder_gtavcs.hpp>
 # include <engine/instruction.hpp>
 # include <core/logger.hpp>
 # include <cassert>
@@ -29,8 +31,14 @@ namespace idascm
             case game::gtavc:
                 m_decoder = new decoder_gtavc;
                 break;
+            case game::gtasa:
+                m_decoder = new decoder_gtasa;
+                break;
             case game::gtalcs:
                 m_decoder = new decoder_gtalcs;
+                break;
+            case game::gtavcs:
+                m_decoder = new decoder_gtavcs;
                 break;
         }
         assert(m_decoder);
@@ -62,7 +70,7 @@ namespace idascm
         instruction src = {};
         if (! analyze_instruction(insn.ea, src))
             return false;
-        IDASCM_LOG_D("analyze +0x%04x %s", insn.ea, src.command->name);
+        IDASCM_LOG_D("analyze +0x%08x 0x%04x %s", insn.ea, src.opcode, instruction_name(src).data());
         if (! handle_instruction(src, insn))
             return false;
         return true;
@@ -75,7 +83,7 @@ namespace idascm
         {
             if (i >= std::size(insn.ops))
             {
-                IDASCM_LOG_W("%s: too many operands (%d)", name(src), src.operand_count);
+                IDASCM_LOG_W("%s: too many operands (%d)", instruction_name(src).data(), src.operand_count);
                 break;
             }
             handle_operand(src, i, insn.ops[i]);
@@ -99,9 +107,9 @@ namespace idascm
         op_set_type(dst, src.operand_list[index].type);
 
         // logical types
-        switch (command->argument_list[index])
+        switch (command->argument_list[index].type)
         {
-            case argument_type::address:
+            case type::address:
             {
                 std::int32_t value = 0;
                 if (to_int(src.operand_list[index], value))
@@ -129,11 +137,26 @@ namespace idascm
         // actual types
         switch (src.operand_list[index].type)
         {
-            case operand_type::string64:
+            case operand_type::none:
+            {
+                dst.type    = o_imm;
+                dst.dtype   = dt_void;
+                break;
+            }
+            case operand_type::string8:
             {
                 dst.type    = o_imm;
                 dst.dtype   = dt_string;
-                dst.addr    = src.address + src.operand_list[index].offset;
+                dst.addr    = src.address + src.operand_list[index].offset + src.operand_list[index].size - 8u;
+                break;
+            }
+            case operand_type::string:
+            case operand_type::string16:
+            case operand_type::string128:
+            {
+                dst.type    = o_imm;
+                dst.dtype   = dt_string;
+                dst.addr    = src.operand_list[index].value.string.address;
                 break;
             }
             case operand_type::int0:
@@ -147,86 +170,71 @@ namespace idascm
             {
                 dst.type    = o_imm;
                 dst.dtype   = dt_byte;
-                dst.value   = src.operand_list[index].value_int8;
                 break;
             }
             case operand_type::int16:
             {
                 dst.type    = o_imm;
                 dst.dtype   = dt_word;
-                dst.value   = src.operand_list[index].value_int16;
                 break;
             }
             case operand_type::int32:
             {
                 dst.type    = o_imm;
                 dst.dtype   = dt_dword;
-                dst.value   = src.operand_list[index].value_int32;
                 break;
             }
             case operand_type::float0:
             {
                 dst.type    = o_imm;
                 dst.dtype   = dt_float;
-                dst.value   = 0;
                 break;
             }
-            case operand_type::float8:
-            case operand_type::float16:
-            case operand_type::float24:
+            case operand_type::float8p:
+            case operand_type::float16p:
+            case operand_type::float16i:
+            case operand_type::float24p:
+            {
+                dst.type    = o_imm;
+                dst.dtype   = dt_packreal;
+                break;
+            }
             case operand_type::float32:
             {
                 dst.type    = o_imm;
                 dst.dtype   = dt_float;
-                dst.value   = src.operand_list[index].value_int32;
-                break;
-            }
-            case operand_type::float16i:
-            {
-                dst.type    = o_imm;
-                dst.dtype   = dt_packreal;
-                dst.value   = src.operand_list[index].value_int16;
                 break;
             }
             case operand_type::global:
             {
                 dst.type    = o_mem;
                 dst.dtype   = dt_dword;
-                dst.addr    = src.operand_list[index].value_address;
-                break;
-            }
-            case operand_type::global_array:
-            {
-                dst.type    = o_displ;
-                dst.dtype   = dt_dword;
-                dst.reg     = src.operand_list[index].array_index;
-                dst.addr    = src.operand_list[index].value_address;
-                op_set_array_size(dst, src.operand_list[index].array_size);
-                break;
-            }
-            case operand_type::local_array:
-            {
-                dst.type    = o_phrase;
-                dst.dtype   = dt_dword;
-                dst.reg     = src.operand_list[index].array_index;
-                dst.addr    = src.operand_list[index].value_address;
-                op_set_array_size(dst, src.operand_list[index].array_size);
+                dst.addr    = src.operand_list[index].value.address;
                 break;
             }
             case operand_type::local:
             {
                 dst.type    = o_reg;
                 dst.dtype   = dt_dword;
-                dst.reg     = src.operand_list[index].value_address;
+                dst.reg     = src.operand_list[index].value.address;
                 break;
             }
-            // case operand_type::timer:
-            // {
-            //     dst.type    = o_reg;
-            //     dst.type    = dt_dword;
-            //     dst.reg     = src.operand_list[index].value_address;
-            //     break;
-            // }
+            case operand_type::global_array:
+            {
+                dst.type    = o_displ;
+                dst.dtype   = dt_dword;
+                dst.reg     = src.operand_list[index].value.array.index;
+                dst.addr    = src.operand_list[index].value.array.address;
+                break;
+            }
+            case operand_type::local_array:
+            {
+                dst.type    = o_phrase;
+                dst.dtype   = dt_dword;
+                dst.reg     = src.operand_list[index].value.array.index;
+                dst.addr    = src.operand_list[index].value.array.address;
+                break;
+            }
             default:
             {
                 dst.flags &= ~OF_SHOW;
@@ -234,6 +242,7 @@ namespace idascm
                 break;
             }
         }
+        op_set_value(dst, src.operand_list[index].value);
         return true;
     }
 }

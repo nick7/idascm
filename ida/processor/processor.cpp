@@ -133,23 +133,44 @@ namespace idascm
     {
         version const gs_processor_table[] = \
         {
-            version::gta3_ps2,              // 2001
-            version::gta3_ps2_ex,           // 2001
-            version::gta3_xbox,             //
-            version::gta3_pc,               // 2002
-            version::gta3_pc_ex,            // 2002
-            version::gta3_anniversary,      // 2011
-            version::gta3_definitive,       // 2021
+            version::gta3_ps2,
+            version::gta3_ps2_ex,
+            version::gta3_xbox,
+            version::gta3_pc,
+            version::gta3_pc_ex,
 
-            version::gtavc_ps2,             // 2002
-            version::gtavc_xbox,            // 2003
-            version::gtavc_pc,              // 2003
-            version::gtavc_anniversary,     // 2012
-            version::gtavc_definitive,      // 2021
+            version::gtavc_ps2,
+            version::gtavc_xbox,
+            version::gtavc_pc,
 
-            version::gtalcs_psp,            //
-            version::gtalcs_ps2,            //
-            version::gtalcs_anniversary,    // 2015
+            version::gtasa_ps2,
+            version::gtasa_xbox,
+            version::gtasa_pc,
+
+            version::gtalcs_psp,
+            version::gtalcs_ps2,
+
+            version::gtavcs_psp,
+            version::gtavcs_ps2,
+
+            version::gta3_pc_cleo,
+            version::gtavc_pc_cleo,
+            version::gtasa_pc_cleo,
+
+            version::gta3_custom,
+            version::gtavc_custom,
+            version::gtasa_custom,
+            version::gtalcs_custom,
+            version::gtavcs_custom,
+
+            version::gta3_anniversary,
+            version::gtavc_anniversary,
+            version::gtasa_anniversary,
+            version::gtalcs_anniversary,
+
+            version::gta3_definitive,
+            version::gtavc_definitive,
+            version::gtasa_definitive,
         };
     }
 
@@ -180,7 +201,7 @@ namespace idascm
         };
 
         asm_t assembler = {};
-        assembler.flag              = AS_COLON | ASH_HEXF3 | ASO_OCTF4 | ASB_BINF4;
+        assembler.flag              = AS_COLON | ASH_HEXF3 | ASO_OCTF1 | ASB_BINF3;
         assembler.uflag             = 0;
         assembler.name              = "GTA SCM";
         assembler.help              = 0;
@@ -195,8 +216,8 @@ namespace idascm
         assembler.a_byte            = ".byte";
         assembler.a_word            = ".word";
         assembler.a_dword           = ".dword";
-        assembler.a_qword           = nullptr;
-        assembler.a_oword           = nullptr;
+        assembler.a_qword           = ".qword";     // 8 bytes
+        assembler.a_oword           = ".oword";     // 16 bytes
         assembler.a_float           = ".float";
         assembler.a_double          = nullptr;
         assembler.a_tbyte           = nullptr;
@@ -244,7 +265,7 @@ namespace idascm
 
         processor_t proc = {};
         proc.version        = IDP_INTERFACE_VERSION;
-        proc.id             = processor_id;
+        proc.id             = processor_id();
         proc.flag           = PR_USE32 | PR_DEFSEG32 | PRN_HEX | PR_BINMEM | PR_NO_SEGMOVE | PR_CNDINSNS;
         // proc.flag2          = 0;
         proc.cnbits         = 8;
@@ -357,6 +378,18 @@ namespace idascm
         return nullptr;
     }
 # endif
+
+    void op_set_value(op_t & op, operand_value const & value) noexcept
+    {
+        op_set_value_uint64(op, value.uint64);
+    }
+
+    auto op_value(op_t const & op) noexcept -> operand_value
+    {
+        operand_value value;
+        value.uint64 = op_value_uint64(op);
+        return value;
+    }
 }
 
 processor_t LPH = idascm::processor();

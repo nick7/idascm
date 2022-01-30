@@ -14,7 +14,7 @@ namespace idascm
     {
         auto load_json_object(std::string root, version ver) -> json_object
         {
-            std::string const path = root + "/" + std::string(to_string(ver)) + ".json";
+            std::string const path = root + "/" + to_string(version_game(ver)) + "/" + to_string(ver) + ".json";
             IDASCM_LOG_I("Loading commands from '%s'", path.c_str());
             auto const json = json_value::from_file(path.c_str());
             if (json.is_valid())
@@ -25,6 +25,7 @@ namespace idascm
                     return object;
                 }
             }
+            IDASCM_LOG_W("Unable to load file '%s'", path.c_str());
             return {};
         }
     }
@@ -62,23 +63,37 @@ namespace idascm
         auto parent = object["parent"].to_primitive();
         if (parent.is_valid())
         {
-            parent_set = get_set(to_version(parent.c_str()));
-            if (! parent_set)
+            auto const parent_version = to_version(parent.c_str());
+            if (parent_version == version::unknown)
+            {
+                IDASCM_LOG_W("invalid parent version: '%s'", parent.c_str());
                 return nullptr;
+            }
+            parent_set = get_set(parent_version);
+            if (! parent_set)
+            {
+                IDASCM_LOG_W("unable to load parent command set: '%s'", to_string(parent_version));
+                return nullptr;
+            }
         }
-        auto commands = object["commands"].to_object();
-        if (commands.is_valid())
+        auto set = new command_set(ver);
+        if (nullptr == parent_set || set->set_parent(parent_set))
         {
-            auto set = new command_set(ver);
-            if (set->set_parent(parent_set))
+            auto commands = object["commands"].to_object();
+            if (commands.is_valid())
             {
                 if (set->load(commands))
                 {
                     return set;
                 }
             }
-            delete set;
+            else
+            {
+                IDASCM_LOG_W("invalid 'commands' object");
+                return set;
+            }
         }
+        delete set;
         return nullptr;
     }
 

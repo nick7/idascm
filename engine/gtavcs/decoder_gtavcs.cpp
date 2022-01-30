@@ -1,6 +1,6 @@
-# include <engine/gtalcs/decoder_gtalcs.hpp>
-# include <engine/memory.hpp>
+# include <engine/gtavcs/decoder_gtavcs.hpp>
 # include <engine/instruction.hpp>
+# include <engine/memory.hpp>
 # include <core/logger.hpp>
 # include <cassert>
 
@@ -20,27 +20,28 @@ namespace idascm
             operand_type::int8,
             operand_type::int16,
             operand_type::float32,
+            operand_type::string,
         };
     }
 
-    auto to_operand_type(operand_type_gtalcs type) noexcept -> operand_type
+    auto to_operand_type(operand_type_gtavcs type) noexcept -> operand_type
     {
         if (to_uint(type) < std::size(gs_operand_type_table))
             return gs_operand_type_table[to_uint(type)];
-        if (type >= operand_type_gtalcs::timer_first && type <= operand_type_gtalcs::timer_last)
+        if (type >= operand_type_gtavcs::timer_first && type <= operand_type_gtavcs::timer_last)
             return operand_type::timer;
-        if (type >= operand_type_gtalcs::local_first && type <= operand_type_gtalcs::local_last)
+        if (type >= operand_type_gtavcs::local_first && type <= operand_type_gtavcs::local_last)
             return operand_type::local;
-        if (type >= operand_type_gtalcs::local_array_first && type <= operand_type_gtalcs::local_array_last)
+        if (type >= operand_type_gtavcs::local_array_first && type <= operand_type_gtavcs::local_array_last)
             return operand_type::local_array;
-        if (type >= operand_type_gtalcs::global_first && type <= operand_type_gtalcs::global_last)
+        if (type >= operand_type_gtavcs::global_first && type <= operand_type_gtavcs::global_last)
             return operand_type::global;
-        if (type >= operand_type_gtalcs::global_array_first && type <= operand_type_gtalcs::global_array_last)
+        if (type >= operand_type_gtavcs::global_array_first && type <= operand_type_gtavcs::global_array_last)
             return operand_type::global_array;
         return operand_type::unknown;
     }
 
-    auto decoder_gtalcs::decode_operand_value(std::uint32_t address, operand_type_gtalcs type, operand_value & value) const -> std::uint32_t
+    auto decoder_gtavcs::decode_operand_value(std::uint32_t address, operand_type_gtavcs type, operand_value & value) const -> std::uint32_t
     {
         assert(m_memory);
         auto reader = memory_reader(*m_memory, address);
@@ -84,9 +85,24 @@ namespace idascm
                 if (! reader.read(value.float32))
                     return 0;
                 break;
+            case operand_type::string:
+            {
+                value.string.address = reader.pointer();
+                value.string.length  = 0;
+                char sym = 0;
+                while (true)
+                {
+                    if (! reader.read(sym))
+                        return 0;
+                    if (! sym)
+                        break;
+                    ++ value.string.length;
+                }
+                break;
+            }
             case operand_type::global:
             {
-                std::uint8_t block = to_uint(type) - to_uint(operand_type_gtalcs::global_first);
+                std::uint8_t block = to_uint(type) - to_uint(operand_type_gtavcs::global_first);
                 std::uint8_t slot;
                 if (! reader.read(slot))
                     return 0;
@@ -95,7 +111,7 @@ namespace idascm
             }
             case operand_type::global_array:
             {
-                std::uint8_t block = to_uint(type) - to_uint(operand_type_gtalcs::global_array_first);
+                std::uint8_t block = to_uint(type) - to_uint(operand_type_gtavcs::global_array_first);
                 std::uint8_t slot, index, size;
                 if (! reader.read(slot) || ! reader.read(index) || ! reader.read(size))
                     return 0;
@@ -106,12 +122,12 @@ namespace idascm
             }
             case operand_type::local:
             {
-                value.variable.address = to_uint(type) - to_uint(operand_type_gtalcs::local_first);
+                value.variable.address = to_uint(type) - to_uint(operand_type_gtavcs::local_first);
                 break;
             }
             case operand_type::local_array:
             {
-                std::uint8_t base = to_uint(type) - to_uint(operand_type_gtalcs::local_array_first);
+                std::uint8_t base = to_uint(type) - to_uint(operand_type_gtavcs::local_array_first);
                 std::uint8_t index, size;
                 if (! reader.read(index) || ! reader.read(size))
                     return 0;
@@ -122,7 +138,7 @@ namespace idascm
             }
             case operand_type::timer:
             {
-                value.variable.address  = to_uint(type) - to_uint(operand_type_gtalcs::timer_first);
+                value.variable.address  = to_uint(type) - to_uint(operand_type_gtavcs::timer_first);
                 value.variable.type     = operand_type::timer;
                 break;
             }
@@ -131,11 +147,11 @@ namespace idascm
     }
 
     // virtual
-    auto decoder_gtalcs::decode_operand(std::uint32_t address, operand & op) const -> std::uint32_t
+    auto decoder_gtavcs::decode_operand(std::uint32_t address, operand & op) const -> std::uint32_t
     {
         assert(m_memory);
         auto reader = memory_reader(*m_memory, address);
-        operand_type_gtalcs type;
+        operand_type_gtavcs type;
         if (reader.read(type))
         {
             auto size = decode_operand_value(reader.pointer(), type, op.value);
