@@ -78,7 +78,8 @@ namespace idascm
                 ++ op;
             }
         }
-        in.operand_count = op;
+        assert(op < std::numeric_limits<std::uint8_t>::max());
+        in.operand_count = static_cast<std::uint8_t>(op);
         in.size = static_cast<std::uint16_t>(reader.pointer() - address);
         // post-processing
         for (std::size_t i = 0; i < in.operand_count; ++ i)

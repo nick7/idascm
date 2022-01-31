@@ -21,11 +21,37 @@ namespace idascm
                 case operand_type::string16:
                     return create_oword(address, count * 16);
                 default:
-                    IDASCM_LOG_W("unsupported data type: %d", type);
-                    break;
+                    // actually dword is the smallest possible type
+                    IDASCM_LOG_D("unspecified data type: %d", type);
+                    return create_dword(address, count * 4);
             }
             return false;
         }
+    }
+
+    auto emulator::near_to_ea(ea_t ea, std::uint32_t address) const noexcept -> ea_t
+    {
+        auto segment = getseg(ea);
+        if (! segment)
+        {
+            IDASCM_LOG_W("no segment found (ea: 0x%08zx)", static_cast<std::size_t>(ea));
+            return BADADDR;
+        }
+        return segment->start_ea + address;
+    }
+
+    auto emulator::operand_address(ea_t ea, op_t const & op) const -> ea_t
+    {
+        std::uint32_t address = op.addr;
+        if (op.type == o_far)
+        {
+            return address;
+        }
+        if (op.type == o_near)
+        {
+            return near_to_ea(ea, address);
+        }
+        return BADADDR;
     }
 
     void emulator::emulate_operand(insn_t const & insn, op_t const & op)
@@ -77,7 +103,7 @@ namespace idascm
                 }
                 else
                 {
-                    if (! create_data(op.addr, value.variable.type,1))
+                    if (! create_data(op.addr, value.variable.type, 1))
                     {
                         IDASCM_LOG_W("create_data failed (ea=0x%08x, type=%d)", op.addr, value.variable.type);
                     }
@@ -92,15 +118,7 @@ namespace idascm
                 std::uint32_t address = op.addr;
                 if (op.type == o_near)
                 {
-                    auto segment = getseg(insn.ea);
-                    if (segment)
-                    {
-                        address = segment->start_ea + address;
-                    }
-                    else
-                    {
-                        IDASCM_LOG_W("no segment found");
-                    }
+                    address = near_to_ea(insn.ea, address);
                 }
                 if (command->flags & command_flag_call)
                 {
@@ -190,12 +208,19 @@ namespace idascm
         assert(m_isa);
         auto const command = m_isa->get_command(insn.itype);
         assert(command);
-        if (! command)
+        return command && (command->flags & command_flag_return);
+    }
+
+    auto emulator::is_switch(insn_t const & insn) const -> bool
+    {
+        assert(m_isa);
+        auto const command = m_isa->get_command(insn.itype);
+        assert(command);
+        if (command && (command->flags & command_flag_switch))
         {
-            return false;
+            if (! (command->flags & command_flag_dependent))
+                return true;
         }
-        if (command->flags & command_flag_return)
-            return true;
-        return false;
+        return true;
     }
 }

@@ -155,6 +155,7 @@ namespace idascm
                 auto const ctx = va_arg(args, outctx_t *);
                 auto const op  = va_arg(args, op_t const *);
                 // return out_opnd(*ctx, *op) ? 1 : -1;
+                assert(ctx && op);
                 return m_output->output_operand(*ctx, *op) ? 1 : -1;
             }
             case processor_t::ev_is_cond_insn:

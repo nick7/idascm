@@ -39,6 +39,10 @@ namespace idascm
                 return "conditional";
             case command_flag_function_call:
                 return "function_call";
+            case command_flag_switch:
+                return "switch";
+            case command_flag_dependent:
+                return "dependent";
             case command_flag_unsupported:
                 return "unsupported";
             case command_flag_macro:

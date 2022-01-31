@@ -1,5 +1,6 @@
 # include <engine/argument.hpp>
 # include <core/json.hpp>
+# include <core/logger.hpp>
 
 namespace idascm
 {
@@ -62,19 +63,29 @@ namespace idascm
     auto argument_from_json(json_value const & value) noexcept -> argument
     {
         argument arg = {};
-        if (value.type() == json_type::primitive)
+        try
         {
-            arg.type = type_from_json(value.to_primitive());
+            if (value.type() == json_type::primitive)
+            {
+                arg.type = type_from_json(value.to_primitive());
+            }
+            else
+            {
+                auto const object = value.to_object();
+                auto const type = object["type"].to_primitive();
+                if (type.is_valid())
+                    arg.type = type_from_json(type);
+                auto const operand_type = object["operand_type"].to_primitive();
+                if (operand_type.is_valid())
+                    arg.operand_type = operand_type_from_json(operand_type);
+                auto const name = object["name"].to_primitive();
+                if (name.is_valid())
+                    arg.name = name.to_string();
+            }
         }
-        else
+        catch (std::bad_alloc const & e)
         {
-            auto const object = value.to_object();
-            auto const type = object["type"].to_primitive();
-            if (type.is_valid())
-                arg.type = type_from_json(type);
-            auto const operand_type = object["operand_type"].to_primitive();
-            if (operand_type.is_valid())
-                arg.operand_type = operand_type_from_json(operand_type);
+            IDASCM_LOG_E("std::bad_alloc: '%s'", e.what());
         }
         return arg;
     }
@@ -84,6 +95,8 @@ namespace idascm
         if (first.type != second.type)
             return false;
         if (first.operand_type != second.operand_type)
+            return false;
+        if (first.name != second.name)
             return false;
         return true;
     }

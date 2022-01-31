@@ -363,10 +363,14 @@ namespace idascm
                 return "out_label";
             case processor_t::ev_creating_segm: // 26
                 return "creating_segm";
+            case processor_t::ev_undefine: // 29
+                return "undefine";
             case processor_t::ev_rename: // 31
                 return "rename";
             case processor_t::ev_is_ret_insn: // 36
                 return "is_ret_insn";
+            case processor_t::ev_is_insn_table_jump: // 40
+                return "is_insn_table_jump";
             case processor_t::ev_is_switch: // 41
                 return "is_switch";
             case processor_t::ev_can_have_type: // 48
@@ -393,6 +397,8 @@ namespace idascm
                 return "add_dref";
             case processor_t::ev_del_cref: // 66
                 return "del_cref";
+            case processor_t::ev_del_dref: // 67
+                return "del_dref";
             case processor_t::ev_coagulate_dref: // 68
                 return "coagulate_dref";
             case processor_t::ev_auto_queue_empty: // 71

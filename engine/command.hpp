@@ -16,9 +16,11 @@ namespace idascm
         command_flag_return         = 1 <<  3, // 
         command_flag_condition      = 1 <<  4, // sets condition flag
         command_flag_conditional    = 1 <<  5, // uses condition flag
-        command_flag_function_call  = 1 <<  6, // call function with arguments (LCS/VCS call_func)
+        command_flag_function_call  = 1 <<  6, // call function with arguments (GTA:LCS/VCS call_func)
         command_flag_unsupported    = 1 <<  7, // opcode is not supported by given executable
         command_flag_macro          = 1 <<  8, // compiler internal high-level command (e.g. "{")
+        command_flag_switch         = 1 <<  9, // switch instruction (GTA:SA)
+        command_flag_dependent      = 1 << 10, // depends on previous one (e.g. switch continue)
         command_flag_cleo           = 1 << 15, // CLEO extension function
     };
     auto to_string(command_flag flag) noexcept -> char const *;
