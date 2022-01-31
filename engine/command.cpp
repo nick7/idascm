@@ -1,5 +1,6 @@
 # include <engine/command.hpp>
 # include <core/json.hpp>
+# include <core/logger.hpp>
 
 namespace idascm
 {
@@ -7,15 +8,16 @@ namespace idascm
     {
         if (first.flags != second.flags)
             return false;
-        if (first.argument_count != second.argument_count)
+        if (first.arguments.size() != second.arguments.size())
             return false;
         if (first.name != second.name)
             return false;
+        if (first.description != second.description)
+            return false;
         if (first.comment != second.comment)
             return false;
-        for (std::size_t i = 0; i < std::min<std::size_t>(first.argument_count, std::size(first.argument_list)); ++ i)
-            if (first.argument_list[i] != second.argument_list[i])
-                return false;
+        if (first.arguments != second.arguments)
+            return false;
         return true;
     }
 
@@ -25,8 +27,8 @@ namespace idascm
         {
             case command_flag_stop:
                 return "stop";
-            case command_flag_jump:
-                return "jump";
+            case command_flag_branch:
+                return "branch";
             case command_flag_call:
                 return "call";
             case command_flag_return:
@@ -37,6 +39,10 @@ namespace idascm
                 return "conditional";
             case command_flag_function_call:
                 return "function_call";
+            case command_flag_switch:
+                return "switch";
+            case command_flag_dependent:
+                return "dependent";
             case command_flag_unsupported:
                 return "unsupported";
             case command_flag_macro:
@@ -75,19 +81,25 @@ namespace idascm
         auto const arguments = object["args"];
         if (arguments.type() == json_type::primitive)
         {
-            command.argument_count = std::atoi(arguments.to_primitive().c_str());
-            for (std::size_t i = 0; i < command.argument_count; ++ i)
-            {
-                command.argument_list[i] = { type::any };
-            }
+            argument any = {};
+            any.type = type::any;
+            command.arguments.resize(std::atoi(arguments.to_primitive().c_str()), any);
         }
         else
         {
             auto const argument_array = arguments.to_array();
-            command.argument_count = (std::uint8_t) argument_array.size();
-            for (std::size_t i = 0; i < command.argument_count; ++ i)
+            auto const argument_count = argument_array.size();
+            command.arguments.reserve(argument_count);
+            for (std::size_t i = 0; i < argument_count; ++ i)
             {
-                command.argument_list[i] = argument_from_json(argument_array[i]);
+                command.arguments.push_back(argument_from_json(argument_array[i]));
+                if (command.arguments.back().type == type::variadic)
+                {
+                    if (i != argument_count - 1)
+                    {
+                        IDASCM_LOG_W("only last argument can be variadic");
+                    }
+                }
             }
         }
 
@@ -95,6 +107,12 @@ namespace idascm
         if (comment.is_valid())
         {
             command.comment = comment.to_string();
+        }
+
+        auto description = object["description"].to_primitive();
+        if (description.is_valid())
+        {
+            command.description = description.to_string();
         }
 
         return command;

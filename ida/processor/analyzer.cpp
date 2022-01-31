@@ -106,31 +106,34 @@ namespace idascm
         dst.flags |= OF_SHOW;
         op_set_type(dst, src.operand_list[index].type);
 
-        // logical types
-        switch (command->argument_list[index].type)
+        if (index < command->arguments.size())
         {
-            case type::address:
+            // logical types
+            switch (command->arguments[index].type)
             {
-                std::int32_t value = 0;
-                if (to_int(src.operand_list[index], value))
+                case type::address:
                 {
-                    dst.value = *reinterpret_cast<std::uint32_t *>(&value);
-                    if (value >= 0)
+                    std::int32_t value = 0;
+                    if (to_int(src.operand_list[index], value))
                     {
-                        dst.type    = o_far;
-                        dst.dtype   = dt_code;
-                        dst.addr    = value;
+                        dst.value = *reinterpret_cast<std::uint32_t *>(&value);
+                        if (value >= 0)
+                        {
+                            dst.type    = o_far;
+                            dst.dtype   = dt_code;
+                            dst.addr    = value;
+                        }
+                        else
+                        {
+                            dst.type    = o_near;
+                            dst.dtype   = dt_code;
+                            dst.addr    = -value;
+                        }
+                        return true;
                     }
-                    else
-                    {
-                        dst.type    = o_near;
-                        dst.dtype   = dt_code;
-                        dst.addr    = -value;
-                    }
-                    return true;
+                    // TODO: handle non-integer address representation
+                    break;
                 }
-                // TODO: handle non-integer address representation
-                break;
             }
         }
 

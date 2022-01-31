@@ -23,6 +23,11 @@ target_include_directories (
     PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/../
 )
+target_link_libraries (
+    ${PROJECT}
+    PRIVATE
+        jsmn
+)
 if (MSVC)
     target_compile_definitions (
         ${PROJECT}

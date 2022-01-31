@@ -19,7 +19,7 @@ namespace idascm
         if (0 != std::fseek(m_stream, offset, SEEK_SET))
             return 0;
         assert(dst);
-        return std::fread(dst, 1, size, m_stream);
+        return static_cast<std::uint32_t>(std::fread(dst, 1, size, m_stream));
     }
     
     memory_api_stdio::~memory_api_stdio(void)

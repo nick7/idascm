@@ -10,11 +10,11 @@ namespace idascm
     {
         auto is_goto(command const & cmd) noexcept -> bool
         {
-            if (! (cmd.flags & (command_flag_jump | command_flag_stop)))
+            if (! (cmd.flags & (command_flag_branch | command_flag_stop)))
                 return false;
             if (cmd.flags & command_flag_conditional)
                 return false;
-            if (cmd.argument_count != 1)
+            if (cmd.arguments.size() != 1)
                 return false;
             return true;
         }

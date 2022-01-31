@@ -79,6 +79,7 @@ namespace idascm
     {
         type            type;
         operand_type    operand_type;
+        std::string     name;
     };
     auto argument_from_json(json_value const & value) noexcept -> argument;
 

@@ -34,7 +34,7 @@ namespace idascm
 
         instruc_t g_instruction_list[0x1000];
 
-        ssize_t idaapi notify_handler(void * user_data, int code, va_list va)
+        auto idaapi notify_handler(void * user_data, int code, va_list va) -> ssize_t
         {
             static bool is_initialized = false;
             if (! is_initialized)
@@ -95,28 +95,30 @@ namespace idascm
         };
         IDASCM_LOG_I("processor_set_isa: %s", isa ? to_string(isa->get_version()) : nullptr);
         g_isa = isa;
-# ifdef IDASCM_FILL_INSTRUCTION_LIST
-        for (std::uint16_t op = 0; op < 0x1000; ++ op)
+
+        if (g_isa && false)
         {
-            g_instruction_list[op] = {};
-            if (! isa)
-                continue;
-            if (auto cmd = isa->get_command(op))
+            for (std::uint16_t op = 0; op < std::size(g_instruction_list); ++ op)
             {
-                g_instruction_list[op].name    = cmd->name;
-                g_instruction_list[op].feature = 0;
-                for (std::size_t i = 0; i < cmd->argument_count; ++ i)
+                g_instruction_list[op] = {};
+                if (auto const cmd = g_isa->get_command(op))
                 {
-                    if (i < std::size(use_map))
-                        g_instruction_list[op].feature |= use_map[i];
+                    g_instruction_list[op].name    = cmd->name.c_str();
+                    g_instruction_list[op].feature = 0;
+                    for (std::size_t i = 0; i < cmd->arguments.size(); ++ i)
+                    {
+                        if (i < std::size(use_map))
+                            g_instruction_list[op].feature |= use_map[i];
+                    }
+                    if (cmd->flags & command_flag_branch)
+                        g_instruction_list[op].feature |= CF_JUMP;
+                    if (cmd->flags & command_flag_call)
+                        g_instruction_list[op].feature |= CF_CALL;
+                    if (cmd->flags & command_flag_stop)
+                        g_instruction_list[op].feature |= CF_STOP;
                 }
-                if (cmd->flags & command_flag_jump)
-                    g_instruction_list[op].feature |= CF_JUMP;
-                if (cmd->flags & command_flag_stop)
-                    g_instruction_list[op].feature |= CF_STOP;
             }
         }
-# endif
     }
 
     auto processor_current_isa(void) -> command_set const *
@@ -332,10 +334,14 @@ namespace idascm
                 return "out_label";
             case processor_t::ev_creating_segm: // 26
                 return "creating_segm";
+            case processor_t::ev_undefine: // 29
+                return "undefine";
             case processor_t::ev_rename: // 31
                 return "rename";
             case processor_t::ev_is_ret_insn: // 36
                 return "is_ret_insn";
+            case processor_t::ev_is_insn_table_jump: // 40
+                return "is_insn_table_jump";
             case processor_t::ev_is_switch: // 41
                 return "is_switch";
             case processor_t::ev_can_have_type: // 48
@@ -362,6 +368,8 @@ namespace idascm
                 return "add_dref";
             case processor_t::ev_del_cref: // 66
                 return "del_cref";
+            case processor_t::ev_del_dref: // 67
+                return "del_dref";
             case processor_t::ev_coagulate_dref: // 68
                 return "coagulate_dref";
             case processor_t::ev_auto_queue_empty: // 71
