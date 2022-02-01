@@ -70,7 +70,7 @@ namespace idascm
         instruction src = {};
         if (! analyze_instruction(insn.ea, src))
             return false;
-        IDASCM_LOG_D("analyze +0x%08x 0x%04x %s", insn.ea, src.opcode, instruction_name(src).data());
+        IDASCM_LOG_T("analyze +0x%08x 0x%04x %s", insn.ea, src.opcode, instruction_name(src).data());
         if (! handle_instruction(src, insn))
             return false;
         return true;

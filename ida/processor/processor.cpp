@@ -336,8 +336,12 @@ namespace idascm
                 return "creating_segm";
             case processor_t::ev_undefine: // 29
                 return "undefine";
+            case processor_t::ev_treat_hindering_item: // 30
+                return "treat_hindering_item";
             case processor_t::ev_rename: // 31
                 return "rename";
+            case processor_t::ev_is_sane_insn: // 33
+                return "is_sane_insn";
             case processor_t::ev_is_ret_insn: // 36
                 return "is_ret_insn";
             case processor_t::ev_is_insn_table_jump: // 40

@@ -140,7 +140,7 @@ namespace idascm
                     insn.add_cref(address, op.offb, fl_JN);
                     break;
                 }
-                insn.add_dref(address, op.offb, dr_O);
+                IDASCM_LOG_W("0x%08x %s: unable to add cref", insn.ea, command->name.c_str());
                 break;
             }
             default:
@@ -170,7 +170,7 @@ namespace idascm
         {
             return false;
         }
-        IDASCM_LOG_D("emulate +0x%04x %s flags=0x%02x", insn.ea, command->name.c_str(), command->flags);
+        IDASCM_LOG_T("emulate +0x%04x %s flags=0x%02x", insn.ea, command->name.c_str(), command->flags);
 
         auto const count = insn_operand_count(insn);
         instruction src = {};
