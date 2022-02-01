@@ -14,7 +14,8 @@ namespace idascm
         unknown,
         mixed,
         code,
-        data,
+        globals,    // .bss
+        readonly,   // .rodata
     };
 
     struct segment
@@ -25,17 +26,33 @@ namespace idascm
         std::string     name;
     };
 
-    struct header
+    struct header_missions
     {
-        std::uint32_t   base;                   // virtual memory base offset
-        std::uint32_t   address_globals;
-        std::uint32_t   address_objects;
-        std::uint32_t   address_missions;
-        std::uint32_t   address_main;           // actual entry point
         std::uint32_t   main_size;
         std::uint32_t   mission_size;
-        std::uint16_t   mission_count;
-        std::uint16_t   mission_script_count;
+        std::uint32_t   mission_count;
+        std::uint32_t   mission_script_count;
+        std::uint32_t   mission_table_address;
+    };
+
+    struct header_objects
+    {
+        std::uint32_t   object_count;
+        std::uint32_t   object_table_address;
+    };
+
+    struct header
+    {
+        std::uint32_t       base;               // virtual memory base offset
+        std::uint32_t       address_globals;
+        std::uint32_t       address_objects;
+        std::uint32_t       address_missions;
+        std::uint32_t       address_scripts;    // (GTA:SA)
+        std::uint32_t       address_unk1;       // (GTA:SA)
+        std::uint32_t       address_unk2;       // (GTA:SA)
+        std::uint32_t       address_start;      // actual entry point
+        header_objects      objects;
+        header_missions     missions;
     };
 
     struct layout
@@ -46,9 +63,10 @@ namespace idascm
     class loader
     {
         public:
-            auto load(void) -> bool;
-            auto load_header(void) -> bool;
-            auto load_layout(void) -> bool;
+            virtual auto load(void) -> bool;
+            virtual auto load_header(void) -> bool = 0;
+            virtual auto load_header_layout(void) -> bool = 0;
+            virtual auto load_mission_layout(void) -> bool;
 
             auto get_header(void) const -> header
             {
@@ -61,16 +79,14 @@ namespace idascm
             }
     
         public:
-            explicit loader(memory_api * memory, decoder * decoder)
-                : m_memory_api(memory)
-                , m_decoder(decoder)
+            explicit loader(memory_api & memory)
+                : m_memory(memory)
                 , m_header({})
                 , m_layout({})
             {}
     
-        private:
-            memory_api *    m_memory_api;
-            decoder *       m_decoder;
+        protected:
+            memory_api &    m_memory;
             header          m_header;
             layout          m_layout;
     };

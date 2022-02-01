@@ -12,16 +12,12 @@ namespace idascm
 
     enum class operand_type : std::uint8_t;
 
-    // decoder?
     class decoder
     {
         public:
+            virtual ~decoder(void) noexcept;
             virtual auto decode_instruction(std::uint32_t address, instruction & in) const -> std::uint32_t;
             virtual auto decode_operand(std::uint32_t address, operand & op) const -> std::uint32_t = 0;
-
-        public:
-            decoder(void);
-            virtual ~decoder(void) noexcept;
 
             void set_command_set(command_set const * isa)
             {
@@ -34,6 +30,7 @@ namespace idascm
             }
 
         protected:
+            decoder(void);
             virtual auto decode_operand_value(std::uint32_t address, operand_type type, operand_value & value) const -> std::uint32_t;
 
         protected:

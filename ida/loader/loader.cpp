@@ -2,8 +2,8 @@
 # include <ida/processor/processor.hpp>
 # include <ida/base/memory_loader.hpp>
 # include <engine/command_manager.hpp>
-# include <engine/gta3/decoder_gta3.hpp>
-# include <engine/gtavc/decoder_gtavc.hpp>
+# include <engine/gtasa/decoder_gtasa.hpp>
+# include <engine/gtasa/loader_gtasa.hpp>
 # include <engine/loader.hpp>
 # include <core/logger.hpp>
 # include <diskio.hpp>
@@ -32,13 +32,13 @@ namespace idascm
             qlseek(li, 0, SEEK_SET);
 
             auto mem = memory_api_loader(li);
-            auto dec = decoder_gta3();
+            auto dec = decoder_gtasa();
             dec.set_memory_api(&mem);
-            dec.set_command_set(base_command_manager().get_set(version::gta3_ps2));
-            auto ldr = loader(&mem, &dec);
+            dec.set_command_set(base_command_manager().get_set(version::gtasa));
+            auto ldr = loader_gtasa(mem, dec);
             if (ldr.load())
             {
-                *fileformatname = version_description(version::gta3_ps2);
+                *fileformatname = version_description(version::gtasa);
                 return 1;
             }
 
@@ -49,13 +49,13 @@ namespace idascm
         {
             IDASCM_LOG_D("load_file: %p, %u, '%s'", li, neflags, fileformatname);
             auto mem = memory_api_loader(li);
-            auto dec = decoder_gta3();
+            auto dec = decoder_gtasa();
             dec.set_memory_api(&mem);
-            dec.set_command_set(base_command_manager().get_set(version::gta3_ps2));
-            auto ldr = loader(&mem, &dec);
+            dec.set_command_set(base_command_manager().get_set(version::gtasa_ps2));
+            auto ldr = loader_gtasa(mem, dec);
             if (ldr.load())
             {
-                set_processor_type(to_string(version::gta3_ps2), SETPROC_LOADER);
+                // set_processor_type(to_string(version::gtasa_ps2), SETPROC_LOADER);
                 file2base(li, 0, 0, qlsize(li), FILEREG_PATCHABLE);
                 auto layout = ldr.get_layout();
                 for (auto const & item : layout.segments)
@@ -63,7 +63,7 @@ namespace idascm
                     segment_t seg = {};
                     seg.sel      = 0;
                     seg.start_ea = item.address;
-                    seg.end_ea   = item.address + item.size;
+                    seg.end_ea   = item.address + std::min(item.size, static_cast<std::uint32_t>(qlsize(li) - item.address));
                     seg.align    = saRelByte;
                     seg.comb     = scPub;
                     seg.bitness  = 1; // 32-bit
@@ -75,8 +75,12 @@ namespace idascm
                             seg.perm = SEGPERM_READ | SEGPERM_EXEC;
                             class_name = "CODE";
                             break;
-                        case segment_type::data:
+                        case segment_type::globals:
                             seg.perm = SEGPERM_READ | SEGPERM_WRITE;
+                            class_name = "DATA";
+                            break;
+                        case segment_type::readonly:
+                            seg.perm = SEGPERM_READ;
                             class_name = "DATA";
                             break;
                         case segment_type::mixed:
@@ -84,7 +88,11 @@ namespace idascm
                             class_name = "CODE";
                             break;
                     }
-                    add_segm_ex(&seg, item.name.c_str(), class_name, ADDSEG_NOSREG | ADDSEG_NOTRUNC | ADDSEG_QUIET);
+
+                    if (! add_segm_ex(&seg, item.name.c_str(), class_name, ADDSEG_NOSREG | ADDSEG_NOTRUNC | ADDSEG_QUIET))
+                    {
+                        IDASCM_LOG_W("add_segm_ex failed!");
+                    }
                 }
             }
         }

@@ -1,7 +1,8 @@
 # include <engine/loader.hpp>
 # include <engine/memory.hpp>
 # include <engine/command_set.hpp>
-# include <engine/gtavc/decoder_gtavc.hpp>
+# include <engine/gta3/decoder_gta3.hpp>
+# include <engine/gta3/loader_gta3.hpp>
 # include <engine/instruction.hpp>
 # include <core/json.hpp>
 # include <cassert>
@@ -14,8 +15,8 @@ namespace idascm
         {
             "0x0002": {
                 "name": "GOTO",
-                "arguments": [ "address" ],
-                "flags": [ "call", "stop" ],
+                "args": [ "address" ],
+                "flags": [ "branch", "stop" ],
             },
             "0x004e": {
                 "name": "TERMINATE_THIS_SCRIPT",
@@ -23,7 +24,12 @@ namespace idascm
             },
             "0x03a4": {
                 "name": "SCRIPT_NAME",
-                "arguments": [ "string64" ],
+                "args": [
+                    {
+                        "type": "string",
+                        "operand_type": "string64"
+                    }
+                ],
             }
         }
         )";
@@ -69,11 +75,11 @@ int main(int argc, char * argv[])
     command_set isa(version::gtavc);
     isa.load(json_value::from_string(gs_commands).to_object());
 
-    decoder_gtavc dec;
+    decoder_gta3 dec;
     dec.set_command_set(&isa);
     dec.set_memory_api(&mem);
     
-    auto ldr = loader(&mem, &dec);
+    auto ldr = loader_gta3(mem, dec);
     ldr.load();
     
     return 0;
