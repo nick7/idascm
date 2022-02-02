@@ -35,14 +35,24 @@ namespace idascm
                 if (! ctx.insn.ops[n].shown())
                     continue;
 
-                if (ctx.insn.ops[n].type == o_void)
+                // if (ctx.insn.ops[n].type == o_void)
+                // {
+                //     break;
+                // }
+                if (n > 0)
                 {
-                    break;
+                    ctx.out_symbol(',');
+                    ctx.out_char(' ');
                 }
                 ctx.out_one_operand(n);
             }
             else
             {
+                if (n > 0)
+                {
+                    ctx.out_symbol(',');
+                    ctx.out_char(' ');
+                }
                 if (m_analyzer)
                 {
                     op_t op = {};
@@ -54,14 +64,8 @@ namespace idascm
                 }
                 else
                 {
-                    ctx.out_line("<OP>");
+                    ctx.out_line("<OP>", COLOR_ERROR);
                 }
-            }
-
-            if (n + 1 < count)
-            {
-                ctx.out_symbol(',');
-                ctx.out_char(' ');
             }
         }
 
@@ -98,7 +102,8 @@ namespace idascm
         {
             case o_void:
             {
-                return false;
+                ctx.out_keyword("VOID");
+                return true;
             }
             case o_imm:
             {

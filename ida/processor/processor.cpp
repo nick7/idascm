@@ -380,6 +380,8 @@ namespace idascm
                 return "auto_queue_empty";
             case processor_t::ev_extract_address: // 75
                 return "extract_address";
+            case processor_t::ev_realcvt: // 76
+                return "realcvt";
 # if IDA_SDK_VERSION >= 750
             case processor_t::ev_get_procmod: // 90
                 return "get_procmod";

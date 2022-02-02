@@ -26,6 +26,8 @@ namespace idascm
             { type::address,            { "address",            "label"                     } },
             { type::mission,            { "mission"                                         } },
             { type::script,             { "script"                                          } },
+            { type::model,              { "model"                                           } },
+            { type::handle,             { "handle"                                          } },
             { type::constant_integer,   { "constant_integer",   "const_int"                 } },
             { type::constant_real,      { "constant_real",      "const_float"               } },
             { type::constant_string,    { "constant_string",    "const_string"              } },

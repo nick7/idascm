@@ -142,8 +142,9 @@ namespace idascm
         {
             case operand_type::none:
             {
-                dst.type    = o_imm;
+                dst.type    = o_void;
                 dst.dtype   = dt_void;
+                dst.clr_shown();
                 break;
             }
             case operand_type::string8:

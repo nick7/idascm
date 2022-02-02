@@ -28,6 +28,8 @@ namespace idascm
         address             = 0xa       | (integer   << 4), // Any executable address (label or sub)
         mission             = 0xb       | (integer   << 4), // Mission ID (can be translated to segment address)
         script              = 0xc       | (integer   << 4), // External script ID (GTA:SA)
+        model               = 0xd       | (integer   << 4), // Game model ID 
+        handle              = 0xe       | (integer   << 4), // Game object handle (player, car, pickup etc)
         constant_integer    = constant  | (integer   << 4),
         constant_real       = constant  | (real      << 4),
         constant_string     = constant  | (string    << 4),
