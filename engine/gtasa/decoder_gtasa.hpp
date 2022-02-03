@@ -35,6 +35,11 @@ namespace idascm
             virtual auto decode_operand(std::uint32_t address, operand & op) const -> std::uint32_t override;
 
         public:
+            decoder_gtasa(command_set const & isa, memory_api & mem)
+                : decoder(isa, mem)
+            {}
+
+        public:
             auto decode_operand_value(std::uint32_t address, operand_type_gtasa type, operand_value & value) const -> std::uint32_t;
     };
 }

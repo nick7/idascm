@@ -29,8 +29,7 @@ namespace idascm
 
     auto decoder_gtavc::decode_operand_value(std::uint32_t address, operand_type_gtavc type, operand_value & value) const -> std::uint32_t
     {
-        assert(m_memory);
-        auto reader = memory_reader(*m_memory, address);
+        auto reader = memory_reader(m_memory, address);
         switch (type)
         {
             case operand_type_gtavc::none:
@@ -65,8 +64,7 @@ namespace idascm
     // virtual
     auto decoder_gtavc::decode_operand(std::uint32_t address, operand & op) const -> std::uint32_t
     {
-        assert(m_memory);
-        auto reader = memory_reader(*m_memory, address);
+        auto reader = memory_reader(m_memory, address);
         operand_type_gtavc type;
         if (reader.read(type))
         {

@@ -60,10 +60,8 @@ int main(int argc, char * argv[])
     command_set isa(version::gtavc);
     isa.load(json_value::from_string(gs_commands).to_object());
 
-    decoder_gtavc dec;
-    dec.set_command_set(&isa);
-    dec.set_memory_api(&mem);
-    
+    decoder_gtavc dec(isa, mem);
+
     std::uint32_t ip = 0;
 
     instruction ins = {};

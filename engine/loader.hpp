@@ -63,6 +63,9 @@ namespace idascm
     class loader
     {
         public:
+            static auto create(game id, decoder & decoder, memory_api & memory) -> loader *;
+
+        public:
             virtual auto load(void) -> bool;
             virtual auto load_header(void) -> bool = 0;
             virtual auto load_header_layout(void) -> bool = 0;

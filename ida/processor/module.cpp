@@ -36,11 +36,10 @@ namespace idascm
 
         processor_set_current_isa(m_isa);
 
-        m_analyzer  = new analyzer(version_game(ver));
+        m_analyzer  = new analyzer(version_game(ver), *m_isa);
         m_emulator  = new emulator;
         m_output    = new output;
 
-        m_analyzer->set_isa(m_isa);
         m_emulator->set_isa(m_isa);
         m_emulator->set_analyzer(m_analyzer);
         m_output->set_isa(m_isa);

@@ -1,11 +1,29 @@
 # include <engine/loader.hpp>
-# include <engine/gta3/decoder_gta3.hpp>
-# include <engine/instruction.hpp>
 # include <engine/command.hpp>
+# include <engine/command_set.hpp>
+# include <engine/decoder.hpp>
+# include <engine/gta3/loader_gta3.hpp>
+# include <engine/gtasa/decoder_gtasa.hpp>
+# include <engine/gtasa/loader_gtasa.hpp>
+# include <engine/instruction.hpp>
 # include <engine/memory.hpp>
 
 namespace idascm
 {
+    auto loader::create(game id, decoder & decoder, memory_api & memory) -> loader *
+    {
+        if (id != version_game(decoder.isa().get_version()))
+            return nullptr;
+        switch (id)
+        {
+            case game::gta3:
+                return new loader_gta3(memory, decoder);
+            case game::gtasa:
+                return new loader_gtasa(memory, static_cast<decoder_gtasa &>(decoder));
+        }
+        return nullptr;
+    }
+
     auto loader::load(void) -> bool
     {
         m_header = header \

@@ -1,4 +1,9 @@
 # include <engine/decoder.hpp>
+# include <engine/gta3/decoder_gta3.hpp>
+# include <engine/gtavc/decoder_gtavc.hpp>
+# include <engine/gtasa/decoder_gtasa.hpp>
+# include <engine/gtalcs/decoder_gtalcs.hpp>
+# include <engine/gtavcs/decoder_gtavcs.hpp>
 # include <engine/instruction.hpp>
 # include <engine/command_set.hpp>
 # include <engine/instruction.hpp>
@@ -8,9 +13,30 @@
 
 namespace idascm
 {
-    decoder::decoder(void)
-        : m_isa(nullptr)
-        , m_memory(nullptr)
+    // static
+    auto decoder::create(game id, command_set const & isa, memory_api & memory) -> decoder *
+    {
+        switch (id)
+        {
+            case game::gta3:
+                return new decoder_gta3(isa, memory);
+            case game::gtavc:
+                return new decoder_gtavc(isa, memory);
+            case game::gtasa:
+                return new decoder_gtasa(isa, memory);
+            case game::gtalcs:
+                return new decoder_gtalcs(isa, memory);
+            case game::gtavcs:
+                return new decoder_gtavcs(isa, memory);
+            default:
+                break;
+        }
+        return nullptr;
+    }
+
+    decoder::decoder(command_set const & isa, memory_api & memory)
+        : m_isa(isa)
+        , m_memory(memory)
     {}
 
     decoder::~decoder(void)
@@ -19,15 +45,14 @@ namespace idascm
 
     auto decoder::decode_instruction(std::uint32_t address, instruction & in) const -> std::uint32_t
     {
-        assert(m_memory && m_isa);
-        auto reader = memory_reader(*m_memory, address);
+        auto reader = memory_reader(m_memory, address);
         std::uint16_t opcode = 0;
         if (! reader.read(opcode))
             return 0;
         in.opcode  = opcode & ~0x8000;
         in.flags   = (opcode & 0x8000) ? instruction_flag_not : 0;
         in.address = address;
-        in.command = m_isa->get_command(in.opcode);
+        in.command = m_isa.get_command(in.opcode);
         if (! in.command)
         {
             IDASCM_LOG_D("unknown opcode: 0x%04x", in.opcode);
@@ -119,8 +144,7 @@ namespace idascm
 
     auto decoder::decode_operand_value(std::uint32_t address, operand_type type, operand_value & value) const -> std::uint32_t
     {
-        assert(m_memory);
-        auto reader = memory_reader(*m_memory, address);
+        auto reader = memory_reader(m_memory, address);
         switch (type)
         {
             case operand_type::int8:

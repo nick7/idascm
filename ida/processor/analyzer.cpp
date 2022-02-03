@@ -2,55 +2,32 @@
 # include <ida/base/memory_ida.hpp>
 # include <engine/command.hpp>
 # include <engine/command_set.hpp>
-# include <engine/gta3/decoder_gta3.hpp>
-# include <engine/gtavc/decoder_gtavc.hpp>
-# include <engine/gtasa/decoder_gtasa.hpp>
-# include <engine/gtalcs/decoder_gtalcs.hpp>
-# include <engine/gtavcs/decoder_gtavcs.hpp>
+# include <engine/decoder.hpp>
 # include <engine/instruction.hpp>
+# include <engine/loader.hpp>
 # include <core/logger.hpp>
 # include <cassert>
 
 namespace idascm
 {
-    void analyzer::set_isa(command_set const * isa)
-    {
-        assert(m_decoder);
-        m_decoder->set_command_set(isa);
-    }
+    // void analyzer::set_isa(command_set const * isa)
+    // {
+    //     assert(m_decoder);
+    //     m_decoder->set_command_set(isa);
+    // }
 
-    analyzer::analyzer(game game)
+    analyzer::analyzer(game game, command_set const & isa)
         : m_decoder(nullptr)
-        , m_memory(new memory_api_ida)
+        , m_loader(nullptr)
+        , m_memory()
     {
-        switch (game)
-        {
-            case game::gta3:
-                m_decoder = new decoder_gta3;
-                break;
-            case game::gtavc:
-                m_decoder = new decoder_gtavc;
-                break;
-            case game::gtasa:
-                m_decoder = new decoder_gtasa;
-                break;
-            case game::gtalcs:
-                m_decoder = new decoder_gtalcs;
-                break;
-            case game::gtavcs:
-                m_decoder = new decoder_gtavcs;
-                break;
-        }
-        assert(m_decoder);
-        m_decoder->set_memory_api(m_memory);
+        m_decoder = decoder::create(game, isa, m_memory);
     }
 
     analyzer::~analyzer(void)
     {
         delete m_decoder;
         m_decoder = nullptr;
-        delete m_memory;
-        m_memory = nullptr;
     }
 
     // TODO: cache ?
@@ -132,6 +109,19 @@ namespace idascm
                         return true;
                     }
                     // TODO: handle non-integer address representation
+                    break;
+                }
+                case type::mission:
+                {
+                    std::int32_t value = 0;
+                    if (to_int(src.operand_list[index], value))
+                    {
+                        m_loader->get_header();
+                    }
+                    break;
+                }
+                case type::model:
+                {
                     break;
                 }
             }

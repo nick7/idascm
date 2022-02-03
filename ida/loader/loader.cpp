@@ -26,74 +26,89 @@ namespace idascm
             IDASCM_LOG_I("idascm_ldr %s (IDA_SDK_VERSION=%d)", build_version(), IDA_SDK_VERSION);
         }
 
-        int idaapi accept_file(qstring * fileformatname, qstring * processor, linput_t * li, const char * filename)
+        auto idaapi accept_file(qstring * fileformatname, qstring * processor, linput_t * li, const char * filename) -> int
         {
             IDASCM_LOG_D("accept_file: '%s', '%s', %p, '%s'", fileformatname, processor->c_str(), li, filename);
-            qlseek(li, 0, SEEK_SET);
-
+            int result = 0;
             auto mem = memory_api_loader(li);
-            auto dec = decoder_gtasa();
-            dec.set_memory_api(&mem);
-            dec.set_command_set(base_command_manager().get_set(version::gtasa));
-            auto ldr = loader_gtasa(mem, dec);
-            if (ldr.load())
+            auto const ver = version::gtasa;
+            auto const isa = base_command_manager().get_set(ver);
+            if (isa)
             {
-                *fileformatname = version_description(version::gtasa);
-                return 1;
+                auto dec = decoder::create(version_game(ver), *isa, mem);
+                if (dec)
+                {
+                    auto ldr = loader::create(version_game(ver), *dec, mem);
+                    if (ldr && ldr->load())
+                    {
+                        *fileformatname = version_description(ver);
+                        result = 1;
+                    }
+                    delete ldr;
+                    delete dec;
+                }
             }
-
-            return 0;
+            return result;
         }
 
         void idaapi load_file(linput_t * li, ushort neflags, char const * fileformatname)
         {
             IDASCM_LOG_D("load_file: %p, %u, '%s'", li, neflags, fileformatname);
             auto mem = memory_api_loader(li);
-            auto dec = decoder_gtasa();
-            dec.set_memory_api(&mem);
-            dec.set_command_set(base_command_manager().get_set(version::gtasa_ps2));
-            auto ldr = loader_gtasa(mem, dec);
-            if (ldr.load())
+            auto const ver = version::gtasa;
+            auto const isa = base_command_manager().get_set(ver);
+            if (! isa)
             {
-                // set_processor_type(to_string(version::gtasa_ps2), SETPROC_LOADER);
-                file2base(li, 0, 0, qlsize(li), FILEREG_PATCHABLE);
-                auto layout = ldr.get_layout();
-                for (auto const & item : layout.segments)
+                IDASCM_LOG_W("unable to get command set '%s'", to_string(ver));
+                return;
+            }
+            if (auto dec = decoder::create(version_game(ver), *isa, mem))
+            {
+                auto ldr = loader::create(version_game(ver), *dec, mem);
+                if (ldr && ldr->load())
                 {
-                    segment_t seg = {};
-                    seg.sel      = 0;
-                    seg.start_ea = item.address;
-                    seg.end_ea   = item.address + std::min(item.size, static_cast<std::uint32_t>(qlsize(li) - item.address));
-                    seg.align    = saRelByte;
-                    seg.comb     = scPub;
-                    seg.bitness  = 1; // 32-bit
-
-                    char const * class_name = nullptr;
-                    switch (item.type)
+                    // set_processor_type(to_string(version::gtasa_ps2), SETPROC_LOADER);
+                    file2base(li, 0, 0, qlsize(li), FILEREG_PATCHABLE);
+                    auto layout = ldr->get_layout();
+                    for (auto const & item : layout.segments)
                     {
-                        case segment_type::code:
-                            seg.perm = SEGPERM_READ | SEGPERM_EXEC;
-                            class_name = "CODE";
-                            break;
-                        case segment_type::globals:
-                            seg.perm = SEGPERM_READ | SEGPERM_WRITE;
-                            class_name = "DATA";
-                            break;
-                        case segment_type::readonly:
-                            seg.perm = SEGPERM_READ;
-                            class_name = "DATA";
-                            break;
-                        case segment_type::mixed:
-                            seg.perm = SEGPERM_READ | SEGPERM_WRITE | SEGPERM_EXEC;
-                            class_name = "CODE";
-                            break;
-                    }
+                        segment_t seg = {};
+                        seg.sel      = 0;
+                        seg.start_ea = item.address;
+                        seg.end_ea   = item.address + std::min(item.size, static_cast<std::uint32_t>(qlsize(li) - item.address));
+                        seg.align    = saRelByte;
+                        seg.comb     = scPub;
+                        seg.bitness  = 1; // 32-bit
 
-                    if (! add_segm_ex(&seg, item.name.c_str(), class_name, ADDSEG_NOSREG | ADDSEG_NOTRUNC | ADDSEG_QUIET))
-                    {
-                        IDASCM_LOG_W("add_segm_ex failed!");
+                        char const * class_name = nullptr;
+                        switch (item.type)
+                        {
+                            case segment_type::code:
+                                seg.perm = SEGPERM_READ | SEGPERM_EXEC;
+                                class_name = "CODE";
+                                break;
+                            case segment_type::globals:
+                                seg.perm = SEGPERM_READ | SEGPERM_WRITE;
+                                class_name = "DATA";
+                                break;
+                            case segment_type::readonly:
+                                seg.perm = SEGPERM_READ;
+                                class_name = "DATA";
+                                break;
+                            case segment_type::mixed:
+                                seg.perm = SEGPERM_READ | SEGPERM_WRITE | SEGPERM_EXEC;
+                                class_name = "CODE";
+                                break;
+                        }
+
+                        if (! add_segm_ex(&seg, item.name.c_str(), class_name, ADDSEG_NOSREG | ADDSEG_NOTRUNC | ADDSEG_QUIET))
+                        {
+                            IDASCM_LOG_W("add_segm_ex failed!");
+                        }
                     }
                 }
+                delete ldr;
+                delete dec;
             }
         }
 

@@ -70,17 +70,17 @@ int main(int argc, char * argv[])
         0x4e, 0x00,             // 004E TERMINATE_THIS_SCRIPT
     };
     auto mem = memory_api_buffer(buffer, sizeof(buffer));
-    // auto mem = memory_api_stdio(std::fopen(argv[1], "rb"), true);
 
     command_set isa(version::gtavc);
     isa.load(json_value::from_string(gs_commands).to_object());
 
-    decoder_gta3 dec;
-    dec.set_command_set(&isa);
-    dec.set_memory_api(&mem);
+    decoder_gta3 dec(isa, mem);
     
     auto ldr = loader_gta3(mem, dec);
-    ldr.load();
+    if (! ldr.load())
+    {
+        assert(false);
+    }
     
     return 0;
 }
