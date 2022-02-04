@@ -25,7 +25,7 @@ namespace idascm
         if (m_decoder)
         {
             auto loader = loader::create(game, *m_decoder, m_memory);
-            if (loader->load())
+            if (loader && loader->load())
             {
                 m_loader = loader;
             }
