@@ -10,17 +10,18 @@ namespace idascm
 
     enum command_flag : std::uint16_t
     {
-        command_flag_stop           = 1 <<  0, // terminate instruction flow
-        command_flag_branch         = 1 <<  1, // simple jump
-        command_flag_call           = 1 <<  2, // call function
+        command_flag_stop           = 1 <<  0, // Don't execute next instruction
+        command_flag_branch         = 1 <<  1, // Branch execution flow
+        command_flag_call           = 1 <<  2, // Function call
         command_flag_return         = 1 <<  3, // 
-        command_flag_condition      = 1 <<  4, // sets condition flag
-        command_flag_conditional    = 1 <<  5, // uses condition flag
-        command_flag_function_call  = 1 <<  6, // call function with arguments (GTA:LCS/VCS call_func)
-        command_flag_unsupported    = 1 <<  7, // opcode is not supported by given executable
-        command_flag_macro          = 1 <<  8, // compiler internal high-level command (e.g. "{")
-        command_flag_switch         = 1 <<  9, // switch instruction (GTA:SA)
-        command_flag_dependent      = 1 << 10, // depends on previous one (e.g. switch continue)
+        command_flag_condition      = 1 <<  4, // Change condition flag
+        command_flag_conditional    = 1 <<  5, // Use condition flag
+        command_flag_function_call  = 1 <<  6, // Function call with arguments (GTA:LCS/VCS call_func)
+        command_flag_unsupported    = 1 <<  7, // Execution is not possible
+        command_flag_macro          = 1 <<  8, // Compiler internal high-level command (e.g. "{")
+        command_flag_switch         = 1 <<  9, // Switch idiom (GTA:SA)
+        command_flag_dependent      = 1 << 10, // Instruction depends on previous one (e.g. switch continue)
+        command_flag_script_name    = 1 << 11, // Unique script name
         command_flag_cleo           = 1 << 15, // CLEO extension function
     };
     auto to_string(command_flag flag) noexcept -> char const *;

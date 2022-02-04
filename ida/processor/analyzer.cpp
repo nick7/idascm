@@ -16,16 +16,30 @@ namespace idascm
     //     m_decoder->set_command_set(isa);
     // }
 
-    analyzer::analyzer(game game, command_set const & isa)
+    analyzer::analyzer(game game, command_set const & isa, memory_api & memory)
         : m_decoder(nullptr)
         , m_loader(nullptr)
-        , m_memory()
+        , m_memory(memory)
     {
         m_decoder = decoder::create(game, isa, m_memory);
+        if (m_decoder)
+        {
+            auto loader = loader::create(game, *m_decoder, m_memory);
+            if (loader->load())
+            {
+                m_loader = loader;
+            }
+            else
+            {
+                delete loader;
+            }
+        }
     }
 
     analyzer::~analyzer(void)
     {
+        delete m_loader;
+        m_loader = nullptr;
         delete m_decoder;
         m_decoder = nullptr;
     }
@@ -82,6 +96,7 @@ namespace idascm
         dst.offb = static_cast<char>(src.operand_list[index].offset);
         dst.flags |= OF_SHOW;
         op_set_type(dst, src.operand_list[index].type);
+        op_set_value(dst, src.operand_list[index].value);
 
         if (index < command->arguments.size())
         {
@@ -93,7 +108,6 @@ namespace idascm
                     std::int32_t value = 0;
                     if (to_int(src.operand_list[index], value))
                     {
-                        dst.value = *reinterpret_cast<std::uint32_t *>(&value);
                         if (value >= 0)
                         {
                             dst.type    = o_far;
@@ -116,12 +130,58 @@ namespace idascm
                     std::int32_t value = 0;
                     if (to_int(src.operand_list[index], value))
                     {
-                        m_loader->get_header();
+                        if (value < 0)
+                            break;
+                        if (! m_loader)
+                            break;
+                        auto const address = m_loader->get_mission_descriptor_address(value);
+                        if (address == -1)
+                        {
+                            IDASCM_LOG_W("Invalid mission index: %d", value);
+                            break;
+                        }
+                        dst.type    = o_mem;
+                        dst.dtype   = dt_dword;
+                        dst.addr    = address;
+                        return true;
+                    }
+                    break;
+                }
+                case type::script:
+                {
+                    std::int32_t value = 0;
+                    if (to_int(src.operand_list[index], value))
+                    {
+                        // TODO
                     }
                     break;
                 }
                 case type::model:
                 {
+                    std::int32_t value = 0;
+                    if (to_int(src.operand_list[index], value))
+                    {
+                        if (value < 0)
+                        {
+                            // Local script identifier (index)
+                            if (! m_loader)
+                                break;
+                            auto const address = m_loader->get_object_descriptor_address(-value);
+                            if (address == -1)
+                            {
+                                IDASCM_LOG_W("Invalid local model index: %d", value);
+                                break;
+                            }
+                            dst.type    = o_mem;
+                            dst.dtype   = dt_string;
+                            dst.addr    = address;
+                            return true;
+                        }
+                        else
+                        {
+                            // Global game identifier
+                        }
+                    }
                     break;
                 }
             }
@@ -236,7 +296,6 @@ namespace idascm
                 break;
             }
         }
-        op_set_value(dst, src.operand_list[index].value);
         return true;
     }
 }

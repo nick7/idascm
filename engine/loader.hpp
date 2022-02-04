@@ -59,6 +59,16 @@ namespace idascm
     {
         std::vector<segment> segments;
     };
+    
+    struct mission_descriptor
+    {
+        std::int32_t    address;
+    };
+
+    struct object_descriptor
+    {
+        char name[32];
+    };
 
     class loader
     {
@@ -79,6 +89,20 @@ namespace idascm
             auto get_layout(void) const -> layout
             {
                 return m_layout;
+            }
+
+            auto get_mission_descriptor_address(std::uint32_t index) const -> std::uint32_t
+            {
+                if (index < m_header.missions.mission_count)
+                    return m_header.missions.mission_table_address + index * sizeof(std::uint32_t);
+                return -1;
+            }
+
+            auto get_object_descriptor_address(std::uint32_t index) const -> std::uint32_t
+            {
+                if (index < m_header.objects.object_count)
+                    return m_header.objects.object_table_address + index * 24;
+                return -1;
             }
     
         public:

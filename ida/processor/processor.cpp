@@ -348,6 +348,8 @@ namespace idascm
                 return "is_insn_table_jump";
             case processor_t::ev_is_switch: // 41
                 return "is_switch";
+            case processor_t::ev_is_align_insn: // 44
+                return "is_align_insn";
             case processor_t::ev_can_have_type: // 48
                 return "can_have_type";
             case processor_t::ev_get_reg_name: // 52
@@ -382,6 +384,8 @@ namespace idascm
                 return "extract_address";
             case processor_t::ev_realcvt: // 76
                 return "realcvt";
+            case processor_t::ev_analyze_prolog: // 81
+                return "analyze_prolog";
 # if IDA_SDK_VERSION >= 750
             case processor_t::ev_get_procmod: // 90
                 return "get_procmod";

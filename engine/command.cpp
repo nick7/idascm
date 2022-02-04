@@ -39,14 +39,16 @@ namespace idascm
                 return "conditional";
             case command_flag_function_call:
                 return "function_call";
-            case command_flag_switch:
-                return "switch";
-            case command_flag_dependent:
-                return "dependent";
             case command_flag_unsupported:
                 return "unsupported";
             case command_flag_macro:
                 return "macro";
+            case command_flag_switch:
+                return "switch";
+            case command_flag_dependent:
+                return "dependent";
+            case command_flag_script_name:
+                return "script_name";
             case command_flag_cleo:
                 return "cleo";
         }

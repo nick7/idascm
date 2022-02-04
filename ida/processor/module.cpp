@@ -12,6 +12,7 @@ namespace idascm
 {
     module::module(void)
         : m_data_id(-1)
+        , m_memory()
         , m_isa(nullptr)
         , m_analyzer(nullptr)
         , m_emulator(nullptr)
@@ -36,7 +37,7 @@ namespace idascm
 
         processor_set_current_isa(m_isa);
 
-        m_analyzer  = new analyzer(version_game(ver), *m_isa);
+        m_analyzer  = new analyzer(version_game(ver), *m_isa, m_memory);
         m_emulator  = new emulator;
         m_output    = new output;
 

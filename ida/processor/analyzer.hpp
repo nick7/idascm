@@ -1,6 +1,5 @@
 # pragma once
 # include <ida/processor/processor.hpp>
-# include <ida/base/memory_ida.hpp>
 
 namespace idascm
 {
@@ -10,6 +9,7 @@ namespace idascm
     class command_set;
     class decoder;
     class loader;
+    class memory_api;
 
     // byte analyzer
     // produces instructions (insn_t)
@@ -25,12 +25,16 @@ namespace idascm
             // void set_isa(command_set const * isa);
 
         public:
-            explicit analyzer(game game, command_set const & isa);
+            explicit analyzer(game game, command_set const & isa, memory_api & memory);
             ~analyzer(void);
+
+        protected:
+            analyzer(analyzer const &) = delete;
+            analyzer & operator = (analyzer const &) = delete;
 
         protected:
             decoder *           m_decoder;
             loader *            m_loader;
-            memory_api_ida      m_memory;
+            memory_api &        m_memory;
     };
 }

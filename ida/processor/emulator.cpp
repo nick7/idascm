@@ -91,22 +91,45 @@ namespace idascm
                 break;
             }
             case o_mem:
+            {
+                auto const value = op_value(op);
+                switch (op_type(op))
+                {
+                    case operand_type::global:
+                        if (! create_data(op.addr, value.variable.type, 1))
+                        {
+                            IDASCM_LOG_W("create_data failed (ea=0x%08x, type=%d)", op.addr, value.variable.type);
+                        }
+                        break;
+                    default:
+                        if (op.n < command->arguments.size())
+                        {
+                            switch (command->arguments[op.n].type)
+                            {
+                                case type::mission:
+                                    break;
+                            }
+                        }
+                        break;
+                }
+                // TODO: deal with dr_R / dw_W
+                insn.add_dref(op.addr, op.offb, dr_O);
+                break;
+            }
             case o_displ:
             {
                 auto const value = op_value(op);
-                if (op.type == o_displ)
+                switch (op_type(op))
                 {
-                    if (! create_data(op.addr, value.array.type, value.array.size))
-                    {
-                        IDASCM_LOG_W("create_data failed (ea=0x%08x, type=%d, count=%d)", op.addr, value.array.type, value.array.size);
-                    }
-                }
-                else
-                {
-                    if (! create_data(op.addr, value.variable.type, 1))
-                    {
-                        IDASCM_LOG_W("create_data failed (ea=0x%08x, type=%d)", op.addr, value.variable.type);
-                    }
+                    case operand_type::global_array:
+                        if (! create_data(op.addr, value.array.type, value.array.size))
+                        {
+                            IDASCM_LOG_W("create_data failed (ea=0x%08x, type=%d, count=%d)", op.addr, value.array.type, value.array.size);
+                        }
+                        break;
+                    default:
+                        IDASCM_LOG_W("unsupported type: %d", op_type(op), operand_type_to_string(op_type(op)));
+                        break;
                 }
                 // TODO: deal with dr_R / dw_W
                 insn.add_dref(op.addr, op.offb, dr_O);

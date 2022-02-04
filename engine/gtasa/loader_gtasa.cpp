@@ -64,6 +64,11 @@ namespace idascm
                     std::uint8_t id;
                     if (! reader.read(id) || id != 0)
                         return false;
+                    std::uint32_t count;
+                    if (! reader.read(count))
+                        return false;
+                    m_header.objects.object_count           = count;
+                    m_header.objects.object_table_address   = reader.pointer();
                     break;
                 }
                 case 2:

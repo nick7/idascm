@@ -1,5 +1,6 @@
 # pragma once
 # include <ida/processor/processor.hpp>
+# include <ida/base/memory_ida.hpp>
 
 namespace idascm
 {
@@ -32,6 +33,7 @@ namespace idascm
 
         private:
             int                 m_data_id;
+            memory_api_ida      m_memory;
             command_set const * m_isa;
             analyzer *          m_analyzer; // 'ana'
             emulator *          m_emulator; // 'emu'
