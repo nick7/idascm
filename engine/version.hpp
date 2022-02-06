@@ -2,6 +2,7 @@
 # include <core/core.hpp>
 # include <cstdio>
 # include <cstdint>
+# include <string_view>
 
 namespace idascm
 {
@@ -15,7 +16,7 @@ namespace idascm
         gtalcs      = 0x04, // Liberty City Stories
         gtavcs      = 0x05, // Vice City Stories
     };
-    auto to_string(game game) noexcept -> char const *;
+    auto game_to_string(game game) noexcept -> std::string_view;
 
     enum class edition : std::uint8_t
     {
@@ -98,8 +99,10 @@ namespace idascm
         gtavcs_custom       = combine(game::gtavcs, edition::custom),       // GTA: Vice City Stories - User Defined
     };
 
-    auto to_string(version version) noexcept -> char const *;
-    auto to_version(char const * string) noexcept -> version;
+    // auto version_to_c_str(version version) noexcept -> char const *;
+    auto version_to_string(version version) noexcept -> std::string_view;
+    auto version_from_string(char const * string) noexcept -> version;
+    auto version_from_string(std::string_view const & string) noexcept -> version;
 
     constexpr auto version_game(version ver) noexcept -> game
     {
@@ -109,5 +112,5 @@ namespace idascm
     {
         return static_cast<edition>(to_uint(ver) & 0x1f);
     }
-    auto version_description(version ver) noexcept -> char const *;
+    auto version_description(version ver) noexcept -> std::string_view;
 }

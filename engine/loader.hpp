@@ -25,34 +25,48 @@ namespace idascm
         segment_type    type;
         std::string     name;
     };
+    auto segment_create(std::uint32_t address, std::uint32_t size, segment_type type, std::string name) noexcept -> segment;
 
-    struct header_missions
+    struct header_globals
     {
-        std::uint32_t   main_size;
-        std::uint32_t   mission_size;
-        std::uint32_t   mission_count;
-        std::uint32_t   mission_script_count;
-        std::uint32_t   mission_table_address;
+        std::uint32_t   base;
+        std::uint32_t   size;               // in bytes
+        std::uint32_t   save_table_base;    // GTA:LCS
+        std::uint32_t   save_table_size;    // GTA:LCS
     };
 
     struct header_objects
     {
-        std::uint32_t   object_count;
-        std::uint32_t   object_table_address;
+        std::uint32_t   base;
+        std::uint32_t   table_base;
+        std::uint32_t   table_size;
+    };
+
+    struct header_missions
+    {
+        std::uint32_t   base;
+        std::uint32_t   main_size;
+        std::uint32_t   mission_size;
+        std::uint32_t   script_count;
+        std::uint32_t   table_base;
+        std::uint32_t   table_size;
+    };
+
+    struct header_scripts
+    {
+        std::uint32_t   base;
     };
 
     struct header
     {
         std::uint32_t       base;               // virtual memory base offset
-        std::uint32_t       address_globals;
-        std::uint32_t       address_objects;
-        std::uint32_t       address_missions;
-        std::uint32_t       address_scripts;    // (GTA:SA)
         std::uint32_t       address_unk1;       // (GTA:SA)
         std::uint32_t       address_unk2;       // (GTA:SA)
-        std::uint32_t       address_start;      // actual entry point
+        std::uint32_t       entry_point;        // actual entry point
+        header_globals      globals;
         header_objects      objects;
         header_missions     missions;
+        header_missions     scripts;
     };
 
     struct layout
@@ -91,20 +105,25 @@ namespace idascm
                 return m_layout;
             }
 
-            auto get_mission_descriptor_address(std::uint32_t index) const -> std::uint32_t
+            auto get_base(void) const noexcept -> std::uint32_t
             {
-                if (index < m_header.missions.mission_count)
-                    return m_header.missions.mission_table_address + index * sizeof(std::uint32_t);
-                return -1;
+                return m_header.base;
             }
 
-            auto get_object_descriptor_address(std::uint32_t index) const -> std::uint32_t
+            auto get_mission_descriptor_address(std::uint32_t index) const noexcept -> std::uint32_t
             {
-                if (index < m_header.objects.object_count)
-                    return m_header.objects.object_table_address + index * 24;
-                return -1;
+                if (index < m_header.missions.table_size)
+                    return m_header.missions.table_base + index * sizeof(std::uint32_t);
+                return invalid_address;
             }
-    
+
+            auto get_object_descriptor_address(std::uint32_t index) const noexcept -> std::uint32_t
+            {
+                if (index < m_header.objects.table_size)
+                    return m_header.objects.table_base + index * 24;
+                return invalid_address;
+            }
+
         public:
             explicit loader(memory_api & memory)
                 : m_memory(memory)

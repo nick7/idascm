@@ -14,7 +14,7 @@ namespace idascm
     {
         auto load_json_object(std::string root, version ver) -> json_object
         {
-            std::string const path = root + "/" + to_string(version_game(ver)) + "/" + to_string(ver) + ".json";
+            std::string const path = root + "/" + game_to_string(version_game(ver)).data() + "/" + version_to_string(ver).data() + ".json";
             IDASCM_LOG_I("Loading commands from '%s'", path.c_str());
             auto const json = json_value::from_file(path.c_str());
             if (json.is_valid())
@@ -57,13 +57,13 @@ namespace idascm
         auto object = load_json_object(m_root_path, ver);
         if (! object.is_valid())
             return nullptr;
-        if (to_version(object["version"].to_primitive().c_str()) != ver)
+        if (version_from_string(object["version"].to_primitive().to_string()) != ver)
             return false;
         command_set const * parent_set = nullptr;
         auto parent = object["parent"].to_primitive();
         if (parent.is_valid())
         {
-            auto const parent_version = to_version(parent.c_str());
+            auto const parent_version = version_from_string(parent.to_string());
             if (parent_version == version::unknown)
             {
                 IDASCM_LOG_W("invalid parent version: '%s'", parent.c_str());
@@ -72,7 +72,7 @@ namespace idascm
             parent_set = get_set(parent_version);
             if (! parent_set)
             {
-                IDASCM_LOG_W("unable to load parent command set: '%s'", to_string(parent_version));
+                IDASCM_LOG_W("unable to load parent command set: '%s'", version_to_string(parent_version));
                 return nullptr;
             }
         }

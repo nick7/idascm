@@ -17,11 +17,11 @@ namespace idascm
         };
     }
 
-    auto to_string(game game) noexcept -> char const *
+    auto game_to_string(game game) noexcept -> std::string_view
     {
         if (to_uint(game) < std::size(l_game_table))
             return l_game_table[to_uint(game)];
-        return nullptr;
+        return {};
     }
 
     namespace
@@ -63,7 +63,7 @@ namespace idascm
             { version::gtasa_definitive,        "gtasa_definitive",         "GTA San Andreas (Definitive Edition 2021)"            },
             { version::gtasa_custom,            "gtasa_custom",             "GTA San Andreas (User Defined)"                       },
 
-            { version::gtalcs,                  "gtalcs_core",              "GTA Librery City Stories (Core)"                      },
+            { version::gtalcs,                  "gtalcs",                   "GTA Librery City Stories (Core)"                      },
             { version::gtalcs_psp,              "gtalcs_psp",               "GTA Librery City Stories (PlayStation Portable 2005)" },
             { version::gtalcs_ps2,              "gtalcs_ps2",               "GTA Librery City Stories (PlayStation 2 2006)"        },
             { version::gtalcs_anniversary,      "gtalcs_anniversary",       "GTA Librery City Stories (Anniversary Edition 2015)"  },
@@ -76,7 +76,7 @@ namespace idascm
         };
     }
 
-    auto to_string(version version) noexcept -> char const *
+    auto version_to_c_str(version version) noexcept -> char const *
     {
         for (auto const & row : g_version_table)
         {
@@ -86,7 +86,12 @@ namespace idascm
         return nullptr;
     }
 
-    auto to_version(char const * string) noexcept -> version
+    auto version_to_string(version version) noexcept -> std::string_view
+    {
+        return version_to_c_str(version);
+    }
+
+    auto version_from_string(char const * string) noexcept -> version
     {
         if (string && string[0])
         {
@@ -98,14 +103,19 @@ namespace idascm
         }
         return version::unknown;
     }
+
+    auto version_from_string(std::string_view const & string) noexcept -> version
+    {
+        return version_from_string(string.data());
+    }
     
-    auto version_description(version ver) noexcept -> char const *
+    auto version_description(version ver) noexcept -> std::string_view
     {
         for (auto const & row : g_version_table)
         {
             if (ver == row.value)
                 return row.description;
         }
-        return nullptr;
+        return {};
     }
 }

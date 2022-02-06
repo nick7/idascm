@@ -65,13 +65,25 @@ namespace idascm
         public:
             explicit memory_reader(memory_api & mem, std::uint32_t pointer)
                 : m_memory(mem)
-                , m_pointer(pointer)
-            {}
-
-            auto skip(std::uint32_t size) -> bool
+                , m_pointer(0)
             {
-                m_pointer += size;
+                set_pointer(pointer);
+            }
+
+            auto set_pointer(std::uint32_t pointer) noexcept -> bool
+            {
+                m_pointer = pointer;
                 return true;
+            }
+
+            auto pointer(void) const noexcept -> std::uint32_t
+            {
+                return m_pointer;
+            }
+
+            auto skip(std::uint32_t size) noexcept -> bool
+            {
+                return set_pointer(pointer() + size);
             }
 
             auto read(void * dst, std::uint32_t size) -> bool
@@ -100,11 +112,6 @@ namespace idascm
                         return false;
                 }
                 return true;
-            }
-
-            auto pointer(void) const
-            {
-                return m_pointer;
             }
 
         private:

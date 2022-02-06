@@ -4,14 +4,16 @@
 
 namespace idascm
 {
-    class loader_gtasa : public loader
+    class decoder;
+
+    class loader_gtalcs : public loader
     {
         public:
             virtual auto load_header(void) -> bool override;
             virtual auto load_header_layout(void) -> bool override;
 
         public:
-            explicit loader_gtasa(memory_api & memory, decoder & decoder)
+            explicit loader_gtalcs(memory_api & memory, decoder & decoder)
                 : loader(memory)
                 , m_decoder(decoder)
             {}

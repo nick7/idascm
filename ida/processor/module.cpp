@@ -21,7 +21,7 @@ namespace idascm
 
     auto module::set_version(version ver) -> bool
     {
-        IDASCM_LOG_I("Initializing '%s'", to_string(ver));
+        IDASCM_LOG_I("Initializing '%s'", version_to_string(ver).data());
         m_isa = processor_isa(ver);
         delete m_analyzer;
         delete m_emulator;
@@ -31,7 +31,7 @@ namespace idascm
         m_output   = nullptr;
         if (! m_isa)
         {
-            IDASCM_LOG_W("Unable to retrieve ISA for '%s'", to_string(ver));
+            IDASCM_LOG_W("Unable to retrieve ISA for '%s'", version_to_string(ver).data());
             return false;
         }
 

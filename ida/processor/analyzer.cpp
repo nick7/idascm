@@ -10,12 +10,6 @@
 
 namespace idascm
 {
-    // void analyzer::set_isa(command_set const * isa)
-    // {
-    //     assert(m_decoder);
-    //     m_decoder->set_command_set(isa);
-    // }
-
     analyzer::analyzer(game game, command_set const & isa, memory_api & memory)
         : m_decoder(nullptr)
         , m_loader(nullptr)

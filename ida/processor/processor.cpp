@@ -93,7 +93,7 @@ namespace idascm
             CF_USE7, CF_USE8,
 # endif
         };
-        IDASCM_LOG_I("processor_set_isa: %s", isa ? to_string(isa->get_version()) : nullptr);
+        IDASCM_LOG_I("processor_set_isa: %s", isa ? version_to_string(isa->get_version()).data() : nullptr);
         g_isa = isa;
 
         if (g_isa && false)
@@ -189,8 +189,8 @@ namespace idascm
         static char const * s_lnames[std::size(gs_processor_table) + 1];
         for (std::size_t i = 0; i < std::size(gs_processor_table); ++ i)
         {
-            s_snames[i] = to_string(gs_processor_table[i]);
-            s_lnames[i] = version_description(gs_processor_table[i]);
+            s_snames[i] = version_to_string(gs_processor_table[i]).data();
+            s_lnames[i] = version_description(gs_processor_table[i]).data();
         }
 
         static char l_assembler_header_string[256];
@@ -392,6 +392,8 @@ namespace idascm
             case processor_t::ev_asm_installed: // 91
                 return "asm_installed";
 # endif
+            case processor_t::ev_get_reg_info: // 1008
+                return "get_reg_info";
         }
         return nullptr;
     }
