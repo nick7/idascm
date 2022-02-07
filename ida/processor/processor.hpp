@@ -20,6 +20,16 @@ namespace idascm
         return 0x8000 | ('s' << 0) | ('c' << 8);
     }
 
+    enum class processor_flag : std::uint32_t
+    {
+        show_suffixes           = 1 << 0,
+        resolve_missions        = 1 << 1,
+        resolve_objects         = 1 << 2,
+        resolve_scripts         = 1 << 3,
+    };
+    auto processor_flag_to_string(processor_flag value) noexcept -> std::string_view;
+    auto processor_flag_from_string(std::string_view const & value) noexcept -> processor_flag;
+
     auto processor_command_manager(void) -> command_manager &;
 
     void processor_set_current_isa(command_set const * set);

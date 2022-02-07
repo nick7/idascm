@@ -12,12 +12,19 @@ namespace idascm
 {
     module::module(void)
         : m_data_id(-1)
+        , m_flags(0)
         , m_memory()
         , m_isa(nullptr)
         , m_analyzer(nullptr)
         , m_emulator(nullptr)
         , m_output(nullptr)
-    {}
+    {
+        // initial setup
+        set_flag(processor_flag::show_suffixes,     false);
+        set_flag(processor_flag::resolve_missions,  true);
+        set_flag(processor_flag::resolve_objects,   true);
+        set_flag(processor_flag::resolve_scripts,   true);
+    }
 
     auto module::set_version(version ver) -> bool
     {
@@ -79,6 +86,50 @@ namespace idascm
         }
     }
 
+    auto module::set_idp_options(char const * keyword, int value_type, void const * value) -> const char *
+    {
+        static char const form[] =
+# if 0
+            "HELP\n"
+            "SCM specific options\n"
+            "\n"
+            " Show Suffixes\n"
+            "\n"
+            "       Force to output data speific suffixes (s8, i32, f24 etc).\n"
+            "ENDHELP\n"
+# endif
+            "SCM specific options\n"
+            "\n"
+            " <S~h~ow Suffixes     :C>\n"
+            " <Resolve ~M~issions  :C>\n"
+            " <Resolve ~O~bjects   :C>\n"
+            " <Resolve ~S~cripts   :C>>\n"
+            "\n"
+        ;
+
+        if (! keyword)
+        {
+            auto flags = m_flags;
+            if (1 == ask_form(form, &flags))
+            {
+                IDASCM_LOG_I("ask_form: flags=0x%08x", flags);
+                m_flags = flags;
+            }
+            return IDPOPT_OK;
+        }
+
+        if (value_type != IDPOPT_BIT)
+            return IDPOPT_BADTYPE;
+
+        auto const flag = processor_flag_from_string(keyword);
+        if (to_uint(flag))
+        {
+            set_flag(flag, *static_cast<int const *>(value) != 0);
+            return IDPOPT_OK;
+        }
+        return IDPOPT_BADKEY;
+    }
+
     // virtual
     auto idaapi module::on_event(ssize_t msgid, va_list args) -> ssize_t
     {
@@ -116,7 +167,21 @@ namespace idascm
                 IDASCM_LOG_D("ev_newfile: '%s'", va_arg(args, char const *));
                 return 1;
             }
-            case processor_t::ev_set_proc_options: // 3
+            case processor_t::ev_set_idp_options: // 8
+            {
+                auto const keyword      = va_arg(args, char const *);
+                auto const value_type   = va_arg(args, int);
+                auto const value        = va_arg(args, char const *);
+                auto const errmsg       = va_arg(args, char const **);
+                auto const idb_loaded   = va_argi(args, bool);
+                auto ret = set_idp_options(keyword, value_type, value);
+                if (ret == IDPOPT_OK)
+                    return 1;
+                if (errmsg)
+                    *errmsg = ret;
+                return -1;
+            }
+            case processor_t::ev_set_proc_options: // 9
             {
                 auto const options      = va_arg(args, char const *);
                 auto const confidence   = va_arg(args, int);

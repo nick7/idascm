@@ -88,7 +88,9 @@ namespace idascm
 
     auto version_to_string(version version) noexcept -> std::string_view
     {
-        return version_to_c_str(version);
+        if (auto const string = version_to_c_str(version))
+            return string;
+        return {};
     }
 
     auto version_from_string(char const * string) noexcept -> version

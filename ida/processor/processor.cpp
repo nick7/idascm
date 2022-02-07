@@ -8,7 +8,38 @@
 namespace idascm
 {
     command_set const * g_isa;
-    int                 g_proc;
+
+    namespace
+    {
+        struct
+        {
+            processor_flag  value;
+            char const *    string;
+        }
+        const gs_flag_table[] = \
+        {
+            { processor_flag::show_suffixes,    "show_suffixes"     },
+            { processor_flag::resolve_missions, "resolve_missions"  },
+            { processor_flag::resolve_objects,  "resolve_objects"   },
+            { processor_flag::resolve_scripts,  "resolve_scripts"   },
+        };
+    }
+
+    auto processor_flag_to_string(processor_flag value) noexcept -> std::string_view
+    {
+        for (auto & row : gs_flag_table)
+            if (row.value == value)
+                return row.string;
+        return {};
+    }
+
+    auto processor_flag_from_string(std::string_view const & string) noexcept -> processor_flag
+    {
+        for (auto & row : gs_flag_table)
+            if (row.string == string)
+                return row.value;
+        return processor_flag(0);
+    }
 
 # if ! defined IDASCM_DYNAMIC_MODULE_INSTANCE
     auto module_instance(void) -> module &
@@ -269,7 +300,7 @@ namespace idascm
         proc.version        = IDP_INTERFACE_VERSION;
         proc.id             = processor_id();
         proc.flag           = PR_USE32 | PR_DEFSEG32 | PRN_HEX | PR_BINMEM | PR_NO_SEGMOVE | PR_CNDINSNS;
-        // proc.flag2          = 0;
+        proc.flag2          = PR2_IDP_OPTS;
         proc.cnbits         = 8;
         proc.dnbits         = 8;
         proc.psnames        = s_snames;
@@ -312,6 +343,8 @@ namespace idascm
                 return "newbinary";
             case processor_t::ev_endbinary: // 7
                 return "endbinary";
+            case processor_t::ev_set_idp_options: // 8
+                return "set_idp_options";
             case processor_t::ev_ana_insn: // 10
                 return "ana_insn";
             case processor_t::ev_emu_insn: // 11
