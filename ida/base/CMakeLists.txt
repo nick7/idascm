@@ -8,6 +8,7 @@ add_library (
         memory_loader.hpp
         # sources
         base.cpp
+        memory_ida.cpp
         memory_loader.cpp
 )
 target_link_libraries (

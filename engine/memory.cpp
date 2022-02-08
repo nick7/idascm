@@ -4,7 +4,7 @@
 namespace idascm
 {
     // virtual
-    auto memory_api_buffer::read(std::uint32_t offset, void* dst, std::uint32_t size) -> std::uint32_t
+    auto memory_buffer::read(std::uint32_t offset, void* dst, std::uint32_t size) -> std::uint32_t
     {
         auto left = static_cast<std::uint32_t>(std::min<std::size_t>(m_size - offset, size));
         if (left)
@@ -12,17 +12,13 @@ namespace idascm
         return left;
     }
 
-    // virtual
-    auto memory_api_stdio::read(std::uint32_t offset, void * dst, std::uint32_t size) -> std::uint32_t
-    {
-        assert(m_stream);
-        if (0 != std::fseek(m_stream, offset, SEEK_SET))
-            return 0;
-        assert(dst);
-        return static_cast<std::uint32_t>(std::fread(dst, 1, size, m_stream));
-    }
-    
-    memory_api_stdio::~memory_api_stdio(void)
+    memory_stdio::memory_stdio(std::FILE * file, bool is_owner)
+        : memory_device()
+        , m_stream(file)
+        , m_is_owner(is_owner)
+    {}
+
+    memory_stdio::~memory_stdio(void)
     {
         if (m_stream)
         {
@@ -30,5 +26,15 @@ namespace idascm
                 std::fclose(m_stream);
             m_stream = nullptr;
         }
+    }
+
+    // virtual
+    auto memory_stdio::read(std::uint32_t offset, void * dst, std::uint32_t size) -> std::uint32_t
+    {
+        assert(m_stream);
+        if (0 != std::fseek(m_stream, offset, SEEK_SET))
+            return 0;
+        assert(dst);
+        return static_cast<std::uint32_t>(std::fread(dst, 1, size, m_stream));
     }
 }

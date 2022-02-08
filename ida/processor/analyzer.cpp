@@ -10,7 +10,7 @@
 
 namespace idascm
 {
-    analyzer::analyzer(game game, command_set const & isa, memory_api & memory)
+    analyzer::analyzer(game game, command_set const & isa, memory_device & memory)
         : m_decoder(nullptr)
         , m_loader(nullptr)
         , m_memory(memory)

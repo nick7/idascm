@@ -69,7 +69,7 @@ int main(int argc, char * argv[])
 
         0x4e, 0x00,             // 004E TERMINATE_THIS_SCRIPT
     };
-    auto mem = memory_api_buffer(buffer, sizeof(buffer));
+    auto mem = memory_buffer(buffer, sizeof(buffer));
 
     command_set isa(version::gtavc);
     isa.load(json_value::from_string(gs_commands).to_object());

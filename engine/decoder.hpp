@@ -5,7 +5,7 @@
 namespace idascm
 {
     class command_set;
-    class memory_api;
+    class memory_device;
 
     struct instruction;
     struct operand;
@@ -16,7 +16,7 @@ namespace idascm
     class decoder
     {
         public:
-            static auto create(game id, command_set const & isa, memory_api & memory) -> decoder *;
+            static auto create(game id, command_set const & isa, memory_device & memory) -> decoder *;
 
         public:
             virtual ~decoder(void) noexcept;
@@ -28,11 +28,11 @@ namespace idascm
             }
 
         protected:
-            decoder(command_set const & isa, memory_api & memory);
+            decoder(command_set const & isa, memory_device & memory);
             virtual auto decode_operand_value(std::uint32_t address, operand_type type, operand_value & value) const -> std::uint32_t;
 
         protected:
             command_set const & m_isa;
-            memory_api &        m_memory;
+            memory_device &     m_memory;
     };
 }

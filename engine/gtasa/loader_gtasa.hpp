@@ -11,7 +11,7 @@ namespace idascm
             virtual auto load_header_layout(void) -> bool override;
 
         public:
-            explicit loader_gtasa(memory_api & memory, decoder & decoder)
+            explicit loader_gtasa(memory_device & memory, decoder & decoder)
                 : loader(memory)
                 , m_decoder(decoder)
             {}

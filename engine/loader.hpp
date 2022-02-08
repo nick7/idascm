@@ -7,7 +7,7 @@
 namespace idascm
 {
     class decoder;
-    class memory_api;
+    class memory_device;
 
     enum class segment_type
     {
@@ -87,7 +87,7 @@ namespace idascm
     class loader
     {
         public:
-            static auto create(game id, decoder & decoder, memory_api & memory) -> loader *;
+            static auto create(game id, decoder & decoder, memory_device & memory) -> loader *;
 
         public:
             virtual auto load(void) -> bool;
@@ -125,14 +125,14 @@ namespace idascm
             }
 
         public:
-            explicit loader(memory_api & memory)
+            explicit loader(memory_device & memory)
                 : m_memory(memory)
                 , m_header({})
                 , m_layout({})
             {}
     
         protected:
-            memory_api &    m_memory;
+            memory_device & m_memory;
             header          m_header;
             layout          m_layout;
     };

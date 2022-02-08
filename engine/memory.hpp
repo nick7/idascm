@@ -4,34 +4,28 @@
 namespace idascm
 {
     // memory access interface
-    class memory_api
+    class memory_device
     {
         public:
-            virtual auto read(std::uint32_t address, void * dst, std::uint32_t size) ->std::uint32_t = 0;
-
-            template <typename type>
-            auto read(std::uint32_t address, type * dst) -> std::uint32_t
-            {
-                return read(address, dst, sizeof(type));
-            }
+            virtual auto read(std::uint32_t address, void * dst, std::uint32_t size) -> std::uint32_t = 0;
 
         public:
-            virtual ~memory_api(void) = default;
+            virtual ~memory_device(void) = default;
 
         protected:
-            memory_api(void) = default;
-            memory_api(memory_api const &) = delete;
-            memory_api & operator = (memory_api const &) = delete;
+            memory_device(void) = default;
+            memory_device(memory_device const &) = delete;
+            memory_device & operator = (memory_device const &) = delete;
     };
 
-    class memory_api_buffer : public memory_api
+    class memory_buffer : public memory_device
     {
         public:
-            virtual auto read(std::uint32_t offset, void* dst, std::uint32_t size)->std::uint32_t override;
+            virtual auto read(std::uint32_t offset, void * dst, std::uint32_t size)->std::uint32_t override;
 
         public:
-            explicit memory_api_buffer(void * memory, std::size_t size)
-                : memory_api()
+            explicit memory_buffer(void * memory, std::size_t size)
+                : memory_device()
                 , m_memory(static_cast<std::uint8_t *>(memory))
                 , m_size(size)
             {}
@@ -41,29 +35,45 @@ namespace idascm
             std::size_t     m_size;
     };
 
-    class memory_api_stdio : public memory_api
+    class memory_stdio : public memory_device
     {
         public:
             virtual auto read(std::uint32_t offset, void* dst, std::uint32_t size) -> std::uint32_t override;
 
         public:
-            explicit memory_api_stdio(std::FILE * file, bool is_owner)
-                : memory_api()
-                , m_stream(file)
-                , m_is_owner(is_owner)
-            {}
+            explicit memory_stdio(std::FILE * file, bool is_owner);
+            memory_stdio(memory_stdio const &) = delete;
+            memory_stdio(memory_stdio && other) noexcept
+                : memory_device()
+                , m_stream(nullptr)
+                , m_is_owner(false)
+            {
+                swap(other);
+            }
+            auto operator = (memory_stdio const &) -> memory_stdio & = delete;
+            auto operator = (memory_stdio && other) noexcept -> memory_stdio &
+            {
+                swap(other);
+            }
+            virtual ~memory_stdio(void) override;
 
-            virtual ~memory_api_stdio(void) override;
+        protected:
+            void swap(memory_stdio & other) noexcept
+            {
+                std::swap(m_stream,   other.m_stream);
+                std::swap(m_is_owner, other.m_is_owner);
+            }
 
         private:
             std::FILE * m_stream;
             bool        m_is_owner;
     };
 
+    // Reading helper
     class memory_reader
     {
         public:
-            explicit memory_reader(memory_api & mem, std::uint32_t pointer)
+            explicit memory_reader(memory_device & mem, std::uint32_t pointer)
                 : m_memory(mem)
                 , m_pointer(0)
             {
@@ -115,7 +125,7 @@ namespace idascm
             }
 
         private:
-            memory_api &    m_memory;
+            memory_device & m_memory;
             std::uint32_t   m_pointer;
     };
 

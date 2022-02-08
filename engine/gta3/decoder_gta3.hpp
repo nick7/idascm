@@ -22,7 +22,7 @@ namespace idascm
             virtual auto decode_operand(std::uint32_t address, operand & op) const -> std::uint32_t override;
 
         public:
-            decoder_gta3(command_set const & isa, memory_api & mem)
+            decoder_gta3(command_set const & isa, memory_device & mem)
                 : decoder(isa, mem)
             {}
 

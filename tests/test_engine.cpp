@@ -53,7 +53,7 @@ int main(int argc, char * argv[])
         0x06,                   // float32
         0xcd, 0xcc, 0x14, 0x41, // 9.3
     };
-    auto mem = memory_api_buffer(buffer, sizeof(buffer));
+    auto mem = memory_buffer(buffer, sizeof(buffer));
 
     assert(0 == std::strcmp("string16", operand_type_to_string(operand_type::string16)));
 

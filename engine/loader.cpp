@@ -21,7 +21,7 @@ namespace idascm
         return seg;
     }
 
-    auto loader::create(game id, decoder & decoder, memory_api & memory) -> loader *
+    auto loader::create(game id, decoder & decoder, memory_device & memory) -> loader *
     {
         if (id != version_game(decoder.isa().get_version()))
             return nullptr;

@@ -9,7 +9,6 @@ namespace idascm
 
     class analyzer;
     class emulator;
-    class memory_api_ida;
     class output;
 
     class module
@@ -41,7 +40,7 @@ namespace idascm
         private:
             int                 m_data_id;
             std::uint32_t       m_flags;
-            memory_api_ida      m_memory;
+            memory_ida          m_memory;
             command_set const * m_isa;
             analyzer *          m_analyzer; // 'ana'
             emulator *          m_emulator; // 'emu'

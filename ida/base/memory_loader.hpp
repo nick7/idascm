@@ -4,14 +4,14 @@
 
 namespace idascm
 {
-    class memory_api_loader : public memory_api
+    class memory_linput : public memory_device
     {
         public:
             virtual auto read(std::uint32_t address, void * dst, std::uint32_t size) -> std::uint32_t override;
 
         public:
-            explicit memory_api_loader(linput_t * li)
-                : memory_api()
+            explicit memory_linput(linput_t * li)
+                : memory_device()
                 , m_li(li)
             {}
 

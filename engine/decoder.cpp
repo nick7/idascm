@@ -14,7 +14,7 @@
 namespace idascm
 {
     // static
-    auto decoder::create(game id, command_set const & isa, memory_api & memory) -> decoder *
+    auto decoder::create(game id, command_set const & isa, memory_device & memory) -> decoder *
     {
         switch (id)
         {
@@ -34,7 +34,7 @@ namespace idascm
         return nullptr;
     }
 
-    decoder::decoder(command_set const & isa, memory_api & memory)
+    decoder::decoder(command_set const & isa, memory_device & memory)
         : m_isa(isa)
         , m_memory(memory)
     {}

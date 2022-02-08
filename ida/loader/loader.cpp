@@ -39,7 +39,7 @@ namespace idascm
         auto idaapi accept_file(qstring * fileformatname, qstring * processor, linput_t * li, char const * filename) -> int
         {
             IDASCM_LOG_D("accept_file: '%s', '%s', %p, '%s'", fileformatname->c_str(), processor->c_str(), li, filename);
-            auto mem = memory_api_loader(li);
+            auto mem = memory_linput(li);
             for (auto & format : gs_formats)
             {
                 auto const ver = format.ver;
@@ -80,7 +80,7 @@ namespace idascm
         void idaapi load_file(linput_t * li, ushort neflags, char const * fileformatname)
         {
             IDASCM_LOG_D("load_file: %p, %u, '%s'", li, neflags, fileformatname);
-            auto mem = memory_api_loader(li);
+            auto mem = memory_linput(li);
             auto const ver = version_from_description(fileformatname);
             auto const isa = base_command_manager().get_set(ver);
             if (! isa)

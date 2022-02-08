@@ -9,7 +9,7 @@ namespace idascm
     class command_set;
     class decoder;
     class loader;
-    class memory_api;
+    class memory_device;
 
     // byte analyzer
     // produces instructions (insn_t)
@@ -25,7 +25,7 @@ namespace idascm
             // void set_isa(command_set const * isa);
 
         public:
-            explicit analyzer(game game, command_set const & isa, memory_api & memory);
+            explicit analyzer(game game, command_set const & isa, memory_device & memory);
             ~analyzer(void);
 
         protected:
@@ -35,6 +35,6 @@ namespace idascm
         protected:
             decoder *           m_decoder;
             loader *            m_loader;
-            memory_api &        m_memory;
+            memory_device &     m_memory;
     };
 }
