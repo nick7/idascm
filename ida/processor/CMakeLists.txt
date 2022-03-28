@@ -33,3 +33,18 @@ else ()
             OUTPUT_NAME "idascm"
     )
 endif ()
+install (
+    TARGETS
+        ${PROJECT}
+    DESTINATION
+        "procs"
+)
+if (MSVC)
+    install (
+        FILES
+            $<TARGET_PDB_FILE:${PROJECT}>
+        DESTINATION
+            "procs"
+        OPTIONAL
+    )
+endif ()

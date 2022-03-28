@@ -25,3 +25,18 @@ else ()
             OUTPUT_NAME "${PROJECT_NAME}_ldr"
     )
 endif ()
+install (
+    TARGETS
+        ${PROJECT}
+    DESTINATION
+        "loaders"
+)
+if (MSVC)
+    install (
+        FILES
+            $<TARGET_PDB_FILE:${PROJECT}>
+        DESTINATION
+            "loaders"
+        OPTIONAL
+    )
+endif ()

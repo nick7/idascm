@@ -32,3 +32,12 @@ add_subdirectory (engine)
 add_subdirectory (ida)
 
 add_subdirectory (tests)
+
+if (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/data/.gitattributes")
+    install (
+        DIRECTORY
+            "${CMAKE_CURRENT_SOURCE_DIR}/data/"
+        DESTINATION
+            "cfg/idascm"
+    )
+endif ()
