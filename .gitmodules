@@ -1,3 +1,6 @@
 [submodule "3rd-party/jsmn"]
 	path = 3rd-party/jsmn
 	url = https://github.com/zserge/jsmn.git
+[submodule "data"]
+	path = data
+	url = ../idascm-data.git
